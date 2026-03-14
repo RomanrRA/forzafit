@@ -1,0 +1,33 @@
+node_modules/
+dist/
+.next/
+out/
+
+# Секреты — никогда не коммитить
+.env
+.env.local
+.env.prod
+.env.*.local
+apps/backend/.env
+
+# Drizzle generated
+drizzle/meta/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/settings.json
+.idea/
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Expo (mobile)
+.expo/

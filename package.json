@@ -1,0 +1,23 @@
+{
+  "name": "fitlog",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "backend:dev": "npm run start:dev --workspace=apps/backend",
+    "backend:build": "npm run build --workspace=apps/backend",
+    "backend:start": "npm run start:prod --workspace=apps/backend",
+    "web:dev": "npm run dev --workspace=apps/web",
+    "web:build": "npm run build --workspace=apps/web",
+    "db:generate": "npm run db:generate --workspace=apps/backend",
+    "db:migrate": "npm run db:migrate --workspace=apps/backend",
+    "db:studio": "npm run db:studio --workspace=apps/backend"
+  },
+  "devDependencies": {
+    "playwright": "^1.58.2",
+    "typescript": "^5.4.0"
+  }
+}

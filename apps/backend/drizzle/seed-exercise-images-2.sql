@@ -1,0 +1,41 @@
+-- Update exercise images from wger.de
+BEGIN;
+
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/1086/b2ee8d9b-0480-4992-8494-c223b37c2696.jpg' WHERE name = 'Алмазные отжимания' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/1615/7792295c-83b6-4ea8-9353-ce02f0ad2559.jpg' WHERE name = 'Бег на беговой дорожке' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/1604/7695428e-bfed-4021-b987-498d93153995.png' WHERE name = 'Боковые выпады' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/1653/c10c4e17-1e14-4cf9-930b-cc3a614f15dd.webp' WHERE name = 'Боковые выпады с гантелями' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/1618/c18baedc-ff98-4fb2-b4f5-38a05c12f637.png' WHERE name = 'Велотренажёр' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/1725/f0ebd44e-b8e1-400c-b598-ca371f3a07af.png' WHERE name = 'Гребной тренажёр' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/1377/12e7a231-d36a-4992-bf57-ff7bfe0f3ae4.jpg' WHERE name = 'Дровосек на блоке' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/1655/b263c968-e067-4750-916a-d8758a7df23e.webp' WHERE name = 'Жим в тренажёре для груди' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/53/Shoulder-press-machine-2.png' WHERE name = 'Жим в тренажёре для плеч' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/1644/cde4f147-d49a-492f-9c8a-e3c76788fd26.jpg' WHERE name = 'Жим гантелей на обратнонаклонной скамье' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/622/9a429bd0-afd3-4ad0-8043-e9beec901c81.jpeg' WHERE name = 'Икры в тренажёре стоя' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/1086/b2ee8d9b-0480-4992-8494-c223b37c2696.jpg' WHERE name = 'Отжимания с узкой постановкой рук' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/1554/49207a62-8799-4b47-8c0b-7bde02926f3d.png' WHERE name = 'Отжимания с хлопком' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/1551/a6a9e561-3965-45c6-9f2b-ee671e1a3a45.png' WHERE name = 'Отжимания с широкой постановкой рук' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/1649/441cc0e5-eca2-4828-8b0a-a0e554abb2ff.jpg' WHERE name = 'Паук-сгибания' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/1872/df982df1-512a-4eb9-acd9-68cc1c265df6.png' WHERE name = 'Pigen pose (голубь)' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/458/b7bd9c28-9f1d-4647-bd17-ab6a3adf5770.png' WHERE name = 'Планка на вытянутых руках' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/456/3b681e59-377b-40db-9113-ca5873ce084b.jpg' WHERE name = 'Приседания Пистолет с опорой' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/1748/923a3ff7-c269-49bd-9f03-697151a40f06.jpg' WHERE name = 'Разведение ног в тренажёре' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/128/Hyperextensions-1.png' WHERE name = 'Разгибание спины в тренажёре' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/1870/7465bbcf-3b86-42a6-8d2f-12a3d1f60a15.png' WHERE name = 'Растяжка бицепса бедра' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/1866/a2d0d86b-a246-4c36-a207-e0f4e1b978a7.png' WHERE name = 'Растяжка грудных мышц' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/1873/c0ed299b-6d87-4d90-885d-bb3b5d85f1eb.png' WHERE name = 'Растяжка квадрицепса' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/1861/0ffe4e99-71ad-47fb-b98c-1f243faa0499.png' WHERE name = 'Растяжка широчайших' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/12/4a42cc6f-648d-40cc-a72a-c49dd47e1667.webp' WHERE name = 'Сведение ног в тренажёре' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/98/Butterfly-machine-2.png' WHERE name = 'Сведение рук в тренажёре (Баттерфляй)' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/1617/49a6372b-8a67-4856-b7a6-15896a409ad2.gif' WHERE name = 'Скручивания на блоке' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/91/Crunches-1.png' WHERE name = 'Скручивания на фитболе' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/1736/aa724cc5-c485-4f3e-9d2a-0c6ae4baefbe.png' WHERE name = 'Становая тяга на одной ноге' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/1830/3b6c547c-ab3d-4472-93cf-561710279eab.jpg' WHERE name = 'Степ-аэробика' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/957/0fd94587-6021-4763-856e-7227f5fcba2a.png' WHERE name = 'Супермен' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/1638/046c09b0-c35d-48d0-a552-39dd49f956d2.webp' WHERE name = 'Трастер' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/1556/a23c820b-e08b-4911-a6a4-80f16c15d2e0.png' WHERE name = 'Турецкий подъём' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/106/T-bar-row-1.png' WHERE name = 'Тяга Т-грифа' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/1725/f0ebd44e-b8e1-400c-b598-ca371f3a07af.png' WHERE name = 'Тяга в тренажёре для спины' AND animation_url IS NULL;
+UPDATE exercises SET animation_url = 'https://wger.de/media/exercise-images/1735/43bca7d9-2333-43f3-8554-2d0b39fa2a07.png' WHERE name = 'Ягодичный мостик на одной ноге' AND animation_url IS NULL;
+
+COMMIT;
