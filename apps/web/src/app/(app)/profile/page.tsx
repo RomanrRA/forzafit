@@ -15,7 +15,6 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { toast } from '@/hooks/use-toast'
 import { LogOut, User, Sun, Moon, Monitor } from 'lucide-react'
@@ -69,8 +68,11 @@ export default function ProfilePage() {
       const { data } = await api.patch('/users/me', body)
       return data as UserProfile
     },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['users', 'me'] })
+    onSuccess: (data) => {
+      qc.setQueryData(['users', 'me'], data)
+      setName(data.name ?? '')
+      setGender(data.gender ?? '')
+      setDob(data.dob ? data.dob.split('T')[0] : '')
       toast({ title: 'Профиль обновлён' })
     },
     onError: () => {
@@ -80,7 +82,8 @@ export default function ProfilePage() {
 
   function handleSaveProfile(e: React.FormEvent) {
     e.preventDefault()
-    const patch: Record<string, unknown> = { name: name.trim() || undefined }
+    const patch: Record<string, unknown> = {}
+    if (name.trim()) patch.name = name.trim()
     if (gender) patch.gender = gender
     if (dob) patch.dob = new Date(dob).toISOString()
     updateProfile.mutate(patch)
@@ -168,17 +171,17 @@ export default function ProfilePage() {
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <Label>Пол</Label>
-                <Select value={gender} onValueChange={setGender}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Выберите" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="male">Мужской</SelectItem>
-                    <SelectItem value="female">Женский</SelectItem>
-                    <SelectItem value="other">Другой</SelectItem>
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="gender">Пол</Label>
+                <select
+                  id="gender"
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                >
+                  <option value="male">Мужской</option>
+                  <option value="female">Женский</option>
+                  <option value="other">Другой</option>
+                </select>
               </div>
               <div className="space-y-1">
                 <Label htmlFor="dob">Дата рождения</Label>

@@ -31,3 +31,37 @@ Thumbs.db
 
 # Expo (mobile)
 .expo/
+
+# Firebase service account keys (НИКОГДА не коммитить)
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!tsconfig*.json
+!nest-cli.json
+!drizzle.config.ts
+!apps/backend/drizzle/migrations/meta/_journal.json
+
+# Claude / MCP local files
+.claude/
+.mcp.json
+.serena/
+.playwright-mcp/
+
+# Test files and screenshots
+test-screenshots/
+test-login-flow*.js
+apps/backend/playwright-tests/
+
+# Mockups and design assets
+mockups/
+*.png
+*.html
+!apps/web/src/**/*.html
+
+# Requirements docs (keep busines.md, ignore drafts)
+android-requirements.md
+backend-requirements.md
+frontend-requirements.md
+ios-requirements.md
+prototype.html

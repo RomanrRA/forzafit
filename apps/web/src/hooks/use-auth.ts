@@ -7,14 +7,16 @@ import { api } from '@/lib/api'
 import { useAuthStore } from '@/store/auth.store'
 
 export function useAuthInit() {
-  const { setAuth, clearAuth } = useAuthStore()
+  const { setAuth, clearAuth, setInitialized } = useAuthStore()
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        // Если токен уже установлен (логин прошёл на странице входа), не дублируем запрос
         const { accessToken } = useAuthStore.getState()
-        if (accessToken) return
+        if (accessToken) {
+          setInitialized()
+          return
+        }
         try {
           const idToken = await firebaseUser.getIdToken()
           const { data } = await api.post('/auth/login', { idToken })
@@ -30,7 +32,7 @@ export function useAuthInit() {
     })
 
     return unsubscribe
-  }, [setAuth, clearAuth])
+  }, [setAuth, clearAuth, setInitialized])
 }
 
 export async function signOut() {

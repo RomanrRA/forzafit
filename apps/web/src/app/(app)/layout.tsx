@@ -9,15 +9,16 @@ import { BottomNav } from '@/components/layout/bottom-nav'
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const accessToken = useAuthStore((s) => s.accessToken)
+  const isInitializing = useAuthStore((s) => s.isInitializing)
   const router = useRouter()
 
   useEffect(() => {
-    if (!accessToken) {
+    if (!isInitializing && !accessToken) {
       router.replace('/login')
     }
-  }, [accessToken, router])
+  }, [accessToken, isInitializing, router])
 
-  if (!accessToken) return null
+  if (isInitializing || !accessToken) return null
 
   return (
     <div className="lg-bg flex min-h-screen">
