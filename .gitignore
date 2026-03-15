@@ -41,6 +41,7 @@ Thumbs.db
 !nest-cli.json
 !drizzle.config.ts
 !apps/backend/drizzle/migrations/meta/_journal.json
+!apps/mobile/eas.json
 
 # Claude / MCP local files
 .claude/
