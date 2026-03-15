@@ -12,6 +12,8 @@
     "backend:start": "npm run start:prod --workspace=apps/backend",
     "web:dev": "npm run dev --workspace=apps/web",
     "web:build": "npm run build --workspace=apps/web",
+    "mobile:start": "npm run start --workspace=apps/mobile",
+    "mobile:ios": "npm run ios --workspace=apps/mobile",
     "db:generate": "npm run db:generate --workspace=apps/backend",
     "db:migrate": "npm run db:migrate --workspace=apps/backend",
     "db:studio": "npm run db:studio --workspace=apps/backend"
