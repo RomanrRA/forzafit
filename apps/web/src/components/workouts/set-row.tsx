@@ -41,25 +41,29 @@ export function SetRow({ workoutId, workoutExerciseId, set, index, prevSet }: Pr
     }
   }
 
+  const prevLabel = prevSet && (prevSet.weightKg != null || prevSet.reps != null)
+    ? `${prevSet.weightKg ?? '—'}кг × ${prevSet.reps ?? '—'}`
+    : null
+
   return (
-    <div className={cn('flex items-center gap-2 py-1', set.completed && 'opacity-60')}>
-      <span className="text-xs text-muted-foreground w-5 text-center">{index + 1}</span>
+    <div className={cn('flex items-center gap-1.5 py-1', set.completed && 'opacity-60')}>
+      <span className="text-xs text-muted-foreground w-5 shrink-0 text-center">{index + 1}</span>
       <Input
         type="number"
         min={0}
         step={0.5}
         placeholder="кг"
-        className="h-7 w-20 text-sm py-0 text-center"
+        className="h-7 flex-1 min-w-0 text-sm py-0 text-center"
         value={weight}
         onChange={(e) => setWeight(e.target.value)}
         onBlur={handleBlur}
       />
-      <span className="text-muted-foreground text-xs">×</span>
+      <span className="text-muted-foreground text-xs shrink-0">×</span>
       <Input
         type="number"
         min={1}
         placeholder="повт."
-        className="h-7 w-20 text-sm py-0 text-center"
+        className="h-7 flex-1 min-w-0 text-sm py-0 text-center"
         value={reps}
         onChange={(e) => setReps(e.target.value)}
         onBlur={handleBlur}
@@ -67,7 +71,7 @@ export function SetRow({ workoutId, workoutExerciseId, set, index, prevSet }: Pr
       <Button
         size="icon"
         variant={set.completed ? 'default' : 'outline'}
-        className="h-7 w-7"
+        className="h-7 w-7 shrink-0"
         onClick={handleToggle}
         disabled={updateSet.isPending}
       >
@@ -76,17 +80,15 @@ export function SetRow({ workoutId, workoutExerciseId, set, index, prevSet }: Pr
       <Button
         size="icon"
         variant="ghost"
-        className="h-7 w-7 text-muted-foreground hover:text-destructive"
+        className="h-7 w-7 shrink-0 text-muted-foreground hover:text-destructive"
         onClick={() => deleteSet.mutate(set.id)}
         disabled={deleteSet.isPending}
       >
         <Trash2 className="h-3 w-3" />
       </Button>
-      {prevSet && (prevSet.weightKg != null || prevSet.reps != null) && (
-        <span className="text-xs text-muted-foreground/40 ml-1 whitespace-nowrap select-none">
-          {prevSet.weightKg != null ? `${prevSet.weightKg}кг` : '—'}
-          {' × '}
-          {prevSet.reps != null ? prevSet.reps : '—'}
+      {prevLabel && (
+        <span className="text-[10px] text-muted-foreground/40 shrink-0 select-none">
+          {prevLabel}
         </span>
       )}
     </div>

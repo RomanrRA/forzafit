@@ -40,26 +40,27 @@ export function ExerciseRow({ workoutId, workoutExercise }: Props) {
   return (
     <Card>
       <CardHeader className="pb-2 pt-4 px-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="font-medium">{workoutExercise.exercise.name}</span>
+        <div className="flex items-start justify-between gap-2">
+          {/* Название + группа мышц — занимает оставшееся место */}
+          <div className="min-w-0 flex-1">
+            <span className="font-medium leading-snug">{workoutExercise.exercise.name}</span>
             {workoutExercise.exercise.muscleGroups?.[0] && (
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="secondary" className="text-xs ml-2 align-middle">
                 {workoutExercise.exercise.muscleGroups[0]}
               </Badge>
             )}
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">
-              {workoutExercise.sets.filter((s) => s.completed).length}/{workoutExercise.sets.length} подходов
+          {/* Правые кнопки — фиксированная ширина, не сжимаются */}
+          <div className="flex items-center gap-1.5 shrink-0">
+            <span className="text-xs text-muted-foreground whitespace-nowrap">
+              {workoutExercise.sets.filter((s) => s.completed).length}/{workoutExercise.sets.length}
             </span>
             {workoutExercise.exercise.description && (
               <button
                 onClick={() => setShowDescription((v) => !v)}
                 className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-0.5 transition-colors"
               >
-                Как выполнять
-                {showDescription ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                {showDescription ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />}
               </button>
             )}
             <Button
@@ -81,11 +82,12 @@ export function ExerciseRow({ workoutId, workoutExercise }: Props) {
           </p>
         )}
         {workoutExercise.sets.length > 0 && (
-          <div className="flex gap-2 text-xs text-muted-foreground mb-1 pl-7">
-            <span className="w-20">Вес</span>
-            <span className="w-20">Повт.</span>
+          <div className="flex gap-1.5 text-xs text-muted-foreground mb-1 pl-[26px] pr-[62px]">
+            <span className="flex-1 text-center">Вес</span>
+            <span className="text-transparent select-none">×</span>
+            <span className="flex-1 text-center">Повт.</span>
             {lastSets && lastSets.length > 0 && (
-              <span className="ml-auto text-xs opacity-40">прошлый раз</span>
+              <span className="text-[10px] opacity-40 shrink-0 ml-auto">прошлый раз</span>
             )}
           </div>
         )}
