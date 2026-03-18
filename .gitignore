@@ -57,8 +57,16 @@ apps/backend/playwright-tests/
 # Mockups and design assets
 mockups/
 *.png
+!apps/web/public/icons/*.png
 *.html
 !apps/web/src/**/*.html
+
+# PWA generated files (created at build time)
+apps/web/public/sw.js
+apps/web/public/sw.js.map
+apps/web/public/workbox-*.js
+apps/web/public/workbox-*.js.map
+apps/web/public/swe-worker-*.js
 
 # Requirements docs (keep busines.md, ignore drafts)
 android-requirements.md

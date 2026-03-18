@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { WorkoutSet, useUpdateSet, useDeleteSet } from '@/hooks/use-workouts'
+import { WorkoutSet, useUpdateSet, useDeleteSet, LastSet } from '@/hooks/use-workouts'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Check, Trash2 } from 'lucide-react'
@@ -12,9 +12,10 @@ interface Props {
   workoutExerciseId: string
   set: WorkoutSet
   index: number
+  prevSet?: LastSet | null
 }
 
-export function SetRow({ workoutId, workoutExerciseId, set, index }: Props) {
+export function SetRow({ workoutId, workoutExerciseId, set, index, prevSet }: Props) {
   const [weight, setWeight] = useState(set.weightKg?.toString() ?? '')
   const [reps, setReps] = useState(set.reps?.toString() ?? '')
   const updateSet = useUpdateSet(workoutId, workoutExerciseId)
@@ -81,6 +82,13 @@ export function SetRow({ workoutId, workoutExerciseId, set, index }: Props) {
       >
         <Trash2 className="h-3 w-3" />
       </Button>
+      {prevSet && (prevSet.weightKg != null || prevSet.reps != null) && (
+        <span className="text-xs text-muted-foreground/40 ml-1 whitespace-nowrap select-none">
+          {prevSet.weightKg != null ? `${prevSet.weightKg}кг` : '—'}
+          {' × '}
+          {prevSet.reps != null ? prevSet.reps : '—'}
+        </span>
+      )}
     </div>
   )
 }

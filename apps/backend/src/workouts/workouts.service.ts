@@ -3,7 +3,7 @@ import {
   NotFoundException,
   ForbiddenException,
 } from '@nestjs/common';
-import { eq, and, gte, lte, desc, asc, count, sql, isNull, isNotNull } from 'drizzle-orm';
+import { eq, and, gte, lte, desc, asc, count, sql, isNull, isNotNull, inArray } from 'drizzle-orm';
 import { DrizzleService } from '../db/db.service';
 import {
   workoutSessions,
@@ -86,28 +86,45 @@ export class WorkoutsService {
 
     if (!session) throw new NotFoundException('Тренировка не найдена');
 
-    // Load exercises with sets and exercise details
-    const wExercises = await this.drizzle.db
-      .select()
+    // Load exercises with their details in one JOIN query
+    const wExercisesWithDetails = await this.drizzle.db
+      .select({
+        id: workoutExercises.id,
+        sessionId: workoutExercises.sessionId,
+        exerciseId: workoutExercises.exerciseId,
+        orderIndex: workoutExercises.orderIndex,
+        notes: workoutExercises.notes,
+        createdAt: workoutExercises.createdAt,
+        exercise: exercises,
+      })
       .from(workoutExercises)
-      .where(eq(workoutExercises.sessionId, id));
+      .leftJoin(exercises, eq(exercises.id, workoutExercises.exerciseId))
+      .where(eq(workoutExercises.sessionId, id))
+      .orderBy(asc(workoutExercises.orderIndex), asc(workoutExercises.createdAt));
 
-    const result = [];
-    for (const we of wExercises) {
-      const [exercise] = await this.drizzle.db
-        .select()
-        .from(exercises)
-        .where(eq(exercises.id, we.exerciseId))
-        .limit(1);
+    // Load all sets for this session in one query (avoids N+1)
+    const weIds = wExercisesWithDetails.map((we) => we.id);
+    const allSets =
+      weIds.length > 0
+        ? await this.drizzle.db
+            .select()
+            .from(workoutSets)
+            .where(inArray(workoutSets.workoutExerciseId, weIds))
+            .orderBy(workoutSets.createdAt)
+        : [];
 
-      const sets = await this.drizzle.db
-        .select()
-        .from(workoutSets)
-        .where(eq(workoutSets.workoutExerciseId, we.id))
-        .orderBy(workoutSets.createdAt);
-
-      result.push({ ...we, exercise: exercise ?? null, sets });
+    // Group sets by workoutExerciseId
+    const setsByWeId = new Map<string, typeof allSets>();
+    for (const set of allSets) {
+      const existing = setsByWeId.get(set.workoutExerciseId) ?? [];
+      existing.push(set);
+      setsByWeId.set(set.workoutExerciseId, existing);
     }
+
+    const result = wExercisesWithDetails.map((we) => ({
+      ...we,
+      sets: setsByWeId.get(we.id) ?? [],
+    }));
 
     return { ...session, exercises: result };
   }

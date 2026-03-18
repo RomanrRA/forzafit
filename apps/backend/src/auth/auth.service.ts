@@ -69,7 +69,6 @@ export class AuthService {
     }
 
     const db = this.drizzle.db;
-    const tokenHash = await bcrypt.hash(refreshToken, 1);
 
     // Find valid token
     const [storedToken] = await db
@@ -81,7 +80,7 @@ export class AuthService {
           eq(refreshTokens.revoked, false),
         ),
       )
-      .limit(20);
+      .limit(1);
 
     if (!storedToken) {
       throw new UnauthorizedException('Refresh token не найден или отозван');

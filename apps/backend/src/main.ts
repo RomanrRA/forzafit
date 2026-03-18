@@ -9,8 +9,9 @@ async function bootstrap() {
 
   // Security
   app.use(helmet());
+  const corsOrigins = process.env.CORS_ORIGINS?.split(',').map((o) => o.trim());
   app.enableCors({
-    origin: process.env.CORS_ORIGINS?.split(',') ?? '*',
+    origin: corsOrigins ?? (process.env.NODE_ENV === 'production' ? false : true),
     credentials: true,
   });
 

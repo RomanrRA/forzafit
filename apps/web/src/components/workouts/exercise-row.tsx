@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { WorkoutExercise, useAddSet, useRemoveExerciseFromWorkout } from '@/hooks/use-workouts'
+import { WorkoutExercise, useAddSet, useRemoveExerciseFromWorkout, useLastSetsForExercise } from '@/hooks/use-workouts'
 import { SetRow } from './set-row'
 import { RestTimer } from './rest-timer'
 import { Button } from '@/components/ui/button'
@@ -18,6 +18,7 @@ interface Props {
 export function ExerciseRow({ workoutId, workoutExercise }: Props) {
   const addSet = useAddSet(workoutId, workoutExercise.id)
   const removeExercise = useRemoveExerciseFromWorkout(workoutId)
+  const { data: lastSets } = useLastSetsForExercise(workoutExercise.exerciseId)
   const [adding, setAdding] = useState(false)
   const [showDescription, setShowDescription] = useState(false)
 
@@ -83,6 +84,9 @@ export function ExerciseRow({ workoutId, workoutExercise }: Props) {
           <div className="flex gap-2 text-xs text-muted-foreground mb-1 pl-7">
             <span className="w-20">Вес</span>
             <span className="w-20">Повт.</span>
+            {lastSets && lastSets.length > 0 && (
+              <span className="ml-auto text-xs opacity-40">прошлый раз</span>
+            )}
           </div>
         )}
         {workoutExercise.sets.map((set, i) => (
@@ -92,6 +96,7 @@ export function ExerciseRow({ workoutId, workoutExercise }: Props) {
             workoutExerciseId={workoutExercise.id}
             set={set}
             index={i}
+            prevSet={lastSets?.[i] ?? null}
           />
         ))}
         <Button

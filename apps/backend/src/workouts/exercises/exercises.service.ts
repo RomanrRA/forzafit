@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { eq, and, or, ilike } from 'drizzle-orm';
+import { eq, and, or, ilike, sql } from 'drizzle-orm';
 import { DrizzleService } from '../../db/db.service';
 import { exercises } from '../../db/schema';
 import { CreateExerciseDto, ExerciseFilterDto } from './dto/exercise.dto';
@@ -31,18 +31,18 @@ export class ExercisesService {
       conditions.push(eq(exercises.isCustom, filters.custom));
     }
 
-    let result = await db
+    if (filters.muscleGroup) {
+      const mg = `%${filters.muscleGroup.toLowerCase()}%`;
+      conditions.push(
+        sql`array_to_string(${exercises.muscleGroups}, ',') ILIKE ${mg}`,
+      );
+    }
+
+    const result = await db
       .select()
       .from(exercises)
       .where(and(...conditions))
       .orderBy(exercises.name);
-
-    if (filters.muscleGroup) {
-      const mg = filters.muscleGroup.toLowerCase();
-      result = result.filter((e) =>
-        e.muscleGroups?.some((m) => m.toLowerCase().includes(mg)),
-      );
-    }
 
     return { items: result, total: result.length };
   }

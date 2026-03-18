@@ -146,6 +146,24 @@ export function useDeleteSet(workoutId: string, workoutExerciseId: string) {
   })
 }
 
+export interface LastSet {
+  weightKg: number | null
+  reps: number | null
+  restTimerSec: number | null
+}
+
+export function useLastSetsForExercise(exerciseId: string) {
+  return useQuery({
+    queryKey: ['last-sets', exerciseId],
+    queryFn: async () => {
+      const { data } = await api.get(`/workouts/last-sets/${exerciseId}`)
+      return data as LastSet[]
+    },
+    enabled: !!exerciseId,
+    staleTime: 30_000,
+  })
+}
+
 export interface ProgressPoint {
   sessionId: string
   date: string
