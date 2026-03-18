@@ -16,7 +16,7 @@ export function Header() {
   }
 
   return (
-    <header className="glass-header sticky top-0 z-20">
+    <header className="glass-header sticky top-0 z-20 pt-safe">
       <div className="flex items-center justify-between px-5 h-14">
         {/* Mobile logo */}
         <div className="flex items-center gap-2 md:hidden">
