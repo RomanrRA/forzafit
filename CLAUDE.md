@@ -7,30 +7,29 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-HomeoAI is a Russian-language Streamlit web application for homeopathic consultations. It allows practitioners to:
-- Manage patient records
-- Enter symptoms in Russian, translate them via LLM, and search homeopathic repertories
-- Generate AI-assisted clinical analysis based on repertory findings
-- Store and review visit history
+FitLog (ForzaFit) — кроссплатформенный трекер тренировок и питания.
+Монорепо: apps/backend (NestJS), apps/web (Next.js 15), packages/types.
 
-## Running the Application
+## Деплой
 
+### Порядок деплоя (ОБЯЗАТЕЛЬНО)
+1. Сначала поднимаешь локально на `localhost:5000` для тестирования
+2. Ждёшь подтверждения от пользователя ("проверил", "ок", "катим" и т.п.)
+3. Только после подтверждения раскатываешь на прод
+
+**НИКОГДА не деплой на прод без явного подтверждения пользователя.**
+
+### Прод
+- Сервер: TimeWeb Cloud, 147.45.243.93
+- Домен: https://forzafit.myalfanews.com
+- Remote dir: /opt/fitlog
+- Команда: `docker compose -f docker-compose.prod.yml --env-file .env.prod up --build -d`
+- На Windows нет rsync — используй `tar czf | ssh ... tar xzf` для передачи кода
+
+### Локальный запуск
 ```bash
-cd C:\Users\roman\Projects\fitnessHelp
-.\venv\Scripts\python.exe -m streamlit run .\app.py
+docker compose up -d                    # PostgreSQL + Redis
+cd apps/backend && npm run start:dev    # Backend :3001
+cd apps/web && npm run dev              # Frontend :3000
 ```
-
-## Architecture
-
-### Core Components
-
-### Data Flow
-
-
-### Databases
-
-### Key Functions
-
-
-## Supported Repertories
 

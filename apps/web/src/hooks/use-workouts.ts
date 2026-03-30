@@ -16,6 +16,7 @@ export interface WorkoutExercise {
   exerciseId: string
   exercise: { id: string; name: string; muscleGroups: string[]; description?: string | null }
   orderIndex: number
+  restTimerSec: number | null
   sets: WorkoutSet[]
 }
 
@@ -85,9 +86,21 @@ export function useDeleteWorkout() {
 export function useAddExerciseToWorkout(workoutId: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (body: { exerciseId: string; orderIndex?: number }) => {
+    mutationFn: async (body: { exerciseId: string; orderIndex?: number; restTimerSec?: number }) => {
       const { data } = await api.post(`/workouts/${workoutId}/exercises`, body)
       return data as WorkoutExercise
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['workouts', workoutId] }),
+  })
+}
+
+export function useUpdateWorkoutExercise(workoutId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (body: { workoutExerciseId: string; restTimerSec?: number; notes?: string }) => {
+      const { workoutExerciseId, ...rest } = body
+      const { data } = await api.patch(`/workouts/${workoutId}/exercises/${workoutExerciseId}`, rest)
+      return data
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['workouts', workoutId] }),
   })

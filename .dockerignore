@@ -1,0 +1,12 @@
+.git
+.gitignore
+.env*
+!.env.example
+node_modules
+apps/*/node_modules
+apps/web/.next
+apps/backend/dist
+*.md
+.vscode
+.idea
+*.log

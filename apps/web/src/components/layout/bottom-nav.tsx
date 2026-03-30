@@ -2,14 +2,14 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, ListChecks, ClipboardList, TrendingUp, User } from 'lucide-react'
+import { LayoutDashboard, ListChecks, ClipboardList, Scale, User } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
   { href: '/dashboard', label: 'Дашборд', icon: LayoutDashboard },
   { href: '/workouts', label: 'Тренировки', icon: ListChecks },
   { href: '/plans', label: 'Планы', icon: ClipboardList },
-  { href: '/progress', label: 'Прогресс', icon: TrendingUp },
+  { href: '/body', label: 'Замеры', icon: Scale },
   { href: '/profile', label: 'Профиль', icon: User },
 ]
 

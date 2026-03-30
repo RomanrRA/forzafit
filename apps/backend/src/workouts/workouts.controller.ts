@@ -24,6 +24,7 @@ import {
   UpdateWorkoutDto,
   WorkoutQueryDto,
   AddExerciseToWorkoutDto,
+  UpdateWorkoutExerciseDto,
   AddSetDto,
 } from './dto/workout.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -128,6 +129,17 @@ export class WorkoutsController {
     @Body() dto: AddExerciseToWorkoutDto,
   ) {
     return this.workouts.addExercise(sessionId, userId, dto);
+  }
+
+  @Patch(':id/exercises/:weId')
+  @ApiOperation({ summary: 'Обновить упражнение в тренировке (отдых, заметки)' })
+  updateExercise(
+    @Param('id', ParseUUIDPipe) sessionId: string,
+    @Param('weId', ParseUUIDPipe) weId: string,
+    @CurrentUser('userId') userId: string,
+    @Body() dto: UpdateWorkoutExerciseDto,
+  ) {
+    return this.workouts.updateExercise(sessionId, weId, userId, dto);
   }
 
   @Delete(':id/exercises/:weId')

@@ -2,23 +2,23 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { format } from 'date-fns'
+import { format, startOfDay } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { useWorkouts, useDeleteWorkout } from '@/hooks/use-workouts'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Plus, ChevronLeft, ChevronRight, Dumbbell, CheckCircle2, Clock, Trash2 } from 'lucide-react'
+import { Plus, ChevronLeft, ChevronRight, Dumbbell, CheckCircle2, Clock, AlertTriangle, Trash2 } from 'lucide-react'
 
 const PAGE_SIZE_OPTIONS = [10, 30, 50, 100]
 
-type Status = 'planned' | 'completed' | 'all'
+type Tab = 'planned' | 'missed' | 'completed' | 'all'
 
-const STATUS_OPTIONS: { value: Status; label: string }[] = [
-  { value: 'planned', label: 'Запланированные' },
-  { value: 'completed', label: 'Выполненные' },
-  { value: 'all', label: 'Все' },
+const TAB_OPTIONS: { value: Tab; label: string; shortLabel: string }[] = [
+  { value: 'planned', label: 'Запланированные', shortLabel: 'План' },
+  { value: 'missed', label: 'Пропущенные', shortLabel: 'Пропущ.' },
+  { value: 'completed', label: 'Выполненные', shortLabel: 'Готово' },
+  { value: 'all', label: 'Все', shortLabel: 'Все' },
 ]
 
 export default function WorkoutsPage() {
@@ -26,28 +26,34 @@ export default function WorkoutsPage() {
   const [pageSize, setPageSize] = useState(10)
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
-  const [status, setStatus] = useState<Status>('planned')
+  const [tab, setTab] = useState<Tab>('planned')
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
   const deleteMutation = useDeleteWorkout()
 
-  const { data, isLoading } = useWorkouts({
-    limit: pageSize,
-    page,
-    from: from || undefined,
-    to: to || undefined,
-    status,
-    order: 'asc',
-  })
+  const todayDate = format(new Date(), 'yyyy-MM-dd')
+  const yesterdayDate = format(new Date(Date.now() - 86400000), 'yyyy-MM-dd')
+
+  const queryParams = (() => {
+    const base = { limit: pageSize, page, from: from || undefined, to: to || undefined, order: 'asc' as const }
+    if (tab === 'planned') return { ...base, status: 'planned' as const, from: base.from || todayDate }
+    if (tab === 'missed') return { ...base, status: 'planned' as const, to: base.to || yesterdayDate }
+    if (tab === 'completed') return { ...base, status: 'completed' as const }
+    return { ...base, status: 'all' as const }
+  })()
+
+  const { data, isLoading } = useWorkouts(queryParams)
 
   const workouts = data?.items ?? []
   const total = data?.total ?? 0
   const totalPages = Math.ceil(total / pageSize)
   const allSelected = workouts.length > 0 && workouts.every((w) => selected.has(w.id))
 
-  function handleStatusChange(s: Status) {
-    setStatus(s)
+  function handleTabChange(t: Tab) {
+    setTab(t)
     setPage(1)
+    setFrom('')
+    setTo('')
     setSelected(new Set())
   }
 
@@ -76,83 +82,88 @@ export default function WorkoutsPage() {
   }
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
+      {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Тренировки</h1>
-        <Button asChild>
+        <h1 className="text-2xl sm:text-3xl font-bold">Тренировки</h1>
+        <Button asChild size="sm" className="sm:size-default">
           <Link href="/workouts/new">
-            <Plus className="h-4 w-4 mr-2" />
-            Новая тренировка
+            <Plus className="h-4 w-4 sm:mr-2" />
+            <span className="hidden sm:inline">Новая тренировка</span>
           </Link>
         </Button>
       </div>
 
       {/* Status tabs */}
-      <div className="flex gap-1 p-1 bg-muted rounded-lg w-fit">
-        {STATUS_OPTIONS.map((opt) => (
+      <div className="grid grid-cols-4 gap-1 p-1 bg-muted rounded-lg">
+        {TAB_OPTIONS.map((opt) => (
           <button
             key={opt.value}
-            onClick={() => handleStatusChange(opt.value)}
-            className={`px-4 py-1.5 rounded-md text-sm font-medium transition-colors ${
-              status === opt.value
+            onClick={() => handleTabChange(opt.value)}
+            className={`px-2 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-colors text-center ${
+              tab === opt.value
                 ? 'bg-background text-foreground shadow-sm'
                 : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            {opt.label}
+            <span className="hidden sm:inline">{opt.label}</span>
+            <span className="sm:hidden">{opt.shortLabel}</span>
           </button>
         ))}
       </div>
 
-
       {/* Date filters */}
-      <div className="flex gap-3 flex-wrap">
-        <div className="flex items-center gap-2">
-          <label className="text-sm text-muted-foreground">С</label>
-          <Input
-            type="date"
-            className="w-40"
-            value={from}
-            onChange={(e) => { setFrom(e.target.value); setPage(1) }}
-          />
+      {(tab === 'completed' || tab === 'all') && (
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-muted-foreground w-6 shrink-0">С</label>
+            <Input
+              type="date"
+              className="flex-1 sm:w-40"
+              value={from}
+              onChange={(e) => { setFrom(e.target.value); setPage(1) }}
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <label className="text-sm text-muted-foreground w-6 shrink-0">По</label>
+            <Input
+              type="date"
+              className="flex-1 sm:w-40"
+              value={to}
+              onChange={(e) => { setTo(e.target.value); setPage(1) }}
+            />
+          </div>
+          {(from || to) && (
+            <Button variant="ghost" size="sm" onClick={() => { setFrom(''); setTo(''); setPage(1) }}>
+              Сбросить
+            </Button>
+          )}
         </div>
-        <div className="flex items-center gap-2">
-          <label className="text-sm text-muted-foreground">По</label>
-          <Input
-            type="date"
-            className="w-40"
-            value={to}
-            onChange={(e) => { setTo(e.target.value); setPage(1) }}
-          />
-        </div>
-        {(from || to) && (
-          <Button variant="ghost" size="sm" onClick={() => { setFrom(''); setTo(''); setPage(1) }}>
-            Сбросить
-          </Button>
-        )}
-      </div>
+      )}
 
       {isLoading && <p className="text-muted-foreground">Загрузка...</p>}
 
       {!isLoading && workouts.length === 0 && (
         <div className="text-center py-16 text-muted-foreground">
           <Dumbbell className="h-12 w-12 mx-auto mb-3 opacity-30" />
-          <p>
-            {status === 'planned'
-              ? 'Нет запланированных тренировок. Откройте план и запланируйте занятия!'
-              : status === 'completed'
-              ? 'Нет завершённых тренировок.'
+          <p className="text-sm sm:text-base">
+            {tab === 'planned'
+              ? 'Нет запланированных тренировок'
+              : tab === 'missed'
+              ? 'Нет пропущенных. Так держать!'
+              : tab === 'completed'
+              ? 'Нет завершённых тренировок'
               : 'Нет тренировок. Начните первую!'}
           </p>
-          <Button className="mt-4" asChild>
+          <Button className="mt-4" size="sm" asChild>
             <Link href="/workouts/new">Создать тренировку</Link>
           </Button>
         </div>
       )}
 
-      {/* Toolbar: select-all + bulk delete + page size */}
+      {/* Toolbar */}
       {workouts.length > 0 && (
-        <div className="flex items-center justify-between gap-3 flex-wrap gap-y-2">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div className="flex items-center gap-3">
             <label className="flex items-center gap-2 cursor-pointer select-none text-sm text-muted-foreground">
               <input
@@ -161,7 +172,7 @@ export default function WorkoutsPage() {
                 checked={allSelected}
                 onChange={toggleSelectAll}
               />
-              {allSelected ? 'Снять всё' : 'Выбрать все'}
+              {allSelected ? 'Снять' : 'Выбрать все'}
             </label>
             {selected.size > 0 && (
               <Button
@@ -170,13 +181,13 @@ export default function WorkoutsPage() {
                 onClick={deleteSelected}
                 disabled={deleteMutation.isPending}
               >
-                <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                <Trash2 className="h-3.5 w-3.5 mr-1" />
                 Удалить ({selected.size})
               </Button>
             )}
           </div>
           <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-            <span>Показывать:</span>
+            <span className="text-xs">Показывать:</span>
             {PAGE_SIZE_OPTIONS.map((n) => (
               <button
                 key={n}
@@ -194,60 +205,89 @@ export default function WorkoutsPage() {
         </div>
       )}
 
+      {/* Workout list */}
       <div className="space-y-2">
-        {workouts.map((w) => (
-          <div key={w.id} className="flex items-center gap-2 group">
-            <input
-              type="checkbox"
-              className="h-4 w-4 rounded border-border accent-primary cursor-pointer shrink-0"
-              checked={selected.has(w.id)}
-              onChange={() => toggleSelect(w.id)}
-            />
-            <div className="relative flex-1">
-              <Link href={`/workouts/${w.id}`}>
-                <Card className={`hover:border-primary transition-colors cursor-pointer ${w.finishedAt ? 'bg-muted/50' : ''}`}>
-                  <CardContent className="flex items-center justify-between p-4 pr-12">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <p className="font-medium">{w.title}</p>
-                        {w.finishedAt ? (
-                          <Badge variant="secondary" className="text-xs">
-                            <CheckCircle2 className="h-3 w-3 mr-1" />
-                            Выполнена
-                          </Badge>
-                        ) : (
-                          <Badge variant="outline" className="text-xs">
-                            <Clock className="h-3 w-3 mr-1" />
-                            Запланирована
-                          </Badge>
-                        )}
+        {workouts.map((w) => {
+          const isCompleted = !!w.finishedAt
+          const isMissed = !w.finishedAt && startOfDay(new Date(w.startedAt)) < startOfDay(new Date())
+
+          const cardClass = isCompleted
+            ? 'border-green-300 dark:border-green-800 bg-green-50 dark:bg-green-950/30 hover:border-green-400'
+            : isMissed
+            ? 'border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-950/30 hover:border-red-400'
+            : 'hover:border-primary'
+
+          const StatusIcon = isCompleted ? CheckCircle2 : isMissed ? AlertTriangle : Clock
+          const iconClass = isCompleted
+            ? 'text-green-600 dark:text-green-400'
+            : isMissed
+            ? 'text-red-500'
+            : 'text-primary'
+
+          const titleClass = isCompleted
+            ? 'text-green-700 dark:text-green-400'
+            : isMissed
+            ? 'text-red-700 dark:text-red-400'
+            : ''
+
+          const dateClass = isCompleted
+            ? 'text-green-600/70 dark:text-green-500/60'
+            : isMissed
+            ? 'text-red-500/70 dark:text-red-500/60'
+            : 'text-muted-foreground'
+
+          return (
+            <div key={w.id} className="flex items-start gap-2 group">
+              <input
+                type="checkbox"
+                className="h-4 w-4 rounded border-border accent-primary cursor-pointer shrink-0 mt-4"
+                checked={selected.has(w.id)}
+                onChange={() => toggleSelect(w.id)}
+              />
+              <Link href={`/workouts/${w.id}`} className="flex-1 min-w-0">
+                <Card className={`transition-colors cursor-pointer ${cardClass}`}>
+                  <CardContent className="p-3 sm:p-4">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        {/* Title row */}
+                        <div className="flex items-center gap-1.5">
+                          <StatusIcon className={`h-4 w-4 shrink-0 ${iconClass}`} />
+                          <p className={`font-medium text-sm sm:text-base truncate ${titleClass}`}>
+                            {w.title}
+                          </p>
+                        </div>
+                        {/* Date + meta */}
+                        <div className="flex items-center gap-2 mt-1 ml-[22px]">
+                          <span className={`text-xs sm:text-sm ${dateClass}`}>
+                            {format(new Date(w.startedAt), 'd MMM yyyy, EE', { locale: ru })}
+                          </span>
+                          <span className={`text-xs ${dateClass}`}>
+                            · {w.exerciseCount ?? w.exercises?.length ?? 0} упр.
+                          </span>
+                        </div>
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        {format(new Date(w.startedAt), 'd MMMM yyyy, HH:mm', { locale: ru })}
-                      </p>
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {w.exerciseCount ?? w.exercises?.length ?? 0} упр.
+                      {/* Delete button */}
+                      <button
+                        className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors opacity-0 group-hover:opacity-100 shrink-0 sm:mt-0.5"
+                        onClick={(e) => {
+                          e.preventDefault()
+                          if (confirm(`Удалить «${w.title}»?`)) {
+                            deleteMutation.mutate(w.id)
+                          }
+                        }}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
                     </div>
                   </CardContent>
                 </Card>
               </Link>
-              <button
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors opacity-0 group-hover:opacity-100"
-                onClick={(e) => {
-                  e.preventDefault()
-                  if (confirm(`Удалить тренировку «${w.title}»?`)) {
-                    deleteMutation.mutate(w.id)
-                  }
-                }}
-              >
-                <Trash2 className="h-4 w-4" />
-              </button>
             </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
+      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2">
           <Button

@@ -86,6 +86,25 @@ export class AddExerciseToWorkoutDto {
   @Min(0)
   orderIndex?: number;
 
+  @ApiPropertyOptional({ description: 'Время отдыха между подходами (секунды)' })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  restTimerSec?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsString()
+  notes?: string;
+}
+
+export class UpdateWorkoutExerciseDto {
+  @ApiPropertyOptional({ description: 'Время отдыха между подходами (секунды)' })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  restTimerSec?: number;
+
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()

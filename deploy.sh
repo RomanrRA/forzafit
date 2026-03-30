@@ -78,6 +78,10 @@ ssh "${SERVER}" "
   \"'
 "
 
+# ── 8. Очистка старых Docker-образов ────────────────────────
+echo "▶ Очистка неиспользуемых Docker-образов..."
+ssh "${SERVER}" "docker image prune -f"
+
 echo ""
 echo "✅ Деплой завершён!"
 echo "   Сайт доступен: https://${FULL_DOMAIN}"

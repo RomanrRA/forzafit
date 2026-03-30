@@ -158,6 +158,7 @@ export const workoutExercises = pgTable(
       .notNull()
       .references(() => exercises.id, { onDelete: 'restrict' }),
     orderIndex: integer('order_index').notNull().default(0),
+    restTimerSec: integer('rest_timer_sec'),
     notes: text('notes'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },

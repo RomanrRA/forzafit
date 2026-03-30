@@ -6,6 +6,7 @@ import {
   signInWithEmailAndPassword,
   signInWithPopup,
   createUserWithEmailAndPassword,
+  sendPasswordResetEmail,
 } from 'firebase/auth'
 import { auth, googleProvider } from '@/lib/firebase'
 import { api } from '@/lib/api'
@@ -31,6 +32,9 @@ export default function LoginPage() {
   const router = useRouter()
   const [isRegister, setIsRegister] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [showResetPassword, setShowResetPassword] = useState(false)
+  const [resetEmail, setResetEmail] = useState('')
+  const [resetSent, setResetSent] = useState(false)
 
   // Общие поля
   const [email, setEmail] = useState('')
@@ -48,6 +52,30 @@ export default function LoginPage() {
     setName('')
     setGender('')
     setDob('')
+  }
+
+  async function handleResetPassword(e: React.FormEvent) {
+    e.preventDefault()
+    if (!resetEmail.trim()) {
+      toast({ variant: 'destructive', title: 'Ошибка', description: 'Введите email' })
+      return
+    }
+    setIsLoading(true)
+    try {
+      await sendPasswordResetEmail(auth, resetEmail.trim())
+      setResetSent(true)
+      toast({ title: 'Письмо отправлено', description: 'Проверьте почту для сброса пароля' })
+    } catch (err: unknown) {
+      const code = (err as { code?: string }).code
+      const msg =
+        code === 'auth/user-not-found' ? 'Аккаунт с таким email не найден' :
+        code === 'auth/invalid-email' ? 'Некорректный email' :
+        code === 'auth/too-many-requests' ? 'Слишком много попыток. Попробуйте позже.' :
+        'Ошибка отправки. Попробуйте ещё раз.'
+      toast({ variant: 'destructive', title: 'Ошибка', description: msg })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   async function handleEmailAuth(e: React.FormEvent) {
@@ -148,6 +176,65 @@ export default function LoginPage() {
     }
   }
 
+  if (showResetPassword) {
+    return (
+      <div className="lg-bg flex min-h-screen items-center justify-center px-4 py-8">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-2">
+              <Dumbbell className="h-10 w-10 text-primary" />
+            </div>
+            <CardTitle className="text-2xl">Сброс пароля</CardTitle>
+            <CardDescription>
+              {resetSent
+                ? 'Письмо отправлено! Проверьте почту и перейдите по ссылке для сброса пароля.'
+                : 'Введите email, на который зарегистрирован аккаунт. Мы отправим ссылку для сброса пароля.'}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {!resetSent ? (
+              <form onSubmit={handleResetPassword} className="space-y-3">
+                <div className="space-y-1">
+                  <Label htmlFor="resetEmail">Email</Label>
+                  <Input
+                    id="resetEmail"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={resetEmail}
+                    onChange={(e) => setResetEmail(e.target.value)}
+                    required
+                    autoFocus
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? 'Отправка...' : 'Отправить ссылку'}
+                </Button>
+              </form>
+            ) : (
+              <Button
+                className="w-full"
+                onClick={() => { setShowResetPassword(false); setResetSent(false) }}
+              >
+                Вернуться к входу
+              </Button>
+            )}
+            {!resetSent && (
+              <p className="text-center text-sm text-muted-foreground">
+                <button
+                  type="button"
+                  onClick={() => setShowResetPassword(false)}
+                  className="text-primary underline-offset-4 hover:underline"
+                >
+                  ← Назад к входу
+                </button>
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
   return (
     <div className="lg-bg flex min-h-screen items-center justify-center px-4 py-8">
       <Card className="w-full max-w-md">
@@ -198,6 +285,15 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
               />
+              {!isRegister && (
+                <button
+                  type="button"
+                  onClick={() => { setShowResetPassword(true); setResetEmail(email); setResetSent(false) }}
+                  className="text-xs text-primary hover:underline underline-offset-4"
+                >
+                  Забыли пароль?
+                </button>
+              )}
             </div>
 
             {isRegister && (

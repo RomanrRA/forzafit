@@ -228,6 +228,7 @@ function TrainingDayCard({ day, onUpdate, otherTrainingDays, onCopyTo }: DayCard
                     value={ex.weightKg ?? ''}
                     onChange={(e) => updateExercise(i, 'weightKg', e.target.value === '' ? '' : Number(e.target.value))}
                     type="number"
+                    inputMode="decimal"
                     min={0}
                     step={0.5}
                     placeholder="кг"
@@ -239,6 +240,7 @@ function TrainingDayCard({ day, onUpdate, otherTrainingDays, onCopyTo }: DayCard
                     value={ex.sets}
                     onChange={(e) => updateExercise(i, 'sets', Number(e.target.value))}
                     type="number"
+                    inputMode="numeric"
                     min={1}
                     placeholder="—"
                     className="h-7 text-xs text-center"

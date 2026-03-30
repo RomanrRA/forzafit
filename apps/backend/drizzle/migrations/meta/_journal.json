@@ -15,6 +15,13 @@
       "when": 1773235035620,
       "tag": "0001_unique_colleen_wing",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1774793654704,
+      "tag": "0002_dizzy_paibok",
+      "breakpoints": true
     }
   ]
 }

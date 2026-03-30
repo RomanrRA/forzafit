@@ -93,6 +93,7 @@ export class WorkoutsService {
         sessionId: workoutExercises.sessionId,
         exerciseId: workoutExercises.exerciseId,
         orderIndex: workoutExercises.orderIndex,
+        restTimerSec: workoutExercises.restTimerSec,
         notes: workoutExercises.notes,
         createdAt: workoutExercises.createdAt,
         exercise: exercises,
@@ -110,7 +111,7 @@ export class WorkoutsService {
             .select()
             .from(workoutSets)
             .where(inArray(workoutSets.workoutExerciseId, weIds))
-            .orderBy(workoutSets.createdAt)
+            .orderBy(asc(workoutSets.createdAt), asc(workoutSets.id))
         : [];
 
     // Group sets by workoutExerciseId
@@ -183,6 +184,7 @@ export class WorkoutsService {
         sessionId,
         exerciseId: dto.exerciseId,
         orderIndex: dto.orderIndex ?? 0,
+        restTimerSec: dto.restTimerSec ?? null,
         notes: dto.notes,
       })
       .returning();
@@ -194,6 +196,26 @@ export class WorkoutsService {
       .limit(1);
 
     return { ...we, exercise: exercise ?? null, sets: [] };
+  }
+
+  async updateExercise(
+    sessionId: string,
+    workoutExerciseId: string,
+    userId: string,
+    dto: { restTimerSec?: number; notes?: string },
+  ) {
+    await this.assertOwner(sessionId, userId);
+
+    const [we] = await this.drizzle.db
+      .update(workoutExercises)
+      .set({
+        ...(dto.restTimerSec !== undefined ? { restTimerSec: dto.restTimerSec } : {}),
+        ...(dto.notes !== undefined ? { notes: dto.notes } : {}),
+      })
+      .where(eq(workoutExercises.id, workoutExerciseId))
+      .returning();
+
+    return we;
   }
 
   async removeExercise(

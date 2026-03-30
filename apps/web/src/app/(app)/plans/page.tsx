@@ -30,15 +30,15 @@ export default function PlansPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold">Планы тренировок</h1>
-          <p className="text-muted-foreground mt-1">Готовые программы и ваши собственные</p>
+      <div className="flex items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-2xl sm:text-3xl font-bold">Планы тренировок</h1>
+          <p className="text-sm text-muted-foreground mt-0.5 hidden sm:block">Готовые программы и ваши собственные</p>
         </div>
-        <Button asChild>
+        <Button asChild size="sm" className="shrink-0 sm:size-default">
           <Link href="/plans/new">
-            <Plus className="h-4 w-4 mr-1" />
-            Создать план
+            <Plus className="h-4 w-4 sm:mr-1" />
+            <span className="hidden sm:inline">Создать план</span>
           </Link>
         </Button>
       </div>
@@ -66,26 +66,21 @@ export default function PlansPage() {
         )}
 
         {myPlans.length > 0 && (
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
             {myPlans.map((plan) => (
               <Card key={plan.id} className="flex flex-col hover:border-primary transition-colors">
-                <CardHeader className="pb-3">
+                <CardHeader className="p-3 sm:p-6 pb-2 sm:pb-3">
                   <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                        <Dumbbell className="h-5 w-5 text-primary" />
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                        <Dumbbell className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                       </div>
-                      <CardTitle className="text-lg leading-tight">{plan.name}</CardTitle>
+                      <CardTitle className="text-base sm:text-lg leading-tight truncate">{plan.name}</CardTitle>
                     </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      {plan.difficulty && (
-                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${DIFFICULTY_COLOR[plan.difficulty]}`}>
-                          {DIFFICULTY_LABEL[plan.difficulty]}
-                        </span>
-                      )}
+                    <div className="flex items-center gap-0.5 shrink-0">
                       <Link
                         href={`/plans/${plan.id}/edit`}
-                        className="text-muted-foreground hover:text-foreground transition-colors ml-1 p-1"
+                        className="text-muted-foreground hover:text-foreground transition-colors p-1"
                       >
                         <Pencil className="h-4 w-4" />
                       </Link>
@@ -99,24 +94,29 @@ export default function PlansPage() {
                     </div>
                   </div>
                   {plan.description && (
-                    <p className="text-sm text-muted-foreground mt-2">{plan.description}</p>
+                    <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 line-clamp-2">{plan.description}</p>
                   )}
                 </CardHeader>
-                <CardContent className="flex flex-col flex-1 justify-between gap-4">
-                  <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+                <CardContent className="flex flex-col flex-1 justify-between gap-3 p-3 sm:p-6 pt-0 sm:pt-0">
+                  <div className="flex flex-wrap gap-2 text-xs sm:text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
+                      <Calendar className="h-3.5 w-3.5" />
                       {plan.daysPerWeek} дн/нед
                     </span>
                     {plan.duration && (
                       <span className="flex items-center gap-1">
-                        <Clock className="h-4 w-4" />
+                        <Clock className="h-3.5 w-3.5" />
                         {plan.duration}
+                      </span>
+                    )}
+                    {plan.difficulty && (
+                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${DIFFICULTY_COLOR[plan.difficulty]}`}>
+                        {DIFFICULTY_LABEL[plan.difficulty]}
                       </span>
                     )}
                     {plan.goal && <Badge variant="outline" className="text-xs">{plan.goal}</Badge>}
                   </div>
-                  <Button asChild className="w-full">
+                  <Button asChild size="sm" className="w-full sm:size-default">
                     <Link href={`/plans/${plan.id}`}>
                       Открыть план
                       <ChevronRight className="h-4 w-4 ml-1" />
@@ -132,38 +132,38 @@ export default function PlansPage() {
       {/* Готовые планы */}
       <section className="space-y-3">
         <h2 className="text-xl font-semibold">Готовые планы</h2>
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
           {WORKOUT_PLANS.map((plan) => {
             const Icon = TYPE_ICON[plan.type]
             return (
               <Card key={plan.id} className="flex flex-col hover:border-primary transition-colors">
-                <CardHeader className="pb-3">
+                <CardHeader className="p-3 sm:p-6 pb-2 sm:pb-3">
                   <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2">
-                      <div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                        <Icon className="h-5 w-5 text-primary" />
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                        <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                       </div>
-                      <CardTitle className="text-lg leading-tight">{plan.name}</CardTitle>
+                      <CardTitle className="text-base sm:text-lg leading-tight truncate">{plan.name}</CardTitle>
                     </div>
-                    <span className={`text-xs px-2 py-1 rounded-full font-medium shrink-0 ${DIFFICULTY_COLOR[plan.difficulty]}`}>
-                      {DIFFICULTY_LABEL[plan.difficulty]}
-                    </span>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-2">{plan.description}</p>
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 line-clamp-2">{plan.description}</p>
                 </CardHeader>
-                <CardContent className="flex flex-col flex-1 justify-between gap-4">
-                  <div className="flex flex-wrap gap-3 text-sm text-muted-foreground">
+                <CardContent className="flex flex-col flex-1 justify-between gap-3 p-3 sm:p-6 pt-0 sm:pt-0">
+                  <div className="flex flex-wrap gap-2 text-xs sm:text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
-                      <Calendar className="h-4 w-4" />
+                      <Calendar className="h-3.5 w-3.5" />
                       {plan.daysPerWeek} дн/нед
                     </span>
                     <span className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" />
+                      <Clock className="h-3.5 w-3.5" />
                       {plan.duration}
+                    </span>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${DIFFICULTY_COLOR[plan.difficulty]}`}>
+                      {DIFFICULTY_LABEL[plan.difficulty]}
                     </span>
                     <Badge variant="outline" className="text-xs">{plan.goal}</Badge>
                   </div>
-                  <Button asChild className="w-full">
+                  <Button asChild size="sm" className="w-full sm:size-default">
                     <Link href={`/plans/${plan.id}`}>
                       Открыть план
                       <ChevronRight className="h-4 w-4 ml-1" />

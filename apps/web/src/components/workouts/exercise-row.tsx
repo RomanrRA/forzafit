@@ -1,14 +1,31 @@
 'use client'
 
 import { useState } from 'react'
-import { WorkoutExercise, useAddSet, useRemoveExerciseFromWorkout, useLastSetsForExercise } from '@/hooks/use-workouts'
+import { WorkoutExercise, useAddSet, useRemoveExerciseFromWorkout, useUpdateWorkoutExercise, useLastSetsForExercise } from '@/hooks/use-workouts'
 import { SetRow } from './set-row'
-import { RestTimer } from './rest-timer'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Plus, ChevronDown, ChevronUp, Trash2 } from 'lucide-react'
+import { Plus, ChevronDown, ChevronUp, Trash2, Timer } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
+
+const REST_OPTIONS = [
+  { label: '30с', value: 30 },
+  { label: '1м', value: 60 },
+  { label: '1м 30с', value: 90 },
+  { label: '2м', value: 120 },
+  { label: '3м', value: 180 },
+  { label: '5м', value: 300 },
+]
+
+function formatRest(sec: number) {
+  if (sec >= 60) {
+    const m = Math.floor(sec / 60)
+    const s = sec % 60
+    return s ? `${m}м ${s}с` : `${m}м`
+  }
+  return `${sec}с`
+}
 
 interface Props {
   workoutId: string
@@ -18,9 +35,14 @@ interface Props {
 export function ExerciseRow({ workoutId, workoutExercise }: Props) {
   const addSet = useAddSet(workoutId, workoutExercise.id)
   const removeExercise = useRemoveExerciseFromWorkout(workoutId)
+  const updateExercise = useUpdateWorkoutExercise(workoutId)
   const { data: lastSets } = useLastSetsForExercise(workoutExercise.exerciseId)
   const [adding, setAdding] = useState(false)
   const [showDescription, setShowDescription] = useState(false)
+  const [showRestPicker, setShowRestPicker] = useState(false)
+
+  const restSec = workoutExercise.restTimerSec
+  const restLabel = restSec ? formatRest(restSec) : null
 
   async function handleAddSet() {
     setAdding(true)
@@ -37,24 +59,47 @@ export function ExerciseRow({ workoutId, workoutExercise }: Props) {
     }
   }
 
+  async function handleSetRest(sec: number | null) {
+    try {
+      await updateExercise.mutateAsync({
+        workoutExerciseId: workoutExercise.id,
+        restTimerSec: sec ?? 0,
+      })
+      setShowRestPicker(false)
+    } catch {
+      toast({ variant: 'destructive', title: 'Ошибка' })
+    }
+  }
+
   return (
     <Card>
-      <CardHeader className="pb-2 pt-4 px-4">
-        <div className="flex items-start justify-between gap-2">
-          {/* Название + группа мышц — занимает оставшееся место */}
+      <CardHeader className="pb-2 pt-3 sm:pt-4 px-3 sm:px-4">
+        <div className="flex items-start justify-between gap-1.5">
+          {/* Название + группа мышц */}
           <div className="min-w-0 flex-1">
-            <span className="font-medium leading-snug">{workoutExercise.exercise.name}</span>
+            <span className="text-sm sm:text-base font-medium leading-snug">{workoutExercise.exercise.name}</span>
             {workoutExercise.exercise.muscleGroups?.[0] && (
-              <Badge variant="secondary" className="text-xs ml-2 align-middle">
+              <Badge variant="secondary" className="text-[10px] sm:text-xs ml-1.5 align-middle">
                 {workoutExercise.exercise.muscleGroups[0]}
               </Badge>
             )}
           </div>
-          {/* Правые кнопки — фиксированная ширина, не сжимаются */}
-          <div className="flex items-center gap-1.5 shrink-0">
+          {/* Правые кнопки */}
+          <div className="flex items-center gap-1 shrink-0">
             <span className="text-xs text-muted-foreground whitespace-nowrap">
               {workoutExercise.sets.filter((s) => s.completed).length}/{workoutExercise.sets.length}
             </span>
+            <button
+              onClick={() => setShowRestPicker((v) => !v)}
+              className={`text-xs flex items-center gap-0.5 transition-colors ${
+                restLabel
+                  ? 'text-primary hover:text-primary/80'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Timer className="h-3.5 w-3.5" />
+              {restLabel && <span className="hidden min-[360px]:inline">{restLabel}</span>}
+            </button>
             {workoutExercise.exercise.description && (
               <button
                 onClick={() => setShowDescription((v) => !v)}
@@ -75,31 +120,67 @@ export function ExerciseRow({ workoutId, workoutExercise }: Props) {
           </div>
         </div>
       </CardHeader>
-      <CardContent className="px-4 pb-4 space-y-1">
+      <CardContent className="px-3 sm:px-4 pb-3 sm:pb-4 space-y-0.5 sm:space-y-1">
+        {/* Выбор времени отдыха */}
+        {showRestPicker && (
+          <div className="flex flex-wrap gap-1.5 pb-2">
+            {REST_OPTIONS.map((opt) => (
+              <button
+                key={opt.value}
+                onClick={() => handleSetRest(opt.value)}
+                className={`px-2.5 py-1 rounded-md text-xs border transition-colors ${
+                  restSec === opt.value
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'bg-muted/50 border-border hover:bg-muted'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+            {restSec && (
+              <button
+                onClick={() => handleSetRest(null)}
+                className="px-2.5 py-1 rounded-md text-xs border border-border text-muted-foreground hover:text-destructive hover:border-destructive transition-colors"
+              >
+                Убрать
+              </button>
+            )}
+          </div>
+        )}
+
         {showDescription && workoutExercise.exercise.description && (
           <p className="text-sm text-muted-foreground bg-muted/50 rounded-md px-3 py-2 mb-2 leading-relaxed">
             {workoutExercise.exercise.description}
           </p>
         )}
         {workoutExercise.sets.length > 0 && (
-          <div className="flex gap-1.5 text-xs text-muted-foreground mb-1 pl-[26px] pr-[62px]">
+          <div className="flex gap-1 sm:gap-1.5 text-[10px] sm:text-xs text-muted-foreground mb-0.5 pl-6 pr-[68px] sm:pr-[62px]">
             <span className="flex-1 text-center">Вес</span>
             <span className="text-transparent select-none">×</span>
             <span className="flex-1 text-center">Повт.</span>
-            {lastSets && lastSets.length > 0 && (
-              <span className="text-[10px] opacity-40 shrink-0 ml-auto">прошлый раз</span>
-            )}
           </div>
         )}
         {workoutExercise.sets.map((set, i) => (
-          <SetRow
-            key={set.id}
-            workoutId={workoutId}
-            workoutExerciseId={workoutExercise.id}
-            set={set}
-            index={i}
-            prevSet={lastSets?.[i] ?? null}
-          />
+          <div key={set.id}>
+            <SetRow
+              workoutId={workoutId}
+              workoutExerciseId={workoutExercise.id}
+              set={set}
+              index={i}
+              prevSet={lastSets?.[i] ?? null}
+            />
+            {/* Разделитель с отдыхом между выполненными подходами */}
+            {set.completed && i < workoutExercise.sets.length - 1 && restLabel && (
+              <div className="flex items-center gap-2 py-0.5 pl-6 pr-[68px] sm:pr-[62px]">
+                <div className="flex-1 border-t border-dashed border-muted-foreground/20" />
+                <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
+                  <Timer className="h-2.5 w-2.5" />
+                  {restLabel}
+                </span>
+                <div className="flex-1 border-t border-dashed border-muted-foreground/20" />
+              </div>
+            )}
+          </div>
         ))}
         <Button
           variant="ghost"
@@ -111,7 +192,6 @@ export function ExerciseRow({ workoutId, workoutExercise }: Props) {
           <Plus className="h-3 w-3 mr-1" />
           Добавить подход
         </Button>
-        <RestTimer />
       </CardContent>
     </Card>
   )
