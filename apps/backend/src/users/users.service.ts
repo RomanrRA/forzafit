@@ -4,13 +4,28 @@ import { DrizzleService } from '../db/db.service';
 import { users } from '../db/schema';
 import { UpdateUserDto } from './dto/update-user.dto';
 
+const PUBLIC_USER_COLUMNS = {
+  id: users.id,
+  email: users.email,
+  name: users.name,
+  gender: users.gender,
+  dob: users.dob,
+  heightCm: users.heightCm,
+  weightKg: users.weightKg,
+  goal: users.goal,
+  appMode: users.appMode,
+  subscriptionTier: users.subscriptionTier,
+  createdAt: users.createdAt,
+  updatedAt: users.updatedAt,
+} as const;
+
 @Injectable()
 export class UsersService {
   constructor(private drizzle: DrizzleService) {}
 
   async findById(id: string) {
     const [user] = await this.drizzle.db
-      .select()
+      .select(PUBLIC_USER_COLUMNS)
       .from(users)
       .where(eq(users.id, id))
       .limit(1);
@@ -33,7 +48,7 @@ export class UsersService {
         updatedAt: new Date(),
       })
       .where(eq(users.id, id))
-      .returning();
+      .returning(PUBLIC_USER_COLUMNS);
 
     if (!user) throw new NotFoundException('Пользователь не найден');
     return user;

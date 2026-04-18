@@ -18,6 +18,9 @@ logs/
 *.log
 npm-debug.log*
 
+# Cygwin / Git Bash crash dumps (Windows)
+*.stackdump
+
 # OS
 .DS_Store
 Thumbs.db

@@ -64,8 +64,8 @@ export const users = pgTable(
   'users',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    firebaseUid: text('firebase_uid').notNull(),
     email: text('email').notNull(),
+    passwordHash: text('password_hash').notNull(),
     name: text('name'),
     gender: genderEnum('gender'),
     dob: timestamp('dob', { mode: 'date' }),
@@ -79,10 +79,7 @@ export const users = pgTable(
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
-  (t) => [
-    uniqueIndex('users_firebase_uid_idx').on(t.firebaseUid),
-    uniqueIndex('users_email_idx').on(t.email),
-  ],
+  (t) => [uniqueIndex('users_email_idx').on(t.email)],
 );
 
 // ─── Refresh Tokens ───────────────────────────────────────────────────────────
@@ -100,6 +97,26 @@ export const refreshTokens = pgTable(
     createdAt: timestamp('created_at').defaultNow().notNull(),
   },
   (t) => [index('refresh_tokens_user_id_idx').on(t.userId)],
+);
+
+// ─── Password Resets ──────────────────────────────────────────────────────────
+
+export const passwordResets = pgTable(
+  'password_resets',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    tokenHash: text('token_hash').notNull(),
+    expiresAt: timestamp('expires_at').notNull(),
+    usedAt: timestamp('used_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (t) => [
+    index('password_resets_user_id_idx').on(t.userId),
+    uniqueIndex('password_resets_token_hash_idx').on(t.tokenHash),
+  ],
 );
 
 // ─── Exercises ────────────────────────────────────────────────────────────────
@@ -208,6 +225,32 @@ export const planTemplates = pgTable(
   (t) => [index('plan_templates_user_id_idx').on(t.userId)],
 );
 
+// ─── Body Measurements ───────────────────────────────────────────────────
+
+export const bodyMeasurements = pgTable(
+  'body_measurements',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    date: timestamp('date', { mode: 'date' }).notNull(),
+    weightKg: real('weight_kg'),
+    bodyFatPct: real('body_fat_pct'),
+    chestCm: real('chest_cm'),
+    waistCm: real('waist_cm'),
+    hipsCm: real('hips_cm'),
+    armCm: real('arm_cm'),
+    custom: jsonb('custom').$type<{ fieldId: string; name: string; value: number; unit: string }[]>(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (t) => [
+    index('body_measurements_user_id_idx').on(t.userId),
+    index('body_measurements_date_idx').on(t.date),
+  ],
+);
+
 // ─── Sync Events ──────────────────────────────────────────────────────────────
 
 export const syncEvents = pgTable(
@@ -235,10 +278,19 @@ export const syncEvents = pgTable(
 
 export const usersRelations = relations(users, ({ many }) => ({
   refreshTokens: many(refreshTokens),
+  passwordResets: many(passwordResets),
   workoutSessions: many(workoutSessions),
   exercises: many(exercises),
   syncEvents: many(syncEvents),
   planTemplates: many(planTemplates),
+  bodyMeasurements: many(bodyMeasurements),
+}));
+
+export const passwordResetsRelations = relations(passwordResets, ({ one }) => ({
+  user: one(users, {
+    fields: [passwordResets.userId],
+    references: [users.id],
+  }),
 }));
 
 export const workoutSessionsRelations = relations(
@@ -277,6 +329,13 @@ export const workoutSetsRelations = relations(workoutSets, ({ one }) => ({
 export const exercisesRelations = relations(exercises, ({ one }) => ({
   user: one(users, {
     fields: [exercises.userId],
+    references: [users.id],
+  }),
+}));
+
+export const bodyMeasurementsRelations = relations(bodyMeasurements, ({ one }) => ({
+  user: one(users, {
+    fields: [bodyMeasurements.userId],
     references: [users.id],
   }),
 }));

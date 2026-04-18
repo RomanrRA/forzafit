@@ -7,6 +7,10 @@ import { globalValidationPipe } from './common/pipes/validation.pipe';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Доверять ближайшему reverse-proxy (nginx), чтобы @nestjs/throttler
+  // и req.ip видели реальный клиентский IP из X-Forwarded-For.
+  app.getHttpAdapter().getInstance().set('trust proxy', 1);
+
   // Security
   app.use(helmet());
   const corsOrigins = process.env.CORS_ORIGINS?.split(',').map((o) => o.trim());
@@ -28,6 +32,8 @@ async function bootstrap() {
     .addTag('Users', 'Профиль пользователя')
     .addTag('Workouts', 'Тренировки')
     .addTag('Exercises', 'База упражнений')
+    .addTag('Plan Templates', 'Шаблоны тренировочных планов')
+    .addTag('Body Measurements', 'Замеры тела')
     .addTag('Sync', 'Синхронизация данных')
     .build();
 

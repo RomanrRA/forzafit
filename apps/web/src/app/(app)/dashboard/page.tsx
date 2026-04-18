@@ -6,22 +6,10 @@ import { format, startOfDay, differenceInDays } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { useAuthStore } from '@/store/auth.store'
 import { useWorkouts, usePersonalRecords } from '@/hooks/use-workouts'
+import { useBodyMeasurements, type BodyMeasurement } from '@/hooks/use-body-measurements'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Scale, TrendingDown, TrendingUp, Minus, CalendarClock, AlertTriangle, Trophy, ChevronDown, ChevronUp, Bell, Settings } from 'lucide-react'
-import { loadEncryptedJson } from '@/lib/crypto'
-
-interface BodyEntry {
-  id: string
-  date: string
-  weightKg: number | null
-  bodyFatPct: number | null
-  chestCm: number | null
-  waistCm: number | null
-  hipsCm: number | null
-  armCm: number | null
-  custom: { fieldId: string; name: string; value: number; unit: string }[]
-}
 
 interface BodyReminderSettings {
   enabled: boolean
@@ -56,7 +44,6 @@ interface CustomFieldDef {
 
 const CUSTOM_FIELDS_KEY = 'fitlog_custom_fields'
 
-const STORAGE_KEY = 'fitlog_body_measurements'
 const REMINDER_SETTINGS_KEY = 'fitlog_body_reminder_settings'
 const WIDGET_SETTINGS_KEY = 'fitlog_body_widget_settings'
 const DEFAULT_REMINDER: BodyReminderSettings = { enabled: true, intervalDays: 21 }
@@ -87,14 +74,19 @@ function loadWidgetSettings(): BodyWidgetSettings {
 }
 
 export default function DashboardPage() {
-  const userId = useAuthStore((s) => s.user?.id ?? 'anon')
   const user = useAuthStore((s) => s.user)
-  const [entries, setEntries] = useState<BodyEntry[]>([])
   const [missedExpanded, setMissedExpanded] = useState(true)
   const [reminderSettings, setReminderSettings] = useState<BodyReminderSettings>(DEFAULT_REMINDER)
   const [widgetSettings, setWidgetSettings] = useState<BodyWidgetSettings>(DEFAULT_WIDGET_SETTINGS)
   const [showWidgetConfig, setShowWidgetConfig] = useState(false)
   const [customFields, setCustomFields] = useState<CustomFieldDef[]>([])
+
+  // Body measurements from API
+  const { data: bodyData } = useBodyMeasurements({ limit: 200 })
+  const entries = useMemo(() => {
+    if (!bodyData?.items) return [] as BodyMeasurement[]
+    return [...bodyData.items].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  }, [bodyData])
 
   // Все метрики = стандартные + кастомные
   const allMetrics = useMemo(() => {
@@ -138,16 +130,13 @@ export default function DashboardPage() {
   }, [plannedWorkouts])
 
   useEffect(() => {
-    loadEncryptedJson<BodyEntry>(STORAGE_KEY, userId).then((data) =>
-      setEntries(data.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()))
-    )
     setReminderSettings(loadReminderSettings())
     setWidgetSettings(loadWidgetSettings())
     try {
       const raw = localStorage.getItem(CUSTOM_FIELDS_KEY)
       if (raw) setCustomFields(JSON.parse(raw))
     } catch {}
-  }, [userId])
+  }, [])
 
   function updateWidgetSettings(next: BodyWidgetSettings) {
     setWidgetSettings(next)
@@ -158,13 +147,13 @@ export default function DashboardPage() {
   const previous = entries.length >= 2 ? entries[entries.length - 2] : null
 
   // Получить значение метрики из записи (стандартной или кастомной)
-  function getMetricValue(entry: BodyEntry, key: string): number | null {
+  function getMetricValue(entry: BodyMeasurement, key: string): number | null {
     if (key.startsWith('custom_')) {
       const fieldId = key.replace('custom_', '')
       const found = entry.custom?.find((c) => c.fieldId === fieldId)
       return found?.value ?? null
     }
-    return (entry[key as keyof BodyEntry] as number | null) ?? null
+    return (entry[key as keyof BodyMeasurement] as number | null) ?? null
   }
 
   // Дельты для компактного виджета — с учётом настроек

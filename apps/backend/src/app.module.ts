@@ -4,12 +4,12 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 
 import { DbModule } from './db/db.module';
-import { FirebaseModule } from './firebase/firebase.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { WorkoutsModule } from './workouts/workouts.module';
 import { SyncModule } from './sync/sync.module';
 import { PlanTemplatesModule } from './plan-templates/plan-templates.module';
+import { BodyMeasurementsModule } from './body-measurements/body-measurements.module';
 
 @Module({
   imports: [
@@ -25,12 +25,12 @@ import { PlanTemplatesModule } from './plan-templates/plan-templates.module';
       },
     ]),
     DbModule,
-    FirebaseModule,
     AuthModule,
     UsersModule,
     WorkoutsModule,
     SyncModule,
     PlanTemplatesModule,
+    BodyMeasurementsModule,
   ],
   providers: [
     {

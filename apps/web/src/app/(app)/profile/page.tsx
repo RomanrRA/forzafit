@@ -3,12 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import {
-  EmailAuthProvider,
-  reauthenticateWithCredential,
-  updatePassword,
-} from 'firebase/auth'
-import { auth } from '@/lib/firebase'
 import { api } from '@/lib/api'
 import { signOut } from '@/hooks/use-auth'
 import { Button } from '@/components/ui/button'
@@ -101,29 +95,24 @@ export default function ProfilePage() {
       toast({ variant: 'destructive', title: 'Ошибка', description: 'Новые пароли не совпадают' })
       return
     }
-    if (newPassword.length < 6) {
-      toast({ variant: 'destructive', title: 'Ошибка', description: 'Пароль должен быть не менее 6 символов' })
+    if (newPassword.length < 8) {
+      toast({ variant: 'destructive', title: 'Ошибка', description: 'Пароль должен быть не менее 8 символов' })
       return
     }
 
     setIsChangingPassword(true)
     try {
-      const user = auth.currentUser
-      if (!user || !user.email) throw new Error('Пользователь не авторизован')
-
-      const credential = EmailAuthProvider.credential(user.email, currentPassword)
-      await reauthenticateWithCredential(user, credential)
-      await updatePassword(user, newPassword)
-
+      await api.post('/auth/change-password', { currentPassword, newPassword })
       setCurrentPassword('')
       setNewPassword('')
       setConfirmNewPassword('')
       toast({ title: 'Пароль изменён' })
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Ошибка смены пароля'
-      const friendly = msg.includes('wrong-password') || msg.includes('invalid-credential')
-        ? 'Неверный текущий пароль'
-        : msg
+      const status = (err as { response?: { status?: number } }).response?.status
+      const apiMsg = (err as { response?: { data?: { message?: string } } }).response?.data?.message
+      const friendly =
+        status === 401 ? 'Неверный текущий пароль' :
+        apiMsg ?? 'Ошибка смены пароля'
       toast({ variant: 'destructive', title: 'Ошибка', description: friendly })
     } finally {
       setIsChangingPassword(false)

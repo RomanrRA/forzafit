@@ -22,6 +22,20 @@
       "when": 1774793654704,
       "tag": "0002_dizzy_paibok",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1774947648514,
+      "tag": "0003_aberrant_invaders",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1776468471019,
+      "tag": "0004_local_auth",
+      "breakpoints": true
     }
   ]
 }

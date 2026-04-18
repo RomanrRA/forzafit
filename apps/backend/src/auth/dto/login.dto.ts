@@ -1,11 +1,17 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsEmail, MinLength, MaxLength } from 'class-validator';
 
 export class LoginDto {
-  @ApiProperty({ description: 'Firebase ID Token' })
+  @ApiProperty({ example: 'user@example.com' })
+  @IsEmail()
+  email: string;
+
+  @ApiProperty({ example: 'correcthorsebattery' })
   @IsString()
   @IsNotEmpty()
-  idToken: string;
+  @MinLength(8)
+  @MaxLength(128)
+  password: string;
 }
 
 export class RefreshDto {

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import {
@@ -10,10 +10,17 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Scale, Plus, Trash2, Bell, BellOff, Settings, Pencil, Check } from 'lucide-react'
+import { Scale, Plus, Trash2, Bell, BellOff, Settings, Pencil, Check, Upload } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { useAuthStore } from '@/store/auth.store'
-import { loadEncryptedJson, saveEncryptedJson } from '@/lib/crypto'
+import { loadEncryptedJson } from '@/lib/crypto'
+import {
+  useBodyMeasurements,
+  useCreateBodyMeasurement,
+  useUpdateBodyMeasurement,
+  useDeleteBodyMeasurement,
+  type BodyMeasurement,
+} from '@/hooks/use-body-measurements'
 
 // Custom field definition (persists across sessions)
 interface CustomFieldDef {
@@ -22,7 +29,8 @@ interface CustomFieldDef {
   unit: string
 }
 
-interface BodyEntry {
+// Legacy localStorage entry format
+interface LegacyBodyEntry {
   id: string
   date: string
   weightKg: number | null
@@ -61,6 +69,7 @@ const STANDARD_METRICS = [
 
 const STORAGE_KEY = 'fitlog_body_measurements'
 const FIELDS_KEY  = 'fitlog_custom_fields'
+const MIGRATED_KEY = 'fitlog_body_migrated_to_db'
 const REMINDER_SETTINGS_KEY = 'fitlog_body_reminder_settings'
 const WIDGET_SETTINGS_KEY = 'fitlog_body_widget_settings'
 const DEFAULT_REMINDER: BodyReminderSettings = { enabled: true, intervalDays: 21 }
@@ -88,7 +97,6 @@ const EMPTY_STANDARD = {
 
 export default function BodyPage() {
   const userId = useAuthStore((s) => s.user?.id ?? 'anon')
-  const [entries, setEntries] = useState<BodyEntry[]>([])
   const [customFields, setCustomFields] = useState<CustomFieldDef[]>([])
   const [showForm, setShowForm] = useState(false)
   const [reminderSettings, setReminderSettings] = useState<BodyReminderSettings>(DEFAULT_REMINDER)
@@ -96,6 +104,18 @@ export default function BodyPage() {
   const [widgetSettings, setWidgetSettings] = useState<BodyWidgetSettings>(DEFAULT_WIDGET_SETTINGS)
   const [showChartSettings, setShowChartSettings] = useState(false)
   const [chartMetric, setChartMetric] = useState('weightKg')
+
+  // API hooks
+  const { data, isLoading } = useBodyMeasurements({ limit: 200 })
+  const createMutation = useCreateBodyMeasurement()
+  const updateMutation = useUpdateBodyMeasurement()
+  const deleteMutation = useDeleteBodyMeasurement()
+
+  // Entries sorted by date ascending
+  const entries = useMemo(() => {
+    if (!data?.items) return []
+    return [...data.items].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+  }, [data])
 
   // Все метрики = стандартные + кастомные
   const allMetrics = useMemo(() => {
@@ -121,11 +141,13 @@ export default function BodyPage() {
     custom: Record<string, string>
   } | null>(null)
 
+  // Migration from localStorage
+  const [migrating, setMigrating] = useState(false)
+  const [hasLocalData, setHasLocalData] = useState(false)
+  const migrationChecked = useRef(false)
+
   useEffect(() => {
-    loadEncryptedJson<BodyEntry>(STORAGE_KEY, userId).then((data) =>
-      setEntries(data.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()))
-    )
-    // Custom field definitions are not sensitive — plain localStorage
+    // Custom field definitions — plain localStorage
     try {
       const raw = localStorage.getItem(FIELDS_KEY)
       if (raw) setCustomFields(JSON.parse(raw))
@@ -138,7 +160,48 @@ export default function BodyPage() {
       const raw = localStorage.getItem(WIDGET_SETTINGS_KEY)
       if (raw) setWidgetSettings({ ...DEFAULT_WIDGET_SETTINGS, ...JSON.parse(raw) })
     } catch {}
+  }, [])
+
+  // Check for local data to migrate
+  useEffect(() => {
+    if (migrationChecked.current || userId === 'anon') return
+    migrationChecked.current = true
+    const alreadyMigrated = localStorage.getItem(MIGRATED_KEY)
+    if (alreadyMigrated) return
+    loadEncryptedJson<LegacyBodyEntry>(STORAGE_KEY, userId).then((localEntries) => {
+      if (localEntries.length > 0) {
+        setHasLocalData(true)
+      }
+    })
   }, [userId])
+
+  async function migrateFromLocalStorage() {
+    setMigrating(true)
+    try {
+      const localEntries = await loadEncryptedJson<LegacyBodyEntry>(STORAGE_KEY, userId)
+      let migrated = 0
+      for (const entry of localEntries) {
+        await createMutation.mutateAsync({
+          date: new Date(entry.date).toISOString(),
+          weightKg: entry.weightKg ?? undefined,
+          bodyFatPct: entry.bodyFatPct ?? undefined,
+          chestCm: entry.chestCm ?? undefined,
+          waistCm: entry.waistCm ?? undefined,
+          hipsCm: entry.hipsCm ?? undefined,
+          armCm: entry.armCm ?? undefined,
+          custom: entry.custom?.length ? entry.custom : undefined,
+        })
+        migrated++
+      }
+      localStorage.setItem(MIGRATED_KEY, 'true')
+      setHasLocalData(false)
+      toast({ title: `Перенесено ${migrated} замеров в облако` })
+    } catch (err) {
+      toast({ variant: 'destructive', title: 'Ошибка миграции', description: String(err) })
+    } finally {
+      setMigrating(false)
+    }
+  }
 
   function updateWidgetSettings(next: BodyWidgetSettings) {
     setWidgetSettings(next)
@@ -150,11 +213,6 @@ export default function BodyPage() {
     localStorage.setItem(REMINDER_SETTINGS_KEY, JSON.stringify(settings))
     toast({ title: settings.enabled ? `Напоминание: ${REMINDER_OPTIONS.find(o => o.value === settings.intervalDays)?.label ?? `каждые ${settings.intervalDays} дн.`}` : 'Напоминания отключены' })
   }
-
-  const persistEntries = useCallback(async (updated: BodyEntry[]) => {
-    setEntries(updated)
-    await saveEncryptedJson(STORAGE_KEY, updated, userId)
-  }, [userId])
 
   function saveFields(fields: CustomFieldDef[]) {
     setCustomFields(fields)
@@ -195,36 +253,37 @@ export default function BodyPage() {
       .filter((f) => customValues[f.id])
       .map((f) => ({ fieldId: f.id, name: f.name, value: Number(customValues[f.id]), unit: f.unit }))
 
-    const entry: BodyEntry = {
-      id: Date.now().toString(),
-      date: form.date,
-      weightKg:   form.weightKg   ? Number(form.weightKg)   : null,
-      bodyFatPct: form.bodyFatPct ? Number(form.bodyFatPct) : null,
-      chestCm:    form.chestCm    ? Number(form.chestCm)    : null,
-      waistCm:    form.waistCm    ? Number(form.waistCm)    : null,
-      hipsCm:     form.hipsCm     ? Number(form.hipsCm)     : null,
-      armCm:      form.armCm      ? Number(form.armCm)      : null,
-      custom,
-    }
-    const sorted = [...entries, entry].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-    persistEntries(sorted)
-    setShowForm(false)
-    setForm({ ...EMPTY_STANDARD, date: new Date().toISOString().split('T')[0] })
-    setCustomValues({})
-    toast({ title: 'Замер сохранён' })
+    createMutation.mutate({
+      date: new Date(form.date).toISOString(),
+      weightKg: form.weightKg ? Number(form.weightKg) : undefined,
+      bodyFatPct: form.bodyFatPct ? Number(form.bodyFatPct) : undefined,
+      chestCm: form.chestCm ? Number(form.chestCm) : undefined,
+      waistCm: form.waistCm ? Number(form.waistCm) : undefined,
+      hipsCm: form.hipsCm ? Number(form.hipsCm) : undefined,
+      armCm: form.armCm ? Number(form.armCm) : undefined,
+      custom: custom.length ? custom : undefined,
+    }, {
+      onSuccess: () => {
+        setShowForm(false)
+        setForm({ ...EMPTY_STANDARD, date: new Date().toISOString().split('T')[0] })
+        setCustomValues({})
+        toast({ title: 'Замер сохранён' })
+      },
+    })
   }
 
   function handleDelete(id: string) {
     if (editingId === id) { setEditingId(null); setEditForm(null) }
-    persistEntries(entries.filter((e) => e.id !== id))
+    deleteMutation.mutate(id)
   }
 
-  function startEdit(entry: BodyEntry) {
+  function startEdit(entry: BodyMeasurement) {
     setEditingId(entry.id)
     const custom: Record<string, string> = {}
     entry.custom?.forEach((c) => { custom[c.fieldId] = String(c.value) })
+    const dateStr = entry.date.includes('T') ? entry.date.split('T')[0] : entry.date
     setEditForm({
-      date: entry.date,
+      date: dateStr,
       weightKg: entry.weightKg?.toString() ?? '',
       bodyFatPct: entry.bodyFatPct?.toString() ?? '',
       chestCm: entry.chestCm?.toString() ?? '',
@@ -237,39 +296,39 @@ export default function BodyPage() {
 
   function saveEdit() {
     if (!editingId || !editForm) return
-    const updated = entries.map((e) => {
-      if (e.id !== editingId) return e
-      const custom = customFields
-        .filter((f) => editForm.custom[f.id])
-        .map((f) => ({ fieldId: f.id, name: f.name, value: Number(editForm.custom[f.id]), unit: f.unit }))
-      return {
-        ...e,
-        date: editForm.date,
-        weightKg: editForm.weightKg ? Number(editForm.weightKg) : null,
-        bodyFatPct: editForm.bodyFatPct ? Number(editForm.bodyFatPct) : null,
-        chestCm: editForm.chestCm ? Number(editForm.chestCm) : null,
-        waistCm: editForm.waistCm ? Number(editForm.waistCm) : null,
-        hipsCm: editForm.hipsCm ? Number(editForm.hipsCm) : null,
-        armCm: editForm.armCm ? Number(editForm.armCm) : null,
-        custom,
-      }
-    }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-    persistEntries(updated)
-    setEditingId(null)
-    setEditForm(null)
-    toast({ title: 'Замер обновлён' })
+    const custom = customFields
+      .filter((f) => editForm.custom[f.id])
+      .map((f) => ({ fieldId: f.id, name: f.name, value: Number(editForm.custom[f.id]), unit: f.unit }))
+
+    updateMutation.mutate({
+      id: editingId,
+      date: new Date(editForm.date).toISOString(),
+      weightKg: editForm.weightKg ? Number(editForm.weightKg) : undefined,
+      bodyFatPct: editForm.bodyFatPct ? Number(editForm.bodyFatPct) : undefined,
+      chestCm: editForm.chestCm ? Number(editForm.chestCm) : undefined,
+      waistCm: editForm.waistCm ? Number(editForm.waistCm) : undefined,
+      hipsCm: editForm.hipsCm ? Number(editForm.hipsCm) : undefined,
+      armCm: editForm.armCm ? Number(editForm.armCm) : undefined,
+      custom: custom.length ? custom : undefined,
+    }, {
+      onSuccess: () => {
+        setEditingId(null)
+        setEditForm(null)
+        toast({ title: 'Замер обновлён' })
+      },
+    })
   }
 
   const latest = entries[entries.length - 1]
 
   // Получить значение метрики из записи (стандартной или кастомной)
-  function getMetricValue(entry: BodyEntry, key: string): number | null {
+  function getMetricValue(entry: BodyMeasurement, key: string): number | null {
     if (key.startsWith('custom_')) {
       const fieldId = key.replace('custom_', '')
       const found = entry.custom?.find((c) => c.fieldId === fieldId)
       return found?.value ?? null
     }
-    return (entry[key as keyof BodyEntry] as number | null) ?? null
+    return (entry[key as keyof BodyMeasurement] as number | null) ?? null
   }
 
   // Данные для графика — по выбранному показателю
@@ -296,6 +355,14 @@ export default function BodyPage() {
     return isGood ? '#22c55e' : '#f97316'
   }, [chartData, metricGoal])
 
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-4 sm:space-y-6">
       <div className="flex items-center justify-between gap-2">
@@ -318,6 +385,22 @@ export default function BodyPage() {
           </Button>
         </div>
       </div>
+
+      {/* Migration banner */}
+      {hasLocalData && (
+        <Card className="border-amber-500/50 bg-amber-500/5">
+          <CardContent className="py-3 flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-sm font-medium">Найдены локальные замеры</p>
+              <p className="text-xs text-muted-foreground">Перенести данные из браузера в облако?</p>
+            </div>
+            <Button size="sm" onClick={migrateFromLocalStorage} disabled={migrating}>
+              <Upload className="h-4 w-4 mr-1.5" />
+              {migrating ? 'Переношу...' : 'Перенести'}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Reminder settings */}
       {showReminderSettings && (
@@ -454,7 +537,9 @@ export default function BodyPage() {
             )}
 
             <div className="flex gap-2">
-              <Button onClick={handleAdd}>Сохранить</Button>
+              <Button onClick={handleAdd} disabled={createMutation.isPending}>
+                {createMutation.isPending ? 'Сохраняю...' : 'Сохранить'}
+              </Button>
               <Button variant="outline" onClick={() => { setShowForm(false); setShowAddField(false) }}>Отмена</Button>
             </div>
           </CardContent>
@@ -685,9 +770,9 @@ export default function BodyPage() {
                         ))}
                       </div>
                       <div className="flex gap-2">
-                        <Button size="sm" onClick={saveEdit}>
+                        <Button size="sm" onClick={saveEdit} disabled={updateMutation.isPending}>
                           <Check className="h-3.5 w-3.5 mr-1" />
-                          Сохранить
+                          {updateMutation.isPending ? 'Сохраняю...' : 'Сохранить'}
                         </Button>
                         <Button size="sm" variant="ghost" onClick={() => { setEditingId(null); setEditForm(null) }}>
                           Отмена
@@ -727,6 +812,7 @@ export default function BodyPage() {
                           size="icon"
                           className="h-7 w-7 text-muted-foreground hover:text-destructive"
                           onClick={() => handleDelete(entry.id)}
+                          disabled={deleteMutation.isPending}
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
