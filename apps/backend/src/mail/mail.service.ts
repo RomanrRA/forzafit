@@ -6,7 +6,7 @@ import * as nodemailer from 'nodemailer';
 export class MailService implements OnModuleInit {
   private readonly logger = new Logger(MailService.name);
   private transporter: nodemailer.Transporter | null = null;
-  private fromAddress = 'FitLog <no-reply@forzafit.myalfanews.com>';
+  private fromAddress = 'ForzaFit <no-reply@forzafit.ru>';
 
   constructor(private config: ConfigService) {}
 
@@ -14,7 +14,8 @@ export class MailService implements OnModuleInit {
     const host = this.config.get<string>('SMTP_HOST');
     const user = this.config.get<string>('SMTP_USER');
     const pass = this.config.get<string>('SMTP_PASS');
-    const port = Number(this.config.get<string>('SMTP_PORT') ?? 587);
+    const rawPort = this.config.get<string>('SMTP_PORT');
+    const port = rawPort ? Number(rawPort) : 587;
     const from = this.config.get<string>('SMTP_FROM');
     if (from) this.fromAddress = from;
 
@@ -29,6 +30,7 @@ export class MailService implements OnModuleInit {
       host,
       port,
       secure: port === 465,
+      requireTLS: port !== 465,
       auth: { user, pass },
     });
     this.logger.log(`SMTP transport инициализирован: ${host}:${port}`);

@@ -70,6 +70,7 @@ const STANDARD_METRICS = [
 const STORAGE_KEY = 'fitlog_body_measurements'
 const FIELDS_KEY  = 'fitlog_custom_fields'
 const MIGRATED_KEY = 'fitlog_body_migrated_to_db'
+const MIGRATED_IDS_KEY = 'fitlog_body_migrated_ids'
 const REMINDER_SETTINGS_KEY = 'fitlog_body_reminder_settings'
 const WIDGET_SETTINGS_KEY = 'fitlog_body_widget_settings'
 const DEFAULT_REMINDER: BodyReminderSettings = { enabled: true, intervalDays: 21 }
@@ -177,10 +178,17 @@ export default function BodyPage() {
 
   async function migrateFromLocalStorage() {
     setMigrating(true)
-    try {
-      const localEntries = await loadEncryptedJson<LegacyBodyEntry>(STORAGE_KEY, userId)
-      let migrated = 0
-      for (const entry of localEntries) {
+    // Per-entry progress — если миграция упадёт в середине, повтор пропустит
+    // уже успешные записи и не создаст дубликаты на бэкенде.
+    const alreadyMigrated = new Set<string>(
+      JSON.parse(localStorage.getItem(MIGRATED_IDS_KEY) ?? '[]') as string[],
+    )
+    const localEntries = await loadEncryptedJson<LegacyBodyEntry>(STORAGE_KEY, userId)
+    let migrated = 0
+    let failed = 0
+    for (const entry of localEntries) {
+      if (alreadyMigrated.has(entry.id)) continue
+      try {
         await createMutation.mutateAsync({
           date: new Date(entry.date).toISOString(),
           weightKg: entry.weightKg ?? undefined,
@@ -191,15 +199,25 @@ export default function BodyPage() {
           armCm: entry.armCm ?? undefined,
           custom: entry.custom?.length ? entry.custom : undefined,
         })
+        alreadyMigrated.add(entry.id)
+        localStorage.setItem(MIGRATED_IDS_KEY, JSON.stringify([...alreadyMigrated]))
         migrated++
+      } catch {
+        failed++
       }
+    }
+    setMigrating(false)
+    if (failed === 0) {
       localStorage.setItem(MIGRATED_KEY, 'true')
+      localStorage.removeItem(MIGRATED_IDS_KEY)
       setHasLocalData(false)
       toast({ title: `Перенесено ${migrated} замеров в облако` })
-    } catch (err) {
-      toast({ variant: 'destructive', title: 'Ошибка миграции', description: String(err) })
-    } finally {
-      setMigrating(false)
+    } else {
+      toast({
+        variant: 'destructive',
+        title: `Перенесено ${migrated}, ошибок: ${failed}`,
+        description: 'Нажмите «Перенести» ещё раз — пропущенные попробуем снова',
+      })
     }
   }
 

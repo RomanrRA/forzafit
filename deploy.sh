@@ -1,17 +1,17 @@
 #!/usr/bin/env bash
 # deploy.sh — деплой FitLog на сервер
-# Использование: bash deploy.sh <domain>
-# Пример:        bash deploy.sh grind
+# Использование: bash deploy.sh <apex-domain>
+# Пример:        bash deploy.sh forzafit.ru
 
 set -euo pipefail
 
-DOMAIN="${1:?Укажи домен: bash deploy.sh grind}"
-FULL_DOMAIN="${DOMAIN}.myalfanews.com"
+DOMAIN="${1:?Укажи apex-домен: bash deploy.sh forzafit.ru}"
 SERVER="root@147.45.243.93"
 REMOTE_DIR="/opt/fitlog"
 NGINX_CONF="/opt/n8n-nginx/conf.d/${DOMAIN}.conf"
+LE_EMAIL="romanra.rr@gmail.com"
 
-echo "▶ Деплой FitLog → ${FULL_DOMAIN}"
+echo "▶ Деплой FitLog → ${DOMAIN} (+ www.${DOMAIN} редирект)"
 
 # ── 1. Синхронизация кода ──────────────────────────────────────
 echo "▶ Отправка кода на сервер..."
@@ -33,16 +33,16 @@ echo "▶ Установка nginx конфига..."
 sed "s/DOMAIN/${DOMAIN}/g" nginx/fitlog.conf | \
   ssh "${SERVER}" "cat > ${NGINX_CONF}"
 
-# ── 4. SSL сертификат (если нет) ──────────────────────────────
+# ── 4. SSL сертификат (apex + www в одном SAN-сертификате) ────
 echo "▶ Проверка SSL сертификата..."
 ssh "${SERVER}" "
-  if [ ! -f /etc/letsencrypt/live/${FULL_DOMAIN}/fullchain.pem ]; then
-    echo 'Получаем SSL сертификат...'
+  if [ ! -f /etc/letsencrypt/live/${DOMAIN}/fullchain.pem ]; then
+    echo 'Получаем SSL сертификат для ${DOMAIN} + www.${DOMAIN}...'
     docker exec n8n-nginx-certbot-1 certbot certonly \
       --webroot -w /var/www/certbot \
       --non-interactive --agree-tos \
-      --email admin@myalfanews.com \
-      -d ${FULL_DOMAIN}
+      --email ${LE_EMAIL} \
+      -d ${DOMAIN} -d www.${DOMAIN}
   else
     echo 'SSL сертификат уже существует'
   fi
@@ -84,4 +84,5 @@ ssh "${SERVER}" "docker image prune -f"
 
 echo ""
 echo "✅ Деплой завершён!"
-echo "   Сайт доступен: https://${FULL_DOMAIN}"
+echo "   Сайт доступен: https://${DOMAIN}"
+echo "   www → редирект на apex"

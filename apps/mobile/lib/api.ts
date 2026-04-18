@@ -1,7 +1,7 @@
 import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
-export const API_BASE = 'https://forzafit.myalfanews.com/api/v1';
+export const API_BASE = 'https://forzafit.ru/api/v1';
 
 export const api = axios.create({
   baseURL: API_BASE,
