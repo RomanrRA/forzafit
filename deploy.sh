@@ -14,15 +14,20 @@ LE_EMAIL="romanra.rr@gmail.com"
 echo "▶ Деплой FitLog → ${DOMAIN}"
 
 # ── 1. Синхронизация кода ──────────────────────────────────────
-echo "▶ Отправка кода на сервер..."
-rsync -az --delete \
+echo "▶ Отправка кода на сервер (tar via ssh)..."
+ssh "${SERVER}" "mkdir -p ${REMOTE_DIR}"
+tar czf - \
   --exclude='.git' \
   --exclude='node_modules' \
-  --exclude='apps/*/node_modules' \
+  --exclude='apps/web/node_modules' \
+  --exclude='apps/backend/node_modules' \
+  --exclude='packages/types/node_modules' \
   --exclude='apps/web/.next' \
   --exclude='apps/backend/dist' \
-  --exclude='.env*' \
-  . "${SERVER}:${REMOTE_DIR}/"
+  --exclude='.env' \
+  --exclude='.env.prod' \
+  --exclude='.env.local' \
+  . | ssh "${SERVER}" "tar xzf - -C ${REMOTE_DIR}"
 
 # ── 2. Отправка .env.prod ──────────────────────────────────────
 echo "▶ Отправка .env.prod..."
@@ -38,7 +43,7 @@ echo "▶ Проверка SSL сертификата..."
 ssh "${SERVER}" "
   if [ ! -f /etc/letsencrypt/live/${DOMAIN}/fullchain.pem ]; then
     echo 'Получаем SSL сертификат для ${DOMAIN}...'
-    docker exec n8n-nginx-certbot-1 certbot certonly \
+    docker exec certbot-renewer certbot certonly \
       --webroot -w /var/www/certbot \
       --non-interactive --agree-tos \
       --email ${LE_EMAIL} \
@@ -50,7 +55,7 @@ ssh "${SERVER}" "
 
 # ── 5. Перезагрузка nginx ─────────────────────────────────────
 echo "▶ Перезагрузка nginx..."
-ssh "${SERVER}" "docker exec n8n-nginx-nginx-1 nginx -s reload"
+ssh "${SERVER}" "docker exec n8n-nginx nginx -s reload"
 
 # ── 6. Сборка и запуск контейнеров ───────────────────────────
 echo "▶ Сборка и запуск FitLog..."
