@@ -9,6 +9,12 @@
         "swcrcPath": ".swcrc"
       }
     },
-    "deleteOutDir": true
+    "deleteOutDir": true,
+    "assets": [
+      {
+        "include": "ai/prompts/*.md",
+        "watchAssets": true
+      }
+    ]
   }
 }

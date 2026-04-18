@@ -1,0 +1,12 @@
+import { Module } from '@nestjs/common';
+import { AiController } from './ai.controller';
+import { AiService } from './ai.service';
+import { OpenRouterService } from './openrouter.service';
+import { PlanTemplatesModule } from '../plan-templates/plan-templates.module';
+
+@Module({
+  imports: [PlanTemplatesModule],
+  controllers: [AiController],
+  providers: [AiService, OpenRouterService],
+})
+export class AiModule {}

@@ -35,6 +35,7 @@ async function bootstrap() {
     .addTag('Plan Templates', 'Шаблоны тренировочных планов')
     .addTag('Body Measurements', 'Замеры тела')
     .addTag('Sync', 'Синхронизация данных')
+    .addTag('AI Plan Wizard', 'AI-тренер: генерация планов тренировок')
     .build();
 
   const document = SwaggerModule.createDocument(app, config);

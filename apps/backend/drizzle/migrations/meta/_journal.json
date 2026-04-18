@@ -36,6 +36,13 @@
       "when": 1776468471019,
       "tag": "0004_local_auth",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1776525110480,
+      "tag": "0005_strong_master_chief",
+      "breakpoints": true
     }
   ]
 }

@@ -7,5 +7,6 @@ import { WorkoutsModule } from '../workouts/workouts.module';
   imports: [WorkoutsModule],
   controllers: [PlanTemplatesController],
   providers: [PlanTemplatesService],
+  exports: [PlanTemplatesService],
 })
 export class PlanTemplatesModule {}

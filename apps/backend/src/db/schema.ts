@@ -274,6 +274,35 @@ export const syncEvents = pgTable(
   ],
 );
 
+// ─── AI Conversations ─────────────────────────────────────────────────────────
+
+export const aiConversationStatusEnum = pgEnum('ai_conversation_status', [
+  'active',
+  'finalized',
+  'abandoned',
+]);
+
+export const aiConversations = pgTable(
+  'ai_conversations',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    messages: jsonb('messages').notNull().default([]),
+    context: jsonb('context'),
+    status: aiConversationStatusEnum('status').notNull().default('active'),
+    planTemplateId: uuid('plan_template_id').references(() => planTemplates.id, {
+      onDelete: 'set null',
+    }),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (t) => [
+    index('ai_conversations_user_id_created_at_idx').on(t.userId, t.createdAt),
+  ],
+);
+
 // ─── Relations ────────────────────────────────────────────────────────────────
 
 export const usersRelations = relations(users, ({ many }) => ({
@@ -284,6 +313,18 @@ export const usersRelations = relations(users, ({ many }) => ({
   syncEvents: many(syncEvents),
   planTemplates: many(planTemplates),
   bodyMeasurements: many(bodyMeasurements),
+  aiConversations: many(aiConversations),
+}));
+
+export const aiConversationsRelations = relations(aiConversations, ({ one }) => ({
+  user: one(users, {
+    fields: [aiConversations.userId],
+    references: [users.id],
+  }),
+  planTemplate: one(planTemplates, {
+    fields: [aiConversations.planTemplateId],
+    references: [planTemplates.id],
+  }),
 }));
 
 export const passwordResetsRelations = relations(passwordResets, ({ one }) => ({

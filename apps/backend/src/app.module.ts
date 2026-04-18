@@ -10,6 +10,7 @@ import { WorkoutsModule } from './workouts/workouts.module';
 import { SyncModule } from './sync/sync.module';
 import { PlanTemplatesModule } from './plan-templates/plan-templates.module';
 import { BodyMeasurementsModule } from './body-measurements/body-measurements.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { BodyMeasurementsModule } from './body-measurements/body-measurements.mo
     SyncModule,
     PlanTemplatesModule,
     BodyMeasurementsModule,
+    AiModule,
   ],
   providers: [
     {

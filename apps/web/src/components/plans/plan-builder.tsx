@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Search, X, Coffee, Dumbbell, Copy } from 'lucide-react'
+import { Search, X, Coffee, Dumbbell, Copy, User } from 'lucide-react'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -209,76 +209,109 @@ function TrainingDayCard({ day, onUpdate, otherTrainingDays, onCopyTo }: DayCard
 
       <CardContent className="px-4 pb-4 pt-0 space-y-3 overflow-visible">
         {day.exercises.length > 0 && (
-          <div className="space-y-2">
-            <div className="grid grid-cols-12 gap-1.5">
-              <span className="col-span-3 text-xs text-muted-foreground">Упражнение</span>
-              <span className="col-span-2 text-xs text-muted-foreground text-center">Кг (старт)</span>
-              <span className="col-span-1 text-xs text-muted-foreground text-center">Подх.</span>
-              <span className="col-span-2 text-xs text-muted-foreground text-center">Повт.</span>
-              <span className="col-span-2 text-xs text-muted-foreground text-center">Отдых</span>
-              <span className="col-span-1 text-xs text-muted-foreground">Замет.</span>
-            </div>
+          <div className="space-y-4">
             {day.exercises.map((ex, i) => (
-              <div key={i} className="grid grid-cols-12 gap-1.5 items-center">
-                <div className="col-span-3">
-                  <p className="text-xs font-medium truncate" title={ex.name}>{ex.name}</p>
-                </div>
-                <div className="col-span-2">
-                  <Input
-                    value={ex.weightKg ?? ''}
-                    onChange={(e) => updateExercise(i, 'weightKg', e.target.value === '' ? '' : Number(e.target.value))}
-                    type="number"
-                    inputMode="decimal"
-                    min={0}
-                    step={0.5}
-                    placeholder="кг"
-                    className="h-7 text-xs text-center"
-                  />
-                </div>
-                <div className="col-span-1">
-                  <Input
-                    value={ex.sets}
-                    onChange={(e) => updateExercise(i, 'sets', Number(e.target.value))}
-                    type="number"
-                    inputMode="numeric"
-                    min={1}
-                    placeholder="—"
-                    className="h-7 text-xs text-center"
-                  />
-                </div>
-                <div className="col-span-2">
-                  <Input
-                    value={ex.reps}
-                    onChange={(e) => updateExercise(i, 'reps', e.target.value)}
-                    placeholder="—"
-                    className="h-7 text-xs text-center"
-                  />
-                </div>
-                <div className="col-span-2">
-                  <Input
-                    value={ex.rest}
-                    onChange={(e) => updateExercise(i, 'rest', e.target.value)}
-                    placeholder="—"
-                    className="h-7 text-xs text-center"
-                  />
-                </div>
-                <div className="col-span-1">
-                  <Input
-                    value={ex.note}
-                    onChange={(e) => updateExercise(i, 'note', e.target.value)}
-                    placeholder="—"
-                    className="h-7 text-xs"
-                  />
-                </div>
-                <div className="col-span-1 flex justify-end">
+              <div key={i} className="space-y-1.5 border-b border-border/40 pb-3 last:border-0 last:pb-0">
+                {/* Exercise name — full width, wraps */}
+                <div className="flex items-start gap-2">
+                  <p className="text-sm font-medium leading-snug flex-1 break-words">{ex.name}</p>
                   <button
                     type="button"
                     onClick={() => removeExercise(i)}
-                    className="text-muted-foreground hover:text-destructive transition-colors"
+                    className="text-muted-foreground hover:text-destructive transition-colors mt-0.5 shrink-0"
+                    title="Удалить упражнение"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
                 </div>
+                <div className="grid grid-cols-12 gap-1.5">
+                  <span className="col-span-3 text-[10px] text-muted-foreground text-center">Кг (старт)</span>
+                  <span className="col-span-2 text-[10px] text-muted-foreground text-center">Подх.</span>
+                  <span className="col-span-3 text-[10px] text-muted-foreground text-center">Повт.</span>
+                  <span className="col-span-4 text-[10px] text-muted-foreground text-center">Отдых</span>
+                </div>
+                <div className="grid grid-cols-12 gap-1.5 items-center">
+                  <div className="col-span-3">
+                    {ex.weightKg === 0 ? (
+                      <button
+                        type="button"
+                        onClick={() => updateExercise(i, 'weightKg', undefined)}
+                        title="Свой вес — нажмите для ввода кг"
+                        className="h-7 w-full rounded-md border border-primary/50 bg-primary/10 text-[11px] font-medium text-primary flex items-center justify-center gap-1"
+                      >
+                        <User className="h-3 w-3 shrink-0" />
+                        <span>свой вес</span>
+                      </button>
+                    ) : (
+                      <div className="flex gap-0.5">
+                        <Input
+                          value={ex.weightKg ?? ''}
+                          onChange={(e) => updateExercise(i, 'weightKg', e.target.value === '' ? '' : Number(e.target.value))}
+                          type="number"
+                          inputMode="decimal"
+                          min={0}
+                          step={0.5}
+                          placeholder="кг"
+                          className="h-7 text-xs text-center flex-1 min-w-0"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => updateExercise(i, 'weightKg', 0)}
+                          title="Свой вес"
+                          className="h-7 w-6 shrink-0 rounded-md border border-border text-muted-foreground hover:text-primary hover:border-primary/50 flex items-center justify-center transition-colors"
+                        >
+                          <User className="h-3 w-3" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  <div className="col-span-2">
+                    <Input
+                      value={ex.sets}
+                      onChange={(e) => updateExercise(i, 'sets', Number(e.target.value))}
+                      type="number"
+                      inputMode="numeric"
+                      min={1}
+                      placeholder="—"
+                      className="h-7 text-xs text-center"
+                    />
+                  </div>
+                  <div className="col-span-3">
+                    <Input
+                      value={ex.reps}
+                      onChange={(e) => updateExercise(i, 'reps', e.target.value)}
+                      placeholder="—"
+                      className="h-7 text-xs text-center"
+                    />
+                  </div>
+                  <div className="col-span-4">
+                    <Input
+                      value={ex.rest}
+                      onChange={(e) => updateExercise(i, 'rest', e.target.value)}
+                      placeholder="—"
+                      className="h-7 text-xs text-center"
+                    />
+                  </div>
+                </div>
+                <textarea
+                  value={ex.note ?? ''}
+                  onChange={(e) => {
+                    updateExercise(i, 'note', e.target.value)
+                    // Auto-grow to fit content
+                    const ta = e.currentTarget
+                    ta.style.height = 'auto'
+                    ta.style.height = `${ta.scrollHeight}px`
+                  }}
+                  ref={(el) => {
+                    if (el) {
+                      el.style.height = 'auto'
+                      el.style.height = `${el.scrollHeight}px`
+                    }
+                  }}
+                  placeholder="Заметка к упражнению..."
+                  rows={1}
+                  className="w-full resize-none rounded-md border border-input bg-background px-3 py-1.5 text-xs shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring leading-relaxed"
+                />
               </div>
             ))}
           </div>
@@ -311,6 +344,10 @@ export function PlanBuilder({ initialData, onSave, saving }: Props) {
     buildWeekDays(initialData?.days ?? [])
   )
 
+  // Drag-and-drop state for weekday picker
+  const [dragFromNum, setDragFromNum] = useState<number | null>(null)
+  const [dragOverNum, setDragOverNum] = useState<number | null>(null)
+
   const trainingDays = days.filter((d) => !d.isRest)
   const daysPerWeek = trainingDays.length
 
@@ -326,6 +363,21 @@ export function PlanBuilder({ initialData, onSave, saving }: Props) {
 
   function updateDay(num: number, updated: PlanDay) {
     setDays((prev) => prev.map((d) => d.dayNumber === num ? updated : d))
+  }
+
+  /** Swap a training day with another weekday (rest or training) — keeps dayNumber fixed, moves the rest */
+  function swapDays(fromNum: number, toNum: number) {
+    if (fromNum === toNum) return
+    setDays((prev) => {
+      const from = prev.find((x) => x.dayNumber === fromNum)
+      const to = prev.find((x) => x.dayNumber === toNum)
+      if (!from || !to) return prev
+      return prev.map((d) => {
+        if (d.dayNumber === fromNum) return { ...to, dayNumber: fromNum }
+        if (d.dayNumber === toNum) return { ...from, dayNumber: toNum }
+        return d
+      })
+    })
   }
 
   function copyDayTo(sourceNum: number, targetNum: number) {
@@ -375,11 +427,24 @@ export function PlanBuilder({ initialData, onSave, saving }: Props) {
 
           <div className="space-y-1.5">
             <Label htmlFor="description">Описание</Label>
-            <Input
+            <textarea
               id="description"
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) => {
+                setDescription(e.target.value)
+                const ta = e.currentTarget
+                ta.style.height = 'auto'
+                ta.style.height = `${ta.scrollHeight}px`
+              }}
+              ref={(el) => {
+                if (el) {
+                  el.style.height = 'auto'
+                  el.style.height = `${el.scrollHeight}px`
+                }
+              }}
               placeholder="Краткое описание программы"
+              rows={1}
+              className="w-full resize-none rounded-md border border-input bg-background px-3 py-1.5 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring leading-relaxed"
             />
           </div>
 
@@ -440,7 +505,7 @@ export function PlanBuilder({ initialData, onSave, saving }: Props) {
         <div>
           <h2 className="text-lg font-semibold">Расписание недели</h2>
           <p className="text-sm text-muted-foreground mt-0.5">
-            Выберите тренировочные дни — остальные станут днями отдыха
+            Выберите тренировочные дни — остальные станут днями отдыха. Тренировочный день можно перетащить на соседний, чтобы перенести тренировку.
           </p>
         </div>
 
@@ -449,15 +514,50 @@ export function PlanBuilder({ initialData, onSave, saving }: Props) {
           {WEEKDAYS.map((wd) => {
             const day = days.find((d) => d.dayNumber === wd.num)!
             const isTraining = !day.isRest
+            const isDragSource = dragFromNum === wd.num
+            const isDragOver = dragOverNum === wd.num && dragFromNum !== null && dragFromNum !== wd.num
             return (
               <button
                 key={wd.num}
                 type="button"
                 onClick={() => toggleWeekday(wd.num)}
-                className={`flex-1 flex flex-col items-center py-2.5 rounded-lg border-2 text-sm font-medium transition-colors ${
+                draggable={isTraining}
+                onDragStart={(e) => {
+                  if (!isTraining) return
+                  e.dataTransfer.effectAllowed = 'move'
+                  e.dataTransfer.setData('text/plain', String(wd.num))
+                  setDragFromNum(wd.num)
+                }}
+                onDragEnd={() => {
+                  setDragFromNum(null)
+                  setDragOverNum(null)
+                }}
+                onDragOver={(e) => {
+                  if (dragFromNum === null) return
+                  e.preventDefault()
+                  e.dataTransfer.dropEffect = 'move'
+                }}
+                onDragEnter={() => {
+                  if (dragFromNum !== null && dragFromNum !== wd.num) setDragOverNum(wd.num)
+                }}
+                onDragLeave={() => {
+                  setDragOverNum((cur) => (cur === wd.num ? null : cur))
+                }}
+                onDrop={(e) => {
+                  e.preventDefault()
+                  const fromStr = e.dataTransfer.getData('text/plain')
+                  const fromNum = Number(fromStr)
+                  if (Number.isFinite(fromNum)) swapDays(fromNum, wd.num)
+                  setDragFromNum(null)
+                  setDragOverNum(null)
+                }}
+                title={isTraining ? 'Перетащите на другой день, чтобы перенести тренировку' : undefined}
+                className={`flex-1 flex flex-col items-center py-2.5 rounded-lg border-2 text-sm font-medium transition-all ${
                   isTraining
-                    ? 'border-primary bg-primary text-primary-foreground'
+                    ? 'border-primary bg-primary text-primary-foreground cursor-grab active:cursor-grabbing'
                     : 'border-border bg-background text-muted-foreground hover:border-primary/40'
+                } ${isDragSource ? 'opacity-40' : ''} ${
+                  isDragOver ? 'ring-2 ring-primary ring-offset-1 scale-105' : ''
                 }`}
               >
                 <span>{wd.short}</span>
