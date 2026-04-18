@@ -11,7 +11,7 @@ REMOTE_DIR="/opt/fitlog"
 NGINX_CONF="/opt/n8n-nginx/conf.d/${DOMAIN}.conf"
 LE_EMAIL="romanra.rr@gmail.com"
 
-echo "▶ Деплой FitLog → ${DOMAIN} (+ www.${DOMAIN} редирект)"
+echo "▶ Деплой FitLog → ${DOMAIN}"
 
 # ── 1. Синхронизация кода ──────────────────────────────────────
 echo "▶ Отправка кода на сервер..."
@@ -37,12 +37,12 @@ sed "s/DOMAIN/${DOMAIN}/g" nginx/fitlog.conf | \
 echo "▶ Проверка SSL сертификата..."
 ssh "${SERVER}" "
   if [ ! -f /etc/letsencrypt/live/${DOMAIN}/fullchain.pem ]; then
-    echo 'Получаем SSL сертификат для ${DOMAIN} + www.${DOMAIN}...'
+    echo 'Получаем SSL сертификат для ${DOMAIN}...'
     docker exec n8n-nginx-certbot-1 certbot certonly \
       --webroot -w /var/www/certbot \
       --non-interactive --agree-tos \
       --email ${LE_EMAIL} \
-      -d ${DOMAIN} -d www.${DOMAIN}
+      -d ${DOMAIN}
   else
     echo 'SSL сертификат уже существует'
   fi
@@ -85,4 +85,3 @@ ssh "${SERVER}" "docker image prune -f"
 echo ""
 echo "✅ Деплой завершён!"
 echo "   Сайт доступен: https://${DOMAIN}"
-echo "   www → редирект на apex"

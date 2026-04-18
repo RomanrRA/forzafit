@@ -21,7 +21,7 @@ FitLog (ForzaFit) — кроссплатформенный трекер трен
 
 ### Прод
 - Сервер: TimeWeb Cloud, 147.45.243.93
-- Домен: https://forzafit.ru (www → 301 на apex)
+- Домен: https://forzafit.ru
 - Remote dir: /opt/fitlog
 - Команда: `docker compose -f docker-compose.prod.yml --env-file .env.prod up --build -d`
 - На Windows нет rsync — используй `tar czf | ssh ... tar xzf` для передачи кода
