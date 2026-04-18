@@ -4,14 +4,19 @@ import {
   ForbiddenException,
   ConflictException,
 } from '@nestjs/common';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 import * as fs from 'fs';
 import * as path from 'path';
 import { DrizzleService } from '../db/db.service';
-import { aiConversations, users } from '../db/schema';
+import { aiConversations, planTemplates, users } from '../db/schema';
 import { PlanTemplatesService } from '../plan-templates/plan-templates.service';
 import { OpenRouterService, ChatMessage, ToolCall } from './openrouter.service';
 import { GENERATE_PLAN_TOOL, GeneratePlanArgs } from './tools/generate-plan.tool';
+import {
+  ADJUST_PLAN_TOOL,
+  AdjustPlanArgs,
+  PlanAdjustment,
+} from './tools/adjust-plan.tool';
 import { SseEvent } from './dto/ai.dto';
 
 const GENDER_LABEL: Record<string, string> = {
@@ -55,6 +60,7 @@ function buildProfileContext(user: {
 @Injectable()
 export class AiService {
   private readonly systemPrompt: string;
+  private readonly adjustPrompt: string;
 
   constructor(
     private drizzle: DrizzleService,
@@ -63,6 +69,8 @@ export class AiService {
   ) {
     const promptPath = path.join(__dirname, 'prompts', 'plan-wizard.md');
     this.systemPrompt = fs.readFileSync(promptPath, 'utf-8').trim();
+    const adjustPath = path.join(__dirname, 'prompts', 'plan-adjust.md');
+    this.adjustPrompt = fs.readFileSync(adjustPath, 'utf-8').trim();
   }
 
   async *startConversation(userId: string): AsyncIterable<SseEvent> {
@@ -275,6 +283,275 @@ export class AiService {
       .where(eq(aiConversations.id, conversationId));
 
     return { planTemplateId: plan.id };
+  }
+
+  // ─── Plan adjustment (step 2) ──────────────────────────────────────────────
+
+  async *adjustPlanStream(
+    userId: string,
+    planTemplateId: string,
+  ): AsyncIterable<SseEvent> {
+    // Load plan and ownership
+    const [plan] = await this.drizzle.db
+      .select()
+      .from(planTemplates)
+      .where(and(eq(planTemplates.id, planTemplateId), eq(planTemplates.userId, userId)))
+      .limit(1);
+
+    if (!plan) throw new NotFoundException('План не найден');
+
+    // Build history context: last 4 weeks of finished workouts, aggregated per exercise per plan day
+    const history = await this.buildAdjustmentContext(userId, plan);
+
+    const systemMessage: ChatMessage = { role: 'system', content: this.adjustPrompt };
+    const userMessage: ChatMessage = { role: 'user', content: history };
+    const seedMessages: ChatMessage[] = [systemMessage, userMessage];
+
+    const [conversation] = await this.drizzle.db
+      .insert(aiConversations)
+      .values({
+        userId,
+        messages: seedMessages,
+        planTemplateId,
+        context: { kind: 'adjust' },
+      })
+      .returning();
+
+    yield { type: 'meta', conversationId: conversation.id };
+
+    let assistantContent = '';
+    let toolCallResult: ToolCall | null = null;
+
+    for await (const event of this.openRouter.streamCompletion({
+      messages: seedMessages,
+      tools: [ADJUST_PLAN_TOOL as any],
+    })) {
+      if (event.type === 'token') {
+        assistantContent += event.content;
+        yield { type: 'token', content: event.content };
+      } else if (event.type === 'tool_call') {
+        toolCallResult = event.toolCall;
+        yield {
+          type: 'tool_call',
+          name: event.toolCall.function.name,
+          args: JSON.parse(event.toolCall.function.arguments || '{}'),
+        };
+      } else if (event.type === 'done') {
+        break;
+      }
+    }
+
+    const assistantMessage: ChatMessage = {
+      role: 'assistant',
+      content: assistantContent || null,
+      ...(toolCallResult ? { tool_calls: [toolCallResult] } : {}),
+    };
+
+    await this.drizzle.db
+      .update(aiConversations)
+      .set({ messages: [...seedMessages, assistantMessage], updatedAt: new Date() })
+      .where(eq(aiConversations.id, conversation.id));
+
+    yield { type: 'done' };
+  }
+
+  async applyAdjustments(
+    conversationId: string,
+    userId: string,
+    indices: number[],
+  ): Promise<{ planTemplateId: string; applied: number }> {
+    const conversation = await this.getOwnedActiveConversation(conversationId, userId);
+    if (!conversation.planTemplateId) {
+      throw new ConflictException('Беседа не привязана к плану');
+    }
+
+    const messages = (conversation.messages as ChatMessage[]) ?? [];
+    const lastAssistant = [...messages]
+      .reverse()
+      .find(
+        (m) =>
+          m.role === 'assistant' &&
+          m.tool_calls?.some((tc) => tc.function.name === 'adjust_plan'),
+      );
+
+    if (!lastAssistant || !lastAssistant.tool_calls) {
+      throw new ConflictException('AI ещё не предложил правки');
+    }
+
+    const toolCall = lastAssistant.tool_calls.find(
+      (tc) => tc.function.name === 'adjust_plan',
+    );
+    if (!toolCall) throw new ConflictException('Нет правок для применения');
+
+    let args: AdjustPlanArgs;
+    try {
+      args = JSON.parse(toolCall.function.arguments);
+    } catch {
+      throw new ConflictException('Не удалось разобрать правки');
+    }
+
+    const picked = indices
+      .map((i) => args.adjustments?.[i])
+      .filter((a): a is PlanAdjustment => !!a);
+
+    if (picked.length === 0) {
+      throw new ConflictException('Не выбрано ни одной правки');
+    }
+
+    const plan = await this.planTemplatesService.findOne(
+      conversation.planTemplateId,
+      userId,
+    );
+
+    const days = Array.isArray(plan.days) ? (plan.days as any[]) : [];
+    let appliedCount = 0;
+
+    const updatedDays = days.map((day) => {
+      const dayAdjustments = picked.filter(
+        (a) => Number(a.dayNumber) === Number(day.dayNumber),
+      );
+      if (dayAdjustments.length === 0) return day;
+
+      const exs = Array.isArray(day.exercises) ? [...day.exercises] : [];
+      for (const adj of dayAdjustments) {
+        const idx = exs.findIndex(
+          (ex: any) =>
+            typeof ex?.name === 'string' &&
+            ex.name.trim().toLowerCase() === adj.exerciseName.trim().toLowerCase(),
+        );
+        if (idx === -1) continue;
+
+        const current = exs[idx] ?? {};
+        const next: Record<string, any> = { ...current };
+
+        if (adj.action === 'replace' && adj.newExerciseName) {
+          next.name = adj.newExerciseName;
+          // Drop exerciseId since the name changed; user can re-link on edit.
+          next.exerciseId = undefined;
+        }
+        if (adj.newSets != null) next.sets = adj.newSets;
+        if (adj.newReps != null) next.reps = adj.newReps;
+        if (adj.newWeightKg != null) next.weightKg = adj.newWeightKg;
+
+        exs[idx] = next;
+        appliedCount++;
+      }
+
+      return { ...day, exercises: exs };
+    });
+
+    await this.planTemplatesService.update(plan.id, userId, { days: updatedDays });
+
+    await this.drizzle.db
+      .update(aiConversations)
+      .set({ status: 'finalized', updatedAt: new Date() })
+      .where(eq(aiConversations.id, conversationId));
+
+    return { planTemplateId: plan.id, applied: appliedCount };
+  }
+
+  private async buildAdjustmentContext(
+    userId: string,
+    plan: { id: string; name: string; days: unknown },
+  ): Promise<string> {
+    const days = Array.isArray(plan.days) ? (plan.days as any[]) : [];
+
+    // List of plan exercises (name per day) for matching
+    const planExerciseLines: string[] = [];
+    for (const d of days) {
+      if (d?.isRest) continue;
+      const exs = Array.isArray(d?.exercises) ? d.exercises : [];
+      for (const ex of exs) {
+        const setsReps = `${ex?.sets ?? '?'}×${ex?.reps ?? '?'}`;
+        const weight =
+          ex?.weightKg === 0
+            ? 'свой вес'
+            : ex?.weightKg != null
+              ? `${ex.weightKg} кг`
+              : '—';
+        planExerciseLines.push(
+          `  - День ${d.dayNumber} (${d.name ?? d.focus ?? ''}): ${ex?.name ?? '?'} — ${setsReps}, ${weight}`,
+        );
+      }
+    }
+
+    // Last 4 weeks of finished workouts, grouped per exercise (by name, case-insensitive).
+    // We filter by user and finishedAt NOT NULL, look at last ~6 sessions per exercise.
+    const rows = await this.drizzle.db.execute(sql`
+      SELECT
+        ws.id as session_id,
+        ws.started_at as session_date,
+        e.name as exercise_name,
+        wset.weight_kg,
+        wset.reps,
+        wset.completed
+      FROM workout_sets wset
+      JOIN workout_exercises we ON wset.workout_exercise_id = we.id
+      JOIN workout_sessions ws ON we.session_id = ws.id
+      JOIN exercises e ON we.exercise_id = e.id
+      WHERE ws.user_id = ${userId}
+        AND ws.finished_at IS NOT NULL
+        AND ws.started_at >= NOW() - INTERVAL '28 days'
+      ORDER BY e.name ASC, ws.started_at ASC, wset.created_at ASC
+    `);
+
+    type Row = {
+      session_id: string;
+      session_date: Date | string;
+      exercise_name: string;
+      weight_kg: string | number | null;
+      reps: number | null;
+      completed: boolean | null;
+    };
+    const byExercise = new Map<string, Map<string, Row[]>>();
+    for (const r of rows.rows as Row[]) {
+      const nameKey = (r.exercise_name || '').trim().toLowerCase();
+      if (!byExercise.has(nameKey)) byExercise.set(nameKey, new Map());
+      const sessions = byExercise.get(nameKey)!;
+      if (!sessions.has(r.session_id)) sessions.set(r.session_id, []);
+      sessions.get(r.session_id)!.push(r);
+    }
+
+    const historyLines: string[] = [];
+    for (const [nameKey, sessions] of byExercise) {
+      const originalName = [...sessions.values()][0]?.[0]?.exercise_name ?? nameKey;
+      const sessionList = [...sessions.entries()].slice(-6); // keep last 6 sessions
+      const sessionSummaries = sessionList.map(([_sid, sets]) => {
+        const d = sets[0].session_date;
+        const dateStr =
+          d instanceof Date ? d.toISOString().slice(0, 10) : String(d).slice(0, 10);
+        const setStrs = sets.map((s) => {
+          const w = s.weight_kg != null ? Number(s.weight_kg) : null;
+          const wLabel = w === 0 ? 'bw' : w != null ? `${w}` : '—';
+          const r = s.reps != null ? s.reps : '—';
+          const c = s.completed ? '✓' : '✗';
+          return `${wLabel}×${r}${c}`;
+        });
+        return `${dateStr}: ${setStrs.join(', ')}`;
+      });
+      historyLines.push(`  - ${originalName}:\n    ${sessionSummaries.join('\n    ')}`);
+    }
+
+    const historyBlock =
+      historyLines.length > 0
+        ? historyLines.join('\n')
+        : '  (нет завершённых тренировок за последние 4 недели)';
+
+    const planBlock =
+      planExerciseLines.length > 0
+        ? planExerciseLines.join('\n')
+        : '  (в плане нет упражнений)';
+
+    return [
+      `## Текущий план «${plan.name}»`,
+      planBlock,
+      '',
+      '## История за последние 28 дней',
+      'Формат сета: `вес×повторы✓` (✓ = выполнен, ✗ = не выполнен). `bw` = свой вес.',
+      historyBlock,
+      '',
+      'Проанализируй историю и вызови tool `adjust_plan`.',
+    ].join('\n');
   }
 
   private async getOwnedActiveConversation(id: string, userId: string) {

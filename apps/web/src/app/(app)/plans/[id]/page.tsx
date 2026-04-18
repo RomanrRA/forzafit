@@ -13,8 +13,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/hooks/use-toast'
-import { ArrowLeft, Play, Dumbbell, Coffee, ChevronDown, ChevronUp, Pencil, Trash2, CalendarPlus } from 'lucide-react'
+import { ArrowLeft, Play, Dumbbell, Coffee, ChevronDown, ChevronUp, Pencil, Trash2, CalendarPlus, Sparkles } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { PlanAdjustDialog } from '@/components/plans/plan-adjust-dialog'
 
 const DIFFICULTY_LABEL = { beginner: 'Начинающий', intermediate: 'Средний', advanced: 'Продвинутый' }
 
@@ -336,6 +337,7 @@ function UserPlanPage({ id }: { id: string }) {
   const scheduleMutation = useSchedulePlan(id)
   const { data: exercisesData } = useExercises()
   const exercises = exercisesData?.items ?? []
+  const [adjustOpen, setAdjustOpen] = useState(false)
 
   async function handleDelete() {
     if (!plan) return
@@ -373,7 +375,11 @@ function UserPlanPage({ id }: { id: string }) {
           <h1 className="text-2xl font-bold">{plan.name}</h1>
           {plan.description && <p className="text-sm text-muted-foreground">{plan.description}</p>}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Button variant="outline" size="sm" onClick={() => setAdjustOpen(true)}>
+            <Sparkles className="h-3.5 w-3.5 mr-1" />
+            AI-корректировка
+          </Button>
           <Button variant="outline" size="sm" asChild>
             <Link href={`/plans/${id}/edit`}>
               <Pencil className="h-3.5 w-3.5 mr-1" />
@@ -386,6 +392,12 @@ function UserPlanPage({ id }: { id: string }) {
           </Button>
         </div>
       </div>
+
+      <PlanAdjustDialog
+        open={adjustOpen}
+        onOpenChange={setAdjustOpen}
+        planTemplateId={id}
+      />
 
       <div className="flex flex-wrap gap-2">
         {plan.difficulty && <Badge variant="outline">{DIFFICULTY_LABEL[plan.difficulty]}</Badge>}

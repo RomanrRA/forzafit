@@ -7,9 +7,11 @@ import { ru } from 'date-fns/locale'
 import { useAuthStore } from '@/store/auth.store'
 import { useWorkouts, usePersonalRecords } from '@/hooks/use-workouts'
 import { useBodyMeasurements, type BodyMeasurement } from '@/hooks/use-body-measurements'
+import { usePlanTemplates } from '@/hooks/use-plan-templates'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Scale, TrendingDown, TrendingUp, Minus, CalendarClock, AlertTriangle, Trophy, ChevronDown, ChevronUp, Bell, Settings } from 'lucide-react'
+import { Scale, TrendingDown, TrendingUp, Minus, CalendarClock, AlertTriangle, Trophy, ChevronDown, ChevronUp, Bell, Settings, Sparkles } from 'lucide-react'
+import { PlanAdjustDialog } from '@/components/plans/plan-adjust-dialog'
 
 interface BodyReminderSettings {
   enabled: boolean
@@ -101,6 +103,20 @@ export default function DashboardPage() {
   // Запланированные тренировки (finishedAt === null), сортировка по дате
   const { data: plannedData } = useWorkouts({ limit: 50, order: 'asc', status: 'planned' })
   const plannedWorkouts = plannedData?.items ?? []
+
+  // Завершённые тренировки за последние 28 дней — для AI-корректировки плана
+  const { data: completedData } = useWorkouts({ limit: 30, order: 'desc', status: 'completed' })
+  const recentCompletedCount = useMemo(() => {
+    const items = completedData?.items ?? []
+    const cutoff = Date.now() - 28 * 24 * 3600 * 1000
+    return items.filter((w) => w.startedAt && new Date(w.startedAt).getTime() >= cutoff).length
+  }, [completedData])
+
+  const { data: planTemplates } = usePlanTemplates()
+  const latestPlan = planTemplates?.items?.[0] // backend sorts desc by createdAt
+  const ADJUST_THRESHOLD = 6
+  const canAdjust = !!latestPlan && recentCompletedCount >= ADJUST_THRESHOLD
+  const [adjustOpen, setAdjustOpen] = useState(false)
 
   // Персональные рекорды для топ-3 прогресса
   const { data: records } = usePersonalRecords()
@@ -353,6 +369,36 @@ export default function DashboardPage() {
           <Button variant="ghost" size="sm" className="mt-1 text-muted-foreground" asChild>
             <Link href="/workouts">Все тренировки →</Link>
           </Button>
+        </div>
+      )}
+
+      {/* ── AI-корректировка плана (≥6 завершённых тренировок за 28 дней) ─ */}
+      {canAdjust && latestPlan && (
+        <div>
+          <Card
+            onClick={() => setAdjustOpen(true)}
+            className="border-primary/40 bg-primary/5 hover:border-primary transition-colors cursor-pointer"
+          >
+            <CardContent className="flex items-center gap-3 py-4 px-4">
+              <div className="h-9 w-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                <Sparkles className="h-4 w-4 text-primary" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-semibold text-sm">Скорректировать план тренировок</p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {recentCompletedCount} тренировок за 28 дней — AI проанализирует прогресс и предложит правки к «{latestPlan.name}»
+                </p>
+              </div>
+              <Button size="sm" variant="outline" className="shrink-0" onClick={(e) => { e.stopPropagation(); setAdjustOpen(true) }}>
+                Запустить
+              </Button>
+            </CardContent>
+          </Card>
+          <PlanAdjustDialog
+            open={adjustOpen}
+            onOpenChange={setAdjustOpen}
+            planTemplateId={latestPlan.id}
+          />
         </div>
       )}
 

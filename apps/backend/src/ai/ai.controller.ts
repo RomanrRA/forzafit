@@ -17,7 +17,13 @@ import {
 } from '@nestjs/swagger';
 import { Response } from 'express';
 import { AiService } from './ai.service';
-import { SendMessageDto, FinalizeResponseDto, StartConversationDto } from './dto/ai.dto';
+import {
+  SendMessageDto,
+  FinalizeResponseDto,
+  StartConversationDto,
+  ApplyAdjustmentsDto,
+  ApplyAdjustmentsResponseDto,
+} from './dto/ai.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { SseEvent } from './dto/ai.dto';
@@ -70,6 +76,43 @@ export class AiController {
     } finally {
       res.end();
     }
+  }
+
+  @Post(':planTemplateId/adjust')
+  @ApiOperation({
+    summary: 'Запустить AI-анализ истории и получить diff правок плана (SSE stream)',
+  })
+  @ApiResponse({ status: 200, description: 'text/event-stream — meta + tool_call + done' })
+  async adjust(
+    @Param('planTemplateId', ParseUUIDPipe) planTemplateId: string,
+    @CurrentUser('userId') userId: string,
+    @Res() res: Response,
+  ): Promise<void> {
+    this.initSse(res);
+    try {
+      for await (const event of this.aiService.adjustPlanStream(userId, planTemplateId)) {
+        this.writeEvent(res, event);
+      }
+    } catch (err: any) {
+      this.writeEvent(res, {
+        type: 'error',
+        message: err?.message ?? 'Ошибка сервера',
+      } as any);
+    } finally {
+      res.end();
+    }
+  }
+
+  @Post('adjustment/:conversationId/apply')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Применить выбранные правки (по индексам) к плану' })
+  @ApiResponse({ status: 200, type: ApplyAdjustmentsResponseDto })
+  applyAdjustments(
+    @Param('conversationId', ParseUUIDPipe) conversationId: string,
+    @CurrentUser('userId') userId: string,
+    @Body() dto: ApplyAdjustmentsDto,
+  ): Promise<ApplyAdjustmentsResponseDto> {
+    return this.aiService.applyAdjustments(conversationId, userId, dto.indices);
   }
 
   @Post(':id/finalize')

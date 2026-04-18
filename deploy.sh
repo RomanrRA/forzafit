@@ -76,7 +76,7 @@ ssh "${SERVER}" "
     const { Pool } = require(\\\"pg\\\");
     const pool = new Pool({ connectionString: process.env.DATABASE_URL });
     const db = drizzle(pool);
-    migrate(db, { migrationsFolder: \\\"./dist/db/migrations\\\" }).then(() => {
+    migrate(db, { migrationsFolder: \\\"./drizzle/migrations\\\" }).then(() => {
       console.log(\\\"Миграции применены\\\");
       pool.end();
     }).catch(e => { console.error(e); pool.end(); process.exit(1); });

@@ -661,7 +661,6 @@ export function AiPlanWizard() {
         >
           <div className="grid grid-cols-1 gap-2">
             {[
-              'Вес тела',
               'Резинки',
               'Гантели',
               'Штанга + блины',

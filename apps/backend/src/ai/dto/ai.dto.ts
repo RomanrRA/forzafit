@@ -1,5 +1,14 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsNotEmpty, MaxLength, IsOptional } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  MaxLength,
+  IsOptional,
+  IsArray,
+  IsInt,
+  Min,
+  ArrayMaxSize,
+} from 'class-validator';
 
 export class SendMessageDto {
   @ApiProperty({ example: 'Хочу набрать мышечную массу' })
@@ -51,4 +60,24 @@ export class FinalizeResponseDto {
 export class StartConversationResponseDto {
   @ApiPropertyOptional({ description: 'ID созданной беседы (также приходит в SSE meta-событии)' })
   conversationId?: string;
+}
+
+export class ApplyAdjustmentsDto {
+  @ApiProperty({
+    description: 'Индексы выбранных правок из массива adjustments в tool call',
+    type: [Number],
+  })
+  @IsArray()
+  @ArrayMaxSize(50)
+  @IsInt({ each: true })
+  @Min(0, { each: true })
+  indices!: number[];
+}
+
+export class ApplyAdjustmentsResponseDto {
+  @ApiProperty({ description: 'ID обновлённого плана' })
+  planTemplateId!: string;
+
+  @ApiProperty({ description: 'Сколько правок применено' })
+  applied!: number;
 }
