@@ -397,7 +397,12 @@ export default function BodyPage() {
           >
             {reminderSettings.enabled ? <Bell className="h-4 w-4" /> : <BellOff className="h-4 w-4 text-muted-foreground" />}
           </Button>
-          <Button size="sm" className="sm:size-default" onClick={() => setShowForm(!showForm)}>
+          <Button
+            size="icon"
+            className="sm:w-auto sm:px-4"
+            onClick={() => setShowForm(!showForm)}
+            title="Добавить замер"
+          >
             <Plus className="h-4 w-4 sm:mr-1.5" />
             <span className="hidden sm:inline">Добавить замер</span>
           </Button>
