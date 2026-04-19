@@ -20,6 +20,7 @@ interface UseAiPlanChatResult {
   start: (initialMessage?: string) => Promise<void>
   sendMessage: (content: string) => Promise<void>
   finalize: () => Promise<string>
+  reset: () => void
   error: string | null
 }
 
@@ -139,6 +140,8 @@ export function useAiPlanChat(): UseAiPlanChatResult {
             if (payload.name === 'generate_plan') {
               setToolCallReady(true)
             }
+          } else if (payload.type === 'error') {
+            setError((payload.message as string) ?? 'Ошибка сервера')
           } else if (payload.type === 'done') {
             break
           }
@@ -277,5 +280,14 @@ export function useAiPlanChat(): UseAiPlanChatResult {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  return { messages, isStreaming, toolCallReady, start, sendMessage, finalize, error }
+  const reset = useCallback(() => {
+    startedRef.current = false
+    conversationIdRef.current = null
+    setMessages([])
+    setIsStreaming(false)
+    setToolCallReady(false)
+    setError(null)
+  }, [])
+
+  return { messages, isStreaming, toolCallReady, start, sendMessage, finalize, reset, error }
 }

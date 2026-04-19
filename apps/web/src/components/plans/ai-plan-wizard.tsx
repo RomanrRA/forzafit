@@ -292,7 +292,7 @@ export function AiPlanWizard() {
   const [finalizing, setFinalizing] = useState(false)
   const [localError, setLocalError] = useState<string | null>(null)
 
-  const { messages, isStreaming, toolCallReady, start, finalize, error } =
+  const { messages, isStreaming, toolCallReady, start, finalize, reset, error } =
     useAiPlanChat()
 
   // Total steps = 12, but step 7 (equipment) auto-skips when place !== 'home'
@@ -364,9 +364,22 @@ export function AiPlanWizard() {
   // ─── Submission screen: show AI progress + CTA ──────────────────────────────
 
   if (submitted) {
-    const combinedError = error ?? localError
+    const streamEndedEmpty = !isStreaming && !toolCallReady && !finalizing
+    const fallbackError =
+      streamEndedEmpty && !error && !localError
+        ? 'AI не смог составить план. Попробуйте ещё раз или поправьте ответы.'
+        : null
+    const combinedError = error ?? localError ?? fallbackError
     const lastAssistant = [...messages].reverse().find((m) => m.role === 'assistant')
     const aiText = lastAssistant?.content ?? ''
+    const canRetry = !isStreaming && !finalizing && !!combinedError
+
+    const handleRetry = () => {
+      reset()
+      setLocalError(null)
+      setFinalizing(false)
+      setSubmitted(false)
+    }
 
     return (
       <div className="glass-card p-6 space-y-4">
@@ -383,7 +396,9 @@ export function AiPlanWizard() {
                   ? 'Сохраняем план...'
                   : toolCallReady
                     ? 'План готов, открываем редактор...'
-                    : 'Ожидание...'}
+                    : combinedError
+                      ? 'Не удалось сгенерировать план'
+                      : 'Ожидание...'}
             </p>
           </div>
         </div>
@@ -409,6 +424,12 @@ export function AiPlanWizard() {
         {combinedError && (
           <div className="rounded-xl bg-destructive/10 border border-destructive/30 px-4 py-2.5 text-sm text-destructive">
             {combinedError}
+          </div>
+        )}
+
+        {canRetry && (
+          <div className="flex justify-end">
+            <Button onClick={handleRetry}>Попробовать ещё раз</Button>
           </div>
         )}
 

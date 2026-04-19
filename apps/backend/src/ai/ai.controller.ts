@@ -48,8 +48,11 @@ export class AiController {
       for await (const event of this.aiService.startConversationStream(userId, dto?.initialMessage)) {
         this.writeEvent(res, event);
       }
-    } catch (err) {
-      this.writeEvent(res, { type: 'done' });
+    } catch (err: any) {
+      this.writeEvent(res, {
+        type: 'error',
+        message: err?.message ?? 'Ошибка сервера',
+      } as any);
     } finally {
       res.end();
     }

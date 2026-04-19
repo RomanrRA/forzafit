@@ -50,7 +50,17 @@ export interface SseDoneEvent {
   type: 'done';
 }
 
-export type SseEvent = SseMetaEvent | SseTokenEvent | SseToolCallEvent | SseDoneEvent;
+export interface SseErrorEvent {
+  type: 'error';
+  message: string;
+}
+
+export type SseEvent =
+  | SseMetaEvent
+  | SseTokenEvent
+  | SseToolCallEvent
+  | SseDoneEvent
+  | SseErrorEvent;
 
 export class FinalizeResponseDto {
   @ApiProperty({ description: 'ID созданного шаблона плана тренировок' })
