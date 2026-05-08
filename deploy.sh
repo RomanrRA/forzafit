@@ -39,17 +39,20 @@ sed "s/DOMAIN/${DOMAIN}/g" nginx/fitlog.conf | \
   ssh "${SERVER}" "cat > ${NGINX_CONF}"
 
 # ── 4. SSL сертификат (apex + www в одном SAN-сертификате) ────
+# Сертификат живёт в volume контейнера certbot-renewer, поэтому проверяем
+# через docker exec, а не на хосте. Обновлением занимается сам certbot-renewer
+# (cron внутри контейнера) — здесь только инициализация для нового домена.
 echo "▶ Проверка SSL сертификата..."
 ssh "${SERVER}" "
-  if [ ! -f /etc/letsencrypt/live/${DOMAIN}/fullchain.pem ]; then
+  if docker exec certbot-renewer test -f /etc/letsencrypt/live/${DOMAIN}/fullchain.pem; then
+    echo 'SSL сертификат уже существует'
+  else
     echo 'Получаем SSL сертификат для ${DOMAIN}...'
     docker exec certbot-renewer certbot certonly \
       --webroot -w /var/www/certbot \
       --non-interactive --agree-tos \
       --email ${LE_EMAIL} \
       -d ${DOMAIN}
-  else
-    echo 'SSL сертификат уже существует'
   fi
 "
 
