@@ -56,17 +56,21 @@ ssh "${SERVER}" "
   fi
 "
 
-# ── 5. Перезагрузка nginx ─────────────────────────────────────
-echo "▶ Перезагрузка nginx..."
-ssh "${SERVER}" "docker exec n8n-nginx nginx -s reload"
-
-# ── 6. Сборка и запуск контейнеров ───────────────────────────
+# ── 5. Сборка и запуск контейнеров ───────────────────────────
+# Контейнеры поднимаем ДО reload nginx: nginx резолвит upstream при load,
+# и если имена/IP контейнеров поменялись, reload падает на «host not found».
+# Старые контейнеры продолжают обслуживать запросы, пока новые не встанут.
 echo "▶ Сборка и запуск ForzaFit..."
 ssh "${SERVER}" "
   cd ${REMOTE_DIR}
   docker compose -f docker-compose.prod.yml --env-file .env.prod pull || true
   docker compose -f docker-compose.prod.yml --env-file .env.prod up --build -d
 "
+
+# ── 6. Перезагрузка nginx ─────────────────────────────────────
+# После up — nginx подхватит новые IP контейнеров.
+echo "▶ Перезагрузка nginx..."
+ssh "${SERVER}" "docker exec n8n-nginx nginx -s reload"
 
 # ── 7. Миграции БД ────────────────────────────────────────────
 echo "▶ Запуск миграций..."
