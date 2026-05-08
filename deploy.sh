@@ -15,7 +15,10 @@ echo "▶ Деплой ForzaFit → ${DOMAIN}"
 
 # ── 1. Синхронизация кода ──────────────────────────────────────
 echo "▶ Отправка кода на сервер (tar via ssh)..."
-ssh "${SERVER}" "mkdir -p ${REMOTE_DIR}"
+ssh "${SERVER}" "
+  mkdir -p ${REMOTE_DIR}
+  docker network create nginx-shared 2>/dev/null || true
+"
 tar czf - \
   --exclude='.git' \
   --exclude='node_modules' \

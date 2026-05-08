@@ -19,6 +19,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - default
 
   redis:
     image: redis:7-alpine
@@ -27,6 +29,8 @@ services:
     command: redis-server --maxmemory 24mb --maxmemory-policy allkeys-lru
     volumes:
       - redis_data:/data
+    networks:
+      - default
 
   backend:
     build:
@@ -39,6 +43,9 @@ services:
         condition: service_healthy
       redis:
         condition: service_started
+    networks:
+      - default
+      - nginx-shared
     environment:
       NODE_ENV: production
       PORT: 3001
@@ -66,6 +73,9 @@ services:
     restart: unless-stopped
     depends_on:
       - backend
+    networks:
+      - default
+      - nginx-shared
     environment:
       NODE_ENV: production
       NEXT_BACKEND_URL: http://forzafit-backend:3001
@@ -81,7 +91,11 @@ volumes:
     name: fitlog_redis_data
 
 networks:
+  # Внутренняя сеть проекта — postgres/redis/backend/frontend.
   default:
     name: forzafit_default
-  n8n-nginx_default:
+  # Общая сеть с nginx-контейнером (n8n-nginx). Создаётся вручную:
+  #   docker network create nginx-shared
+  # Туда же подключены приложения других проектов под этим nginx.
+  nginx-shared:
     external: true
