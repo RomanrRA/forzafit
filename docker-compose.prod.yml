@@ -1,7 +1,7 @@
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: fitlog-postgres
+    container_name: forzafit-postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: fitlog
@@ -22,7 +22,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: fitlog-redis
+    container_name: forzafit-redis
     restart: unless-stopped
     command: redis-server --maxmemory 24mb --maxmemory-policy allkeys-lru
     volumes:
@@ -32,7 +32,7 @@ services:
     build:
       context: .
       dockerfile: apps/backend/Dockerfile
-    container_name: fitlog-backend
+    container_name: forzafit-backend
     restart: unless-stopped
     depends_on:
       postgres:
@@ -42,8 +42,8 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3001
-      DATABASE_URL: postgresql://fitlog:${POSTGRES_PASSWORD}@fitlog-postgres:5432/fitlog
-      REDIS_URL: redis://fitlog-redis:6379
+      DATABASE_URL: postgresql://fitlog:${POSTGRES_PASSWORD}@forzafit-postgres:5432/fitlog
+      REDIS_URL: redis://forzafit-redis:6379
       JWT_SECRET: ${JWT_SECRET}
       JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET}
       SMTP_HOST: ${SMTP_HOST}
@@ -61,23 +61,27 @@ services:
       context: .
       dockerfile: apps/web/Dockerfile
       args:
-        NEXT_BACKEND_URL: http://fitlog-backend:3001
-    container_name: fitlog-frontend
+        NEXT_BACKEND_URL: http://forzafit-backend:3001
+    container_name: forzafit-frontend
     restart: unless-stopped
     depends_on:
       - backend
     environment:
       NODE_ENV: production
-      NEXT_BACKEND_URL: http://fitlog-backend:3001
+      NEXT_BACKEND_URL: http://forzafit-backend:3001
       PORT: 3000
       HOSTNAME: 0.0.0.0
 
 volumes:
   postgres_data:
+    external: true
+    name: fitlog_postgres_data
   redis_data:
+    external: true
+    name: fitlog_redis_data
 
 networks:
   default:
-    name: fitlog_default
+    name: forzafit_default
   n8n-nginx_default:
     external: true

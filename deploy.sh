@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# deploy.sh — деплой FitLog на сервер
+# deploy.sh — деплой ForzaFit на сервер
 # Использование: bash deploy.sh <apex-domain>
 # Пример:        bash deploy.sh forzafit.ru
 
@@ -7,11 +7,11 @@ set -euo pipefail
 
 DOMAIN="${1:?Укажи apex-домен: bash deploy.sh forzafit.ru}"
 SERVER="root@147.45.243.93"
-REMOTE_DIR="/opt/fitlog"
+REMOTE_DIR="/opt/forzafit"
 NGINX_CONF="/opt/n8n-nginx/conf.d/${DOMAIN}.conf"
 LE_EMAIL="romanra.rr@gmail.com"
 
-echo "▶ Деплой FitLog → ${DOMAIN}"
+echo "▶ Деплой ForzaFit → ${DOMAIN}"
 
 # ── 1. Синхронизация кода ──────────────────────────────────────
 echo "▶ Отправка кода на сервер (tar via ssh)..."
@@ -35,7 +35,7 @@ scp .env.prod "${SERVER}:${REMOTE_DIR}/.env.prod"
 
 # ── 3. nginx конфиг ───────────────────────────────────────────
 echo "▶ Установка nginx конфига..."
-sed "s/DOMAIN/${DOMAIN}/g" nginx/fitlog.conf | \
+sed "s/DOMAIN/${DOMAIN}/g" nginx/forzafit.conf | \
   ssh "${SERVER}" "cat > ${NGINX_CONF}"
 
 # ── 4. SSL сертификат (apex + www в одном SAN-сертификате) ────
@@ -61,7 +61,7 @@ echo "▶ Перезагрузка nginx..."
 ssh "${SERVER}" "docker exec n8n-nginx nginx -s reload"
 
 # ── 6. Сборка и запуск контейнеров ───────────────────────────
-echo "▶ Сборка и запуск FitLog..."
+echo "▶ Сборка и запуск ForzaFit..."
 ssh "${SERVER}" "
   cd ${REMOTE_DIR}
   docker compose -f docker-compose.prod.yml --env-file .env.prod pull || true
@@ -73,7 +73,7 @@ echo "▶ Запуск миграций..."
 ssh "${SERVER}" "
   cd ${REMOTE_DIR}
   sleep 5
-  docker exec fitlog-backend sh -c 'cd /app && node -e \"
+  docker exec forzafit-backend sh -c 'cd /app && node -e \"
     const { drizzle } = require(\\\"drizzle-orm/node-postgres\\\");
     const { migrate } = require(\\\"drizzle-orm/node-postgres/migrator\\\");
     const { Pool } = require(\\\"pg\\\");
