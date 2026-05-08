@@ -274,6 +274,137 @@ export const syncEvents = pgTable(
   ],
 );
 
+// ─── Gamification: Streaks ────────────────────────────────────────────────────
+
+export const streaks = pgTable('streaks', {
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  currentCount: integer('current_count').notNull().default(0),
+  longestCount: integer('longest_count').notNull().default(0),
+  lastActivityDate: timestamp('last_activity_date', { mode: 'date' }),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+// ─── Gamification: Achievements Catalog ───────────────────────────────────────
+
+export const achievementCategoryEnum = pgEnum('achievement_category', [
+  'consistency',
+  'strength',
+  'volume',
+  'milestone',
+  'time',
+  'social',
+]);
+
+export const achievementsCatalog = pgTable(
+  'achievements_catalog',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    code: text('code').notNull(),
+    title: text('title').notNull(),
+    description: text('description').notNull(),
+    emoji: text('emoji').notNull(),
+    category: achievementCategoryEnum('category').notNull(),
+    points: integer('points').notNull().default(10),
+    threshold: real('threshold'),
+    condition: jsonb('condition').notNull(),
+    sortOrder: integer('sort_order').notNull().default(0),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (t) => [uniqueIndex('achievements_catalog_code_idx').on(t.code)],
+);
+
+// ─── Gamification: User Achievements ──────────────────────────────────────────
+
+export const userAchievements = pgTable(
+  'user_achievements',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    achievementId: uuid('achievement_id')
+      .notNull()
+      .references(() => achievementsCatalog.id, { onDelete: 'cascade' }),
+    unlockedAt: timestamp('unlocked_at').defaultNow().notNull(),
+    workoutSessionId: uuid('workout_session_id').references(
+      () => workoutSessions.id,
+      { onDelete: 'set null' },
+    ),
+  },
+  (t) => [
+    uniqueIndex('user_achievements_user_achievement_idx').on(
+      t.userId,
+      t.achievementId,
+    ),
+    index('user_achievements_user_id_idx').on(t.userId),
+  ],
+);
+
+// ─── Gamification: Personal Records ───────────────────────────────────────────
+
+export const prTypeEnum = pgEnum('pr_type', [
+  'one_rm',
+  'working_weight',
+  'volume_session',
+]);
+
+export const personalRecords = pgTable(
+  'personal_records',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    exerciseId: uuid('exercise_id')
+      .notNull()
+      .references(() => exercises.id, { onDelete: 'cascade' }),
+    type: prTypeEnum('type').notNull(),
+    valueKg: real('value_kg').notNull(),
+    reps: integer('reps'),
+    achievedAt: timestamp('achieved_at').defaultNow().notNull(),
+    workoutSessionId: uuid('workout_session_id').references(
+      () => workoutSessions.id,
+      { onDelete: 'set null' },
+    ),
+  },
+  (t) => [
+    uniqueIndex('personal_records_user_exercise_type_idx').on(
+      t.userId,
+      t.exerciseId,
+      t.type,
+    ),
+    index('personal_records_user_id_idx').on(t.userId),
+  ],
+);
+
+export const prHistory = pgTable(
+  'pr_history',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    exerciseId: uuid('exercise_id')
+      .notNull()
+      .references(() => exercises.id, { onDelete: 'cascade' }),
+    type: prTypeEnum('type').notNull(),
+    previousValueKg: real('previous_value_kg'),
+    valueKg: real('value_kg').notNull(),
+    reps: integer('reps'),
+    workoutSessionId: uuid('workout_session_id').references(
+      () => workoutSessions.id,
+      { onDelete: 'set null' },
+    ),
+    achievedAt: timestamp('achieved_at').defaultNow().notNull(),
+  },
+  (t) => [
+    index('pr_history_user_id_idx').on(t.userId),
+    index('pr_history_user_exercise_idx').on(t.userId, t.exerciseId),
+  ],
+);
+
 // ─── AI Conversations ─────────────────────────────────────────────────────────
 
 export const aiConversationStatusEnum = pgEnum('ai_conversation_status', [
@@ -305,7 +436,7 @@ export const aiConversations = pgTable(
 
 // ─── Relations ────────────────────────────────────────────────────────────────
 
-export const usersRelations = relations(users, ({ many }) => ({
+export const usersRelations = relations(users, ({ many, one }) => ({
   refreshTokens: many(refreshTokens),
   passwordResets: many(passwordResets),
   workoutSessions: many(workoutSessions),
@@ -314,6 +445,74 @@ export const usersRelations = relations(users, ({ many }) => ({
   planTemplates: many(planTemplates),
   bodyMeasurements: many(bodyMeasurements),
   aiConversations: many(aiConversations),
+  streak: one(streaks, {
+    fields: [users.id],
+    references: [streaks.userId],
+  }),
+  achievements: many(userAchievements),
+  personalRecords: many(personalRecords),
+}));
+
+export const streaksRelations = relations(streaks, ({ one }) => ({
+  user: one(users, {
+    fields: [streaks.userId],
+    references: [users.id],
+  }),
+}));
+
+export const achievementsCatalogRelations = relations(
+  achievementsCatalog,
+  ({ many }) => ({
+    userAchievements: many(userAchievements),
+  }),
+);
+
+export const userAchievementsRelations = relations(
+  userAchievements,
+  ({ one }) => ({
+    user: one(users, {
+      fields: [userAchievements.userId],
+      references: [users.id],
+    }),
+    achievement: one(achievementsCatalog, {
+      fields: [userAchievements.achievementId],
+      references: [achievementsCatalog.id],
+    }),
+    workoutSession: one(workoutSessions, {
+      fields: [userAchievements.workoutSessionId],
+      references: [workoutSessions.id],
+    }),
+  }),
+);
+
+export const personalRecordsRelations = relations(personalRecords, ({ one }) => ({
+  user: one(users, {
+    fields: [personalRecords.userId],
+    references: [users.id],
+  }),
+  exercise: one(exercises, {
+    fields: [personalRecords.exerciseId],
+    references: [exercises.id],
+  }),
+  workoutSession: one(workoutSessions, {
+    fields: [personalRecords.workoutSessionId],
+    references: [workoutSessions.id],
+  }),
+}));
+
+export const prHistoryRelations = relations(prHistory, ({ one }) => ({
+  user: one(users, {
+    fields: [prHistory.userId],
+    references: [users.id],
+  }),
+  exercise: one(exercises, {
+    fields: [prHistory.exerciseId],
+    references: [exercises.id],
+  }),
+  workoutSession: one(workoutSessions, {
+    fields: [prHistory.workoutSessionId],
+    references: [workoutSessions.id],
+  }),
 }));
 
 export const aiConversationsRelations = relations(aiConversations, ({ one }) => ({

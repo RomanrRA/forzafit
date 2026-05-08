@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/lib/api'
+import type { WorkoutCompletedGamification } from './use-gamification'
 
 export interface WorkoutSession {
   id: string
@@ -9,6 +10,10 @@ export interface WorkoutSession {
   notes: string | null
   exercises?: WorkoutExercise[]
   exerciseCount?: number
+}
+
+export interface WorkoutSessionWithGamification extends WorkoutSession {
+  gamification: WorkoutCompletedGamification | null
 }
 
 export interface WorkoutExercise {
@@ -64,11 +69,14 @@ export function useUpdateWorkout(id: string) {
   return useMutation({
     mutationFn: async (body: { title?: string; finishedAt?: string; notes?: string }) => {
       const { data } = await api.patch(`/workouts/${id}`, body)
-      return data as WorkoutSession
+      return data as WorkoutSessionWithGamification
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       qc.invalidateQueries({ queryKey: ['workouts', id] })
       qc.invalidateQueries({ queryKey: ['workouts'] })
+      if (data.gamification) {
+        qc.invalidateQueries({ queryKey: ['gamification'] })
+      }
     },
   })
 }

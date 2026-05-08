@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, ListChecks, ClipboardList, Scale, User } from 'lucide-react'
+import { LayoutDashboard, ListChecks, ClipboardList, Scale, Trophy } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const navItems = [
@@ -10,7 +10,7 @@ const navItems = [
   { href: '/workouts', label: 'Тренировки', icon: ListChecks },
   { href: '/plans', label: 'Планы', icon: ClipboardList },
   { href: '/body', label: 'Замеры', icon: Scale },
-  { href: '/profile', label: 'Профиль', icon: User },
+  { href: '/achievements', label: 'Ачивки', icon: Trophy },
 ]
 
 export function BottomNav() {

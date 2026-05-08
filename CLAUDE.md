@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-FitLog (ForzaFit) — кроссплатформенный трекер тренировок и питания.
+ForzaFit — кроссплатформенный трекер тренировок и питания.
 Монорепо: apps/backend (NestJS), apps/web (Next.js 15), packages/types.
 
 ## Деплой

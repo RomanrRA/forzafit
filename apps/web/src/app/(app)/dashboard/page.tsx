@@ -12,6 +12,7 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Scale, TrendingDown, TrendingUp, Minus, CalendarClock, AlertTriangle, Trophy, ChevronDown, ChevronUp, Bell, Settings, Sparkles } from 'lucide-react'
 import { PlanAdjustDialog } from '@/components/plans/plan-adjust-dialog'
+import { StreakWidget } from '@/components/gamification/streak-widget'
 
 interface BodyReminderSettings {
   enabled: boolean
@@ -44,10 +45,10 @@ interface CustomFieldDef {
   unit: string
 }
 
-const CUSTOM_FIELDS_KEY = 'fitlog_custom_fields'
+const CUSTOM_FIELDS_KEY = 'forzafit_custom_fields'
 
-const REMINDER_SETTINGS_KEY = 'fitlog_body_reminder_settings'
-const WIDGET_SETTINGS_KEY = 'fitlog_body_widget_settings'
+const REMINDER_SETTINGS_KEY = 'forzafit_body_reminder_settings'
+const WIDGET_SETTINGS_KEY = 'forzafit_body_widget_settings'
 const DEFAULT_REMINDER: BodyReminderSettings = { enabled: true, intervalDays: 21 }
 
 const DEFAULT_WIDGET_SETTINGS: BodyWidgetSettings = {
@@ -201,6 +202,9 @@ export default function DashboardPage() {
       <div>
         <h1 className="text-2xl font-bold">Привет, {user?.name ?? 'Атлет'}!</h1>
       </div>
+
+      {/* ── Геймификация: streak / ачивки / PR ─────────── */}
+      <StreakWidget />
 
       {/* ── Замеры тела — компактный виджет ──────────── */}
       <div>

@@ -32,7 +32,7 @@ export const useAuthStore = create<AuthState>()(
       setInitialized: () => set({ isInitializing: false }),
     }),
     {
-      name: 'fitlog-auth',
+      name: 'forzafit-auth',
       partialize: (state) => ({
         refreshToken: state.refreshToken,
         user: state.user,

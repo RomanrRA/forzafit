@@ -37,7 +37,7 @@ export class MailService implements OnModuleInit {
   }
 
   async sendPasswordReset(email: string, resetUrl: string): Promise<void> {
-    const subject = 'Сброс пароля FitLog';
+    const subject = 'Сброс пароля ForzaFit';
     const text = `Здравствуйте!\n\nВы запросили сброс пароля. Перейдите по ссылке, чтобы задать новый пароль:\n${resetUrl}\n\nСсылка действительна 1 час. Если вы не запрашивали сброс — проигнорируйте это письмо.`;
     const html = `<p>Здравствуйте!</p><p>Вы запросили сброс пароля. Перейдите по ссылке, чтобы задать новый пароль:</p><p><a href="${resetUrl}">${resetUrl}</a></p><p>Ссылка действительна 1 час. Если вы не запрашивали сброс — проигнорируйте это письмо.</p>`;
 

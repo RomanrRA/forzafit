@@ -24,8 +24,8 @@ async function bootstrap() {
 
   // Swagger
   const config = new DocumentBuilder()
-    .setTitle('FitLog API')
-    .setDescription('Backend API для FitLog — трекер тренировок и питания')
+    .setTitle('ForzaFit API')
+    .setDescription('Backend API для ForzaFit — трекер тренировок и питания')
     .setVersion('1.0')
     .addBearerAuth()
     .addTag('Auth', 'Аутентификация')
@@ -48,7 +48,7 @@ async function bootstrap() {
   const port = process.env.PORT ?? 3001;
   await app.listen(port);
 
-  console.log(`🚀 FitLog API запущен на http://localhost:${port}`);
+  console.log(`🚀 ForzaFit API запущен на http://localhost:${port}`);
   console.log(`📖 Swagger UI: http://localhost:${port}/api`);
 }
 

@@ -1,4 +1,4 @@
-// Shared TypeScript types for FitLog
+// Shared TypeScript types for ForzaFit
 
 export type SubscriptionTier =
   | 'free'

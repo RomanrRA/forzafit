@@ -67,12 +67,12 @@ const STANDARD_METRICS = [
   { key: 'armCm', label: 'Рука', unit: 'см' },
 ]
 
-const STORAGE_KEY = 'fitlog_body_measurements'
-const FIELDS_KEY  = 'fitlog_custom_fields'
-const MIGRATED_KEY = 'fitlog_body_migrated_to_db'
-const MIGRATED_IDS_KEY = 'fitlog_body_migrated_ids'
-const REMINDER_SETTINGS_KEY = 'fitlog_body_reminder_settings'
-const WIDGET_SETTINGS_KEY = 'fitlog_body_widget_settings'
+const STORAGE_KEY = 'forzafit_body_measurements'
+const FIELDS_KEY  = 'forzafit_custom_fields'
+const MIGRATED_KEY = 'forzafit_body_migrated_to_db'
+const MIGRATED_IDS_KEY = 'forzafit_body_migrated_ids'
+const REMINDER_SETTINGS_KEY = 'forzafit_body_reminder_settings'
+const WIDGET_SETTINGS_KEY = 'forzafit_body_widget_settings'
 const DEFAULT_REMINDER: BodyReminderSettings = { enabled: true, intervalDays: 21 }
 
 const DEFAULT_WIDGET_SETTINGS: BodyWidgetSettings = {

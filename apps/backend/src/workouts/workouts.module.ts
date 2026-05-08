@@ -2,9 +2,10 @@ import { Module } from '@nestjs/common';
 import { WorkoutsController } from './workouts.controller';
 import { WorkoutsService } from './workouts.service';
 import { ExercisesModule } from './exercises/exercises.module';
+import { GamificationModule } from '../gamification/gamification.module';
 
 @Module({
-  imports: [ExercisesModule],
+  imports: [ExercisesModule, GamificationModule],
   controllers: [WorkoutsController],
   providers: [WorkoutsService],
   exports: [WorkoutsService],

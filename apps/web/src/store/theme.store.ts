@@ -14,6 +14,6 @@ export const useThemeStore = create<ThemeStore>()(
       mode: 'auto',
       setMode: (mode) => set({ mode }),
     }),
-    { name: 'fitlog-theme' }
+    { name: 'forzafit-theme' }
   )
 )

@@ -57,7 +57,7 @@ export class OpenRouterService {
     return {
       'Authorization': `Bearer ${this.apiKey}`,
       'HTTP-Referer': 'https://forzafit.ru',
-      'X-Title': 'FitLog',
+      'X-Title': 'ForzaFit',
       'Content-Type': 'application/json',
     };
   }

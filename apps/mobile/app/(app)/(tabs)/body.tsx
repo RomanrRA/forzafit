@@ -5,7 +5,7 @@ import { Scale, Plus } from 'lucide-react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
-const STORAGE_KEY = 'fitlog_body_measurements_mobile';
+const STORAGE_KEY = 'forzafit_body_measurements_mobile';
 
 interface BodyEntry {
   id: string;

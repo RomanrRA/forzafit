@@ -18,10 +18,14 @@ import {
   AddExerciseToWorkoutDto,
   AddSetDto,
 } from './dto/workout.dto';
+import { GamificationService } from '../gamification/gamification.service';
 
 @Injectable()
 export class WorkoutsService {
-  constructor(private drizzle: DrizzleService) {}
+  constructor(
+    private drizzle: DrizzleService,
+    private gamification: GamificationService,
+  ) {}
 
   // ─── Sessions ──────────────────────────────────────────────────────────────
 
@@ -146,7 +150,14 @@ export class WorkoutsService {
   }
 
   async update(id: string, userId: string, dto: UpdateWorkoutDto) {
-    await this.assertOwner(id, userId);
+    const [existing] = await this.drizzle.db
+      .select()
+      .from(workoutSessions)
+      .where(eq(workoutSessions.id, id))
+      .limit(1);
+
+    if (!existing) throw new NotFoundException('Тренировка не найдена');
+    if (existing.userId !== userId) throw new ForbiddenException('Нет доступа');
 
     const [session] = await this.drizzle.db
       .update(workoutSessions)
@@ -159,7 +170,17 @@ export class WorkoutsService {
       .where(eq(workoutSessions.id, id))
       .returning();
 
-    return session;
+    const justFinished = !existing.finishedAt && !!session.finishedAt;
+    let gamification: Awaited<ReturnType<typeof this.gamification.onWorkoutCompleted>> | null = null;
+    if (justFinished) {
+      try {
+        gamification = await this.gamification.onWorkoutCompleted(id, userId);
+      } catch (e) {
+        // Не валим обновление тренировки из-за ошибки геймификации
+      }
+    }
+
+    return { ...session, gamification };
   }
 
   async delete(id: string, userId: string): Promise<void> {

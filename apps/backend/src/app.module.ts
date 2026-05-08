@@ -11,6 +11,7 @@ import { SyncModule } from './sync/sync.module';
 import { PlanTemplatesModule } from './plan-templates/plan-templates.module';
 import { BodyMeasurementsModule } from './body-measurements/body-measurements.module';
 import { AiModule } from './ai/ai.module';
+import { GamificationModule } from './gamification/gamification.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { AiModule } from './ai/ai.module';
     PlanTemplatesModule,
     BodyMeasurementsModule,
     AiModule,
+    GamificationModule,
   ],
   providers: [
     {

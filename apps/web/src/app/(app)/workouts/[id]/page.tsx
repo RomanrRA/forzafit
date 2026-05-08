@@ -6,8 +6,10 @@ import { useRouter } from 'next/navigation'
 import { format, formatDistanceStrict } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { useWorkout, useUpdateWorkout, useDeleteWorkout } from '@/hooks/use-workouts'
+import type { WorkoutCompletedGamification } from '@/hooks/use-gamification'
 import { AddExerciseDialog } from '@/components/workouts/add-exercise-dialog'
 import { ExerciseRow } from '@/components/workouts/exercise-row'
+import { CelebrationDialog } from '@/components/gamification/celebration-dialog'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import {
@@ -32,12 +34,24 @@ export default function WorkoutDetailPage({ params }: Props) {
   const updateWorkout = useUpdateWorkout(id)
   const deleteWorkout = useDeleteWorkout()
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [celebration, setCelebration] = useState<WorkoutCompletedGamification | null>(null)
 
   async function handleFinish() {
     try {
-      await updateWorkout.mutateAsync({ finishedAt: new Date().toISOString() })
-      toast({ title: 'Тренировка завершена' })
-      router.push('/workouts')
+      const result = await updateWorkout.mutateAsync({ finishedAt: new Date().toISOString() })
+      const g = result.gamification
+      const hasSomething =
+        !!g &&
+        (g.newPrs.length > 0 ||
+          g.newAchievements.length > 0 ||
+          g.streak.isNewLongest ||
+          g.streak.current >= 1)
+      if (hasSomething && g) {
+        setCelebration(g)
+      } else {
+        toast({ title: 'Тренировка завершена' })
+        router.push('/workouts')
+      }
     } catch {
       toast({ variant: 'destructive', title: 'Ошибка', description: 'Не удалось сохранить тренировку' })
     }
@@ -146,6 +160,13 @@ export default function WorkoutDetailPage({ params }: Props) {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <CelebrationDialog
+        open={!!celebration}
+        onOpenChange={(v) => { if (!v) setCelebration(null) }}
+        data={celebration}
+        onClose={() => router.push('/workouts')}
+      />
     </div>
   )
 }
