@@ -2,8 +2,9 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Dumbbell, LayoutDashboard, ListChecks, ClipboardList, TrendingUp, Scale, Trophy, User } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { Flame, LayoutDashboard, ListChecks, ClipboardList, TrendingUp, Scale, Trophy, User } from 'lucide-react'
+import { useAuthStore } from '@/store/auth.store'
+import { useGamificationOverview } from '@/hooks/use-gamification'
 
 const navItems = [
   { href: '/dashboard', label: 'Дашборд', icon: LayoutDashboard },
@@ -17,72 +18,132 @@ const navItems = [
 
 export function Sidebar() {
   const pathname = usePathname()
+  const user = useAuthStore((s) => s.user)
+  const { data: gam } = useGamificationOverview()
+  const initial = (user?.name ?? user?.email ?? '?').trim().slice(0, 1).toUpperCase()
+  const displayName = user?.name ?? user?.email?.split('@')[0] ?? 'Атлет'
+  const streakCurrent = gam?.streak.current ?? 0
 
   return (
-    <aside className="glass-sidebar hidden md:flex flex-col w-60 min-h-screen relative z-10">
-      {/* Subtle colour overlay */}
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            'linear-gradient(160deg, rgba(120,100,255,0.10) 0%, rgba(0,180,255,0.05) 50%, rgba(255,100,180,0.07) 100%)',
-        }}
-      />
-
-      {/* Logo */}
-      <div className="relative flex items-center gap-3 px-5 py-5 border-b border-white/[0.08]">
+    <aside
+      className="glass-sidebar hidden md:flex flex-col min-h-screen relative z-10"
+      style={{
+        width: 240,
+        minWidth: 240,
+        borderRight: '1px solid var(--gl-border)',
+        padding: '20px 12px 16px',
+      }}
+    >
+      {/* ── Brand ── */}
+      <div className="flex items-center gap-2.5 px-2 pb-5">
         <div
-          className="flex h-9 w-9 items-center justify-center rounded-xl text-lg flex-shrink-0"
+          className="grid place-items-center"
           style={{
-            background: 'linear-gradient(145deg, #ffffff 0%, #dde8ff 50%, #b8caff 100%)',
-            boxShadow: '0 4px 12px rgba(100,120,255,0.28), inset 0 1px 0 rgba(255,255,255,1)',
+            width: 32,
+            height: 32,
+            borderRadius: 10,
+            background:
+              'linear-gradient(135deg, var(--c-accent), color-mix(in oklab, var(--c-accent) 60%, black))',
+            boxShadow: '0 4px 12px var(--c-accent-glow)',
+            color: 'white',
           }}
         >
-          💪
+          <Flame className="h-[18px] w-[18px]" strokeWidth={2.4} />
         </div>
-        <span className="text-[19px] font-bold tracking-tight text-white/95">ForzaFit</span>
+        <div
+          style={{
+            fontWeight: 800,
+            fontSize: 16,
+            letterSpacing: -0.4,
+            color: 'var(--txt-1)',
+          }}
+        >
+          Forza<span style={{ color: 'var(--c-accent)' }}>Fit</span>
+        </div>
       </div>
 
-      {/* Nav */}
-      <nav className="relative flex flex-col gap-0.5 p-3 flex-1">
+      {/* ── Nav ── */}
+      <nav className="flex flex-col gap-0.5">
         {navItems.map(({ href, label, icon: Icon }) => {
           const active = pathname === href || pathname.startsWith(href + '/')
           return (
             <Link
               key={href}
               href={href}
-              className={cn(
-                'relative flex items-center gap-3 rounded-[12px] px-3 py-[9px] text-sm font-medium transition-all duration-200',
-                active
-                  ? 'text-white/95 font-semibold'
-                  : 'text-white/40 hover:text-white/72 hover:bg-white/[0.07]'
-              )}
-              style={
-                active
-                  ? {
-                      background: 'rgba(255,255,255,0.11)',
-                      border: '1px solid rgba(255,255,255,0.16)',
-                      boxShadow:
-                        '0 4px 16px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.22)',
-                    }
-                  : undefined
-              }
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                padding: '10px 12px',
+                borderRadius: 12,
+                background: active ? 'var(--gl-bg-strong)' : 'transparent',
+                border: '1px solid ' + (active ? 'var(--gl-border-strong)' : 'transparent'),
+                color: active ? 'var(--txt-1)' : 'var(--txt-2)',
+                fontSize: 14,
+                fontWeight: active ? 700 : 600,
+                transition: 'background 0.15s, color 0.15s',
+              }}
             >
-              {active && (
-                <span
-                  className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-[18px] rounded-r-full"
-                  style={{
-                    background: 'linear-gradient(180deg, #a0c4ff, #6e9fff)',
-                    boxShadow: '0 0 8px rgba(120,160,255,0.55)',
-                  }}
-                />
-              )}
-              <Icon className="h-[17px] w-[17px] flex-shrink-0 opacity-80" />
-              {label}
+              <Icon
+                className="h-[18px] w-[18px] shrink-0"
+                style={{ color: active ? 'var(--c-accent)' : 'currentColor' }}
+                strokeWidth={2}
+              />
+              <span className="flex-1 truncate text-left">{label}</span>
             </Link>
           )
         })}
       </nav>
+
+      {/* spacer */}
+      <div className="flex-1" />
+
+      {/* ── Profile pill ── */}
+      <Link
+        href="/profile"
+        className="glass-card flex items-center gap-2.5"
+        style={{ padding: '10px 12px' }}
+      >
+        <div
+          className="grid place-items-center shrink-0"
+          style={{
+            width: 32,
+            height: 32,
+            borderRadius: '50%',
+            background:
+              'linear-gradient(135deg, oklch(0.55 0.15 30), oklch(0.45 0.18 280))',
+            color: 'white',
+            fontWeight: 700,
+            fontSize: 13,
+          }}
+        >
+          {initial || <User className="h-4 w-4" />}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div
+            className="truncate"
+            style={{ fontSize: 13, fontWeight: 700, color: 'var(--txt-1)' }}
+          >
+            {displayName}
+          </div>
+          {streakCurrent > 0 ? (
+            <div
+              className="inline-flex items-center gap-1"
+              style={{ fontSize: 11, fontWeight: 700, color: 'var(--c-orange)' }}
+            >
+              <Flame className="h-3 w-3" strokeWidth={2.4} />
+              <span className="tnum">{streakCurrent}</span>{' '}
+              <span style={{ color: 'var(--c-orange)' }}>
+                {streakCurrent === 1 ? 'день' : streakCurrent >= 2 && streakCurrent <= 4 ? 'дня' : 'дней'}
+              </span>
+            </div>
+          ) : (
+            <div style={{ fontSize: 11, color: 'var(--txt-3)', fontWeight: 600 }}>
+              профиль
+            </div>
+          )}
+        </div>
+      </Link>
     </aside>
   )
 }

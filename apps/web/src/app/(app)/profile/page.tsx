@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { toast } from '@/hooks/use-toast'
-import { LogOut, User, Sun, Moon, Monitor } from 'lucide-react'
+import { LogOut, Sun, Moon, Monitor } from 'lucide-react'
 import { useThemeStore, type ThemeMode } from '@/store/theme.store'
 
 interface UserProfile {
@@ -126,20 +126,49 @@ export default function ProfilePage() {
 
   if (isLoading) return <div className="text-muted-foreground">Загрузка...</div>
 
+  const initial = (profile?.name ?? profile?.email ?? '?').trim().slice(0, 1).toUpperCase()
+
   return (
-    <div className="w-full max-w-md space-y-5">
-      <h1 className="text-3xl font-bold">Профиль</h1>
+    <div className="w-full max-w-md space-y-5 fz-rise">
+      <div>
+        <div className="eyebrow">Аккаунт</div>
+        <h1
+          className="mt-1"
+          style={{
+            fontSize: 'clamp(26px, 4.4vw, 32px)',
+            fontWeight: 800,
+            letterSpacing: -0.5,
+            lineHeight: 1,
+            color: 'var(--txt-1)',
+          }}
+        >
+          Профиль
+        </h1>
+      </div>
 
       {/* Личные данные */}
-      <Card>
+      <Card className="strong">
         <CardHeader>
-          <div className="flex items-center gap-3">
-            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-              <User className="h-6 w-6 text-primary" />
+          <div className="flex items-center gap-4">
+            <div
+              className="grid place-items-center shrink-0 fz-pop"
+              style={{
+                width: 64,
+                height: 64,
+                borderRadius: '50%',
+                background:
+                  'linear-gradient(135deg, oklch(0.55 0.15 30), oklch(0.45 0.18 280))',
+                color: 'white',
+                fontWeight: 800,
+                fontSize: 26,
+                boxShadow: '0 6px 20px rgba(0,0,0,0.18)',
+              }}
+            >
+              {initial}
             </div>
-            <div>
+            <div className="min-w-0">
               <CardTitle>{profile?.name ?? 'Пользователь'}</CardTitle>
-              <p className="text-sm text-muted-foreground">{profile?.email}</p>
+              <p className="text-sm txt-muted truncate">{profile?.email}</p>
             </div>
           </div>
         </CardHeader>

@@ -10,9 +10,10 @@ import { useBodyMeasurements, type BodyMeasurement } from '@/hooks/use-body-meas
 import { usePlanTemplates } from '@/hooks/use-plan-templates'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Scale, TrendingDown, TrendingUp, Minus, CalendarClock, AlertTriangle, Trophy, ChevronDown, ChevronUp, Bell, Settings, Sparkles } from 'lucide-react'
+import { Scale, TrendingDown, TrendingUp, Minus, AlertTriangle, Trophy, ChevronDown, ChevronUp, Bell, Settings, Sparkles, Play, Dumbbell } from 'lucide-react'
 import { PlanAdjustDialog } from '@/components/plans/plan-adjust-dialog'
 import { StreakWidget } from '@/components/gamification/streak-widget'
+import { RecentPrCard } from '@/components/gamification/recent-pr-card'
 
 interface BodyReminderSettings {
   enabled: boolean
@@ -197,14 +198,80 @@ export default function DashboardPage() {
     return daysSinceLast >= reminderSettings.intervalDays
   }, [latest, reminderSettings])
 
+  const todayLabel = format(new Date(), 'EEEE, d MMMM', { locale: ru })
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 fz-rise">
       <div>
-        <h1 className="text-2xl font-bold">Привет, {user?.name ?? 'Атлет'}!</h1>
+        <div className="eyebrow">{todayLabel}</div>
+        <h1
+          className="mt-1"
+          style={{
+            fontSize: 'clamp(28px, 5vw, 36px)',
+            fontWeight: 800,
+            letterSpacing: -0.6,
+            lineHeight: 1.05,
+            color: 'var(--txt-1)',
+          }}
+        >
+          Привет, {user?.name ?? 'Атлет'}
+        </h1>
       </div>
+
+      {/* ── Хиро: Сегодня в зале ─────────────────────── */}
+      {nextWorkout && (() => {
+        const wDate = startOfDay(new Date(nextWorkout.startedAt))
+        const today = startOfDay(new Date())
+        const isToday = wDate.getTime() === today.getTime()
+        const isTomorrow = wDate.getTime() === today.getTime() + 86400000
+        const eyebrow = isToday ? 'Сегодня в зале' : isTomorrow ? 'Завтра в зале' : 'Ближайшая тренировка'
+        const exCount = nextWorkout.exerciseCount ?? nextWorkout.exercises?.length ?? 0
+        return (
+          <div className="glass-card strong p-5 sm:p-6 fz-rise">
+            <div className="eyebrow" style={{ color: 'var(--c-accent)' }}>{eyebrow}</div>
+            <div
+              className="mt-1"
+              style={{
+                fontSize: 'clamp(24px, 4.4vw, 30px)',
+                fontWeight: 800,
+                letterSpacing: -0.5,
+                lineHeight: 1.1,
+                color: 'var(--txt-1)',
+              }}
+            >
+              {nextWorkout.title}
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[13px] txt-muted">
+              <span className="capitalize">{format(new Date(nextWorkout.startedAt), 'EEEE, d MMMM', { locale: ru })}</span>
+              {exCount > 0 && (
+                <>
+                  <span className="txt-soft">·</span>
+                  <span>
+                    <strong className="tnum" style={{ color: 'var(--txt-1)', fontWeight: 800 }}>
+                      {exCount}
+                    </strong>{' '}
+                    {exCount === 1 ? 'упражнение' : exCount < 5 ? 'упражнения' : 'упражнений'}
+                  </span>
+                </>
+              )}
+            </div>
+            <Link
+              href={`/workouts/${nextWorkout.id}`}
+              className="glass-btn-primary inline-flex items-center gap-2 mt-5"
+              style={{ padding: '13px 22px', minHeight: 50, fontSize: 15 }}
+            >
+              <Play className="h-[18px] w-[18px]" strokeWidth={2.4} fill="currentColor" />
+              Начать тренировку
+            </Link>
+          </div>
+        )
+      })()}
 
       {/* ── Геймификация: streak / ачивки / PR ─────────── */}
       <StreakWidget />
+
+      {/* ── Свежий PR ───────────────────────────────── */}
+      <RecentPrCard />
 
       {/* ── Замеры тела — компактный виджет ──────────── */}
       <div>
@@ -403,31 +470,6 @@ export default function DashboardPage() {
             onOpenChange={setAdjustOpen}
             planTemplateId={latestPlan.id}
           />
-        </div>
-      )}
-
-      {/* ── Ближайшая тренировка ─────────────────────── */}
-      {nextWorkout && (
-        <div>
-          <h2 className="font-semibold flex items-center gap-2 mb-3">
-            <CalendarClock className="h-4 w-4 text-primary" />
-            Ближайшая тренировка
-          </h2>
-          <Link href={`/workouts/${nextWorkout.id}`}>
-            <Card className="border-primary/50 bg-primary/5 hover:border-primary transition-colors cursor-pointer">
-              <CardContent className="flex items-center justify-between py-4 px-4">
-                <div className="min-w-0">
-                  <p className="font-semibold text-sm truncate">{nextWorkout.title}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {format(new Date(nextWorkout.startedAt), 'EEEE, d MMMM', { locale: ru })}
-                  </p>
-                </div>
-                <span className="text-xs text-muted-foreground shrink-0 ml-2">
-                  {nextWorkout.exerciseCount ?? 0} упр.
-                </span>
-              </CardContent>
-            </Card>
-          </Link>
         </div>
       )}
 

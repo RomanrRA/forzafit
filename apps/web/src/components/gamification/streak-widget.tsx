@@ -1,91 +1,210 @@
 'use client'
 
 import Link from 'next/link'
+import { useMemo } from 'react'
+import { format, startOfDay, subDays } from 'date-fns'
 import { Flame, Trophy, Medal } from 'lucide-react'
-import { Card, CardContent } from '@/components/ui/card'
 import { useGamificationOverview } from '@/hooks/use-gamification'
+import { useWorkouts } from '@/hooks/use-workouts'
 
 export function StreakWidget() {
   const { data, isLoading } = useGamificationOverview()
+
+  const since = useMemo(() => format(startOfDay(subDays(new Date(), 13)), 'yyyy-MM-dd'), [])
+  const { data: completedData } = useWorkouts({
+    limit: 100,
+    order: 'asc',
+    status: 'completed',
+    from: since,
+  })
+
+  const doneDates = useMemo(() => {
+    const set = new Set<string>()
+    for (const w of completedData?.items ?? []) {
+      if (!w.finishedAt && !w.startedAt) continue
+      const date = format(startOfDay(new Date(w.startedAt)), 'yyyy-MM-dd')
+      set.add(date)
+    }
+    return set
+  }, [completedData])
+
+  const days14 = useMemo(() => {
+    const today = startOfDay(new Date())
+    return Array.from({ length: 14 }, (_, i) => {
+      const d = subDays(today, 13 - i)
+      const key = format(d, 'yyyy-MM-dd')
+      return {
+        key,
+        date: d.getDate(),
+        done: doneDates.has(key),
+        today: i === 13,
+      }
+    })
+  }, [doneDates])
 
   if (isLoading || !data) return null
 
   const { streak, achievementsUnlocked, achievementsTotal, prCount, recentAchievements, points } = data
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="font-semibold flex items-center gap-2">
-          <Flame className="h-4 w-4 text-orange-500" />
-          Достижения
-        </h2>
+    <div className="space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="eyebrow">Достижения</div>
         <Link
           href="/achievements"
-          className="text-xs text-muted-foreground hover:text-foreground transition-colors"
+          className="text-xs font-semibold txt-muted hover:opacity-80 transition-opacity"
         >
           Все →
         </Link>
       </div>
 
-      <div className="grid grid-cols-3 gap-2 mb-2">
-        <Card>
-          <CardContent className="py-3 px-3 text-center">
-            <div className="flex items-center justify-center gap-1 text-xl font-bold text-orange-500">
-              <Flame className="h-4 w-4" />
-              {streak.current}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        {/* ── Серия + 14-day heatmap ── */}
+        <div className="glass-card strong p-4 sm:p-5 sm:col-span-1">
+          <div className="flex items-center gap-3">
+            <div
+              className="grid place-items-center shrink-0"
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: 14,
+                background: 'color-mix(in oklab, var(--c-orange) 24%, transparent)',
+                border: '1px solid color-mix(in oklab, var(--c-orange) 40%, transparent)',
+                color: 'var(--c-orange)',
+              }}
+            >
+              <Flame className="h-6 w-6" strokeWidth={2.2} />
             </div>
-            <div className="text-[10px] text-muted-foreground mt-0.5">
-              серия дней
-            </div>
-            {streak.longest > streak.current && (
-              <div className="text-[10px] text-muted-foreground/70">
-                рекорд: {streak.longest}
+            <div className="min-w-0">
+              <div
+                className="tnum"
+                style={{
+                  fontSize: 32,
+                  fontWeight: 800,
+                  letterSpacing: -0.8,
+                  lineHeight: 1,
+                  color: 'var(--txt-1)',
+                }}
+              >
+                {streak.current}
+                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--txt-2)', marginLeft: 6 }}>
+                  {streak.current === 1 ? 'день' : streak.current >= 2 && streak.current <= 4 ? 'дня' : 'дней'}
+                </span>
               </div>
-            )}
-          </CardContent>
-        </Card>
+              <div className="text-[11px] mt-1 txt-soft">
+                {streak.longest > streak.current ? `рекорд: ${streak.longest}` : 'серия. не ломаем.'}
+              </div>
+            </div>
+          </div>
+          {/* 14 дней */}
+          <div className="flex gap-1 mt-3">
+            {days14.map((d) => (
+              <div
+                key={d.key}
+                title={`${d.date} · ${d.done ? 'тренировка' : 'нет'}`}
+                style={{
+                  flex: 1,
+                  height: 22,
+                  borderRadius: 5,
+                  background: d.done
+                    ? 'color-mix(in oklab, var(--c-green) 38%, transparent)'
+                    : 'var(--gl-bg)',
+                  outline: d.today ? '1.5px solid var(--c-accent)' : 'none',
+                  outlineOffset: 1,
+                  transition: 'background 0.2s',
+                }}
+              />
+            ))}
+          </div>
+        </div>
 
-        <Card>
-          <CardContent className="py-3 px-3 text-center">
-            <div className="flex items-center justify-center gap-1 text-xl font-bold text-yellow-500">
-              <Trophy className="h-4 w-4" />
+        {/* ── Ачивки ── */}
+        <Link
+          href="/achievements"
+          className="glass-card p-4 sm:p-5 flex items-center gap-3 hover:opacity-90 transition-opacity"
+        >
+          <div
+            className="grid place-items-center shrink-0"
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: 14,
+              background: 'color-mix(in oklab, var(--c-yellow) 24%, transparent)',
+              border: '1px solid color-mix(in oklab, var(--c-yellow) 40%, transparent)',
+              color: 'var(--c-yellow)',
+            }}
+          >
+            <Trophy className="h-6 w-6" strokeWidth={2.2} />
+          </div>
+          <div className="min-w-0">
+            <div
+              className="tnum"
+              style={{
+                fontSize: 32,
+                fontWeight: 800,
+                letterSpacing: -0.8,
+                lineHeight: 1,
+                color: 'var(--txt-1)',
+              }}
+            >
               {achievementsUnlocked}
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--txt-2)', marginLeft: 6 }}>
+                / {achievementsTotal}
+              </span>
             </div>
-            <div className="text-[10px] text-muted-foreground mt-0.5">
-              из {achievementsTotal} ачивок
-            </div>
-            <div className="text-[10px] text-muted-foreground/70">
-              {points} очк.
-            </div>
-          </CardContent>
-        </Card>
+            <div className="text-[11px] mt-1 txt-soft">{points} очков</div>
+          </div>
+        </Link>
 
-        <Card>
-          <CardContent className="py-3 px-3 text-center">
-            <div className="flex items-center justify-center gap-1 text-xl font-bold text-blue-500">
-              <Medal className="h-4 w-4" />
+        {/* ── PR ── */}
+        <div className="glass-card p-4 sm:p-5 flex items-center gap-3">
+          <div
+            className="grid place-items-center shrink-0"
+            style={{
+              width: 48,
+              height: 48,
+              borderRadius: 14,
+              background: 'color-mix(in oklab, var(--c-green) 24%, transparent)',
+              border: '1px solid color-mix(in oklab, var(--c-green) 40%, transparent)',
+              color: 'var(--c-green)',
+            }}
+          >
+            <Medal className="h-6 w-6" strokeWidth={2.2} />
+          </div>
+          <div className="min-w-0">
+            <div
+              className="tnum"
+              style={{
+                fontSize: 32,
+                fontWeight: 800,
+                letterSpacing: -0.8,
+                lineHeight: 1,
+                color: 'var(--txt-1)',
+              }}
+            >
               {prCount}
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--txt-2)', marginLeft: 6 }}>
+                PR
+              </span>
             </div>
-            <div className="text-[10px] text-muted-foreground mt-0.5">
-              рекордов
-            </div>
-            <div className="text-[10px] text-muted-foreground/70">
-              &nbsp;
-            </div>
-          </CardContent>
-        </Card>
+            <div className="text-[11px] mt-1 txt-soft">личных рекордов</div>
+          </div>
+        </div>
       </div>
 
       {recentAchievements.length > 0 && (
-        <div className="flex gap-2 overflow-x-auto pb-1">
+        <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
           {recentAchievements.map((a) => (
             <div
               key={a.id}
-              className="shrink-0 flex items-center gap-2 rounded-full bg-muted px-3 py-1.5 text-xs"
+              className="glass-card shrink-0 flex items-center gap-2 px-3 py-1.5 text-xs"
+              style={{ borderRadius: 'var(--r-pill)' }}
               title={a.description}
             >
               <span className="text-base">{a.emoji}</span>
-              <span className="font-medium">{a.title}</span>
+              <span className="font-semibold" style={{ color: 'var(--txt-1)' }}>
+                {a.title}
+              </span>
             </div>
           ))}
         </div>

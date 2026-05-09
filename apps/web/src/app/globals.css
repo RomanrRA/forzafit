@@ -2,50 +2,116 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ─────────────────────────────────────────────────────────────
+   Liquid Glass token system (ForzaFit theme).
+   Combines shadcn HSL tokens (back-compat) with the new
+   oklch/color-mix system from forza-theme.css.
+   ───────────────────────────────────────────────────────────── */
+
 @layer base {
   :root {
+    /* Semantic accents */
+    --c-green:  #22c55e;
+    --c-orange: #fb923c;
+    --c-yellow: #facc15;
+    --c-red:    #ef4444;
+    --c-blue:   #3b82f6;
+    --c-accent: var(--c-green);
+    --c-accent-soft: color-mix(in oklab, var(--c-accent) 22%, transparent);
+    --c-accent-glow: color-mix(in oklab, var(--c-accent) 50%, transparent);
+
+    /* Geometry */
+    --r-card: 22px;
+    --r-card-sm: 16px;
+    --r-pill: 9999px;
+    --tap: 44px;
+    --bn: 76px;
+
+    /* Light theme — bg + text + glass */
+    --bg-base: #f3f1ee;
+    --bg-radial:
+      radial-gradient(120% 60% at 12% -10%, oklch(0.85 0.10 250 / 0.55), transparent 60%),
+      radial-gradient(80% 50% at 100% 8%, oklch(0.86 0.10 30 / 0.50), transparent 65%),
+      radial-gradient(90% 60% at 0% 100%, oklch(0.86 0.09 320 / 0.45), transparent 65%),
+      radial-gradient(60% 40% at 100% 100%, oklch(0.88 0.08 180 / 0.40), transparent 70%);
+
+    --txt-1: oklch(0.20 0.02 250);
+    --txt-2: oklch(0.42 0.02 250);
+    --txt-3: oklch(0.55 0.02 250);
+
+    --gl-bg: rgba(255,255,255,0.55);
+    --gl-bg-strong: rgba(255,255,255,0.78);
+    --gl-border: rgba(255,255,255,0.85);
+    --gl-border-strong: rgba(255,255,255,0.95);
+    --gl-shine: rgba(255,255,255,0.7);
+
+    --in-bg: rgba(255,255,255,0.45);
+    --in-border: rgba(0,0,0,0.06);
+
+    /* shadcn HSL tokens — оставлены для обратной совместимости */
     --background: 220 30% 96%;
     --foreground: 220 20% 12%;
     --card: 0 0% 100%;
     --card-foreground: 220 20% 12%;
     --popover: 0 0% 100%;
     --popover-foreground: 220 20% 12%;
-    --primary: 221 90% 56%;
+    --primary: 142 71% 45%;          /* зелёный = бренд-акцент */
     --primary-foreground: 0 0% 100%;
     --secondary: 220 20% 94%;
     --secondary-foreground: 220 20% 20%;
     --muted: 220 20% 94%;
-    --muted-foreground: 220 10% 50%;
+    --muted-foreground: 220 10% 40%;
     --accent: 220 20% 92%;
     --accent-foreground: 220 20% 20%;
     --destructive: 4 86% 58%;
     --destructive-foreground: 0 0% 100%;
     --border: 220 20% 88%;
     --input: 220 20% 88%;
-    --ring: 221 90% 56%;
+    --ring: 142 71% 45%;
     --radius: 0.75rem;
   }
 
   .dark {
-    --background: 224 40% 8%;
+    --bg-base: #07070a;
+    --bg-radial:
+      radial-gradient(120% 60% at 12% -10%, oklch(0.45 0.15 250 / 0.50), transparent 60%),
+      radial-gradient(80% 50% at 100% 8%, oklch(0.50 0.16 30 / 0.32), transparent 65%),
+      radial-gradient(90% 60% at 0% 100%, oklch(0.45 0.14 320 / 0.30), transparent 65%),
+      radial-gradient(60% 40% at 100% 100%, oklch(0.55 0.12 180 / 0.22), transparent 70%);
+
+    --txt-1: oklch(0.98 0.005 250);
+    --txt-2: oklch(0.78 0.01 250);
+    --txt-3: oklch(0.58 0.015 250);
+
+    --gl-bg: rgba(255,255,255,0.06);
+    --gl-bg-strong: rgba(255,255,255,0.10);
+    --gl-border: rgba(255,255,255,0.10);
+    --gl-border-strong: rgba(255,255,255,0.16);
+    --gl-shine: rgba(255,255,255,0.10);
+
+    --in-bg: rgba(255,255,255,0.04);
+    --in-border: rgba(255,255,255,0.08);
+
+    /* shadcn dark */
+    --background: 224 40% 6%;
     --foreground: 210 40% 96%;
     --card: 224 35% 11%;
     --card-foreground: 210 40% 96%;
     --popover: 224 35% 11%;
     --popover-foreground: 210 40% 96%;
-    --primary: 221 90% 62%;
+    --primary: 142 71% 50%;
     --primary-foreground: 0 0% 100%;
     --secondary: 224 30% 16%;
     --secondary-foreground: 210 40% 96%;
     --muted: 224 30% 16%;
-    --muted-foreground: 215 20% 55%;
+    --muted-foreground: 215 20% 65%;
     --accent: 224 30% 16%;
     --accent-foreground: 210 40% 96%;
-    --destructive: 4 70% 45%;
+    --destructive: 4 70% 50%;
     --destructive-foreground: 210 40% 98%;
     --border: 224 25% 18%;
     --input: 224 25% 18%;
-    --ring: 221 90% 62%;
+    --ring: 142 71% 50%;
   }
 }
 
@@ -55,141 +121,146 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: -apple-system, 'SF Pro Display', 'SF Pro Text', system-ui, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro', system-ui, sans-serif;
+    font-feature-settings: 'ss01', 'tnum', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    -webkit-tap-highlight-color: transparent;
     overflow-x: hidden;
   }
 }
 
-/* ── Liquid Glass Background ─────────────────────────────── */
+/* ── Liquid Glass background ─────────────────────────────── */
 .lg-bg {
-  background:
-    radial-gradient(ellipse at 15% 25%, rgba(185, 210, 255, 0.7) 0%, transparent 45%),
-    radial-gradient(ellipse at 85% 10%, rgba(255, 210, 232, 0.6) 0%, transparent 40%),
-    radial-gradient(ellipse at 70% 80%, rgba(190, 240, 210, 0.6) 0%, transparent 45%),
-    radial-gradient(ellipse at 25% 85%, rgba(220, 200, 255, 0.5) 0%, transparent 40%),
-    #eef2ff;
+  background: var(--bg-base);
+  background-image: var(--bg-radial);
+  background-attachment: fixed;
+  color: var(--txt-1);
   min-height: 100vh;
 }
 
-.dark .lg-bg {
-  background:
-    radial-gradient(ellipse at 15% 25%, rgba(60, 80, 160, 0.4) 0%, transparent 45%),
-    radial-gradient(ellipse at 85% 10%, rgba(120, 40, 100, 0.3) 0%, transparent 40%),
-    radial-gradient(ellipse at 70% 80%, rgba(20, 80, 60, 0.35) 0%, transparent 45%),
-    radial-gradient(ellipse at 25% 85%, rgba(80, 40, 130, 0.3) 0%, transparent 40%),
-    #0d0f1a;
-  min-height: 100vh;
-}
-
-/* ── Glass Card ──────────────────────────────────────────── */
+/* ── Glass card ──────────────────────────────────────────── */
 .glass-card {
-  background: rgba(255, 255, 255, 0.52);
-  backdrop-filter: blur(40px) saturate(180%);
-  -webkit-backdrop-filter: blur(40px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.75);
-  box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.07),
-    inset 0 1px 0 rgba(255, 255, 255, 0.95),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.03);
-  border-radius: 18px;
   position: relative;
-}
-
-.glass-card::before {
-  content: '';
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 1px;
-  background: linear-gradient(90deg, transparent 5%, rgba(255,255,255,0.95) 50%, transparent 95%);
-  border-radius: 18px 18px 0 0;
-  pointer-events: none;
-}
-
-.dark .glass-card {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: var(--gl-bg);
+  border: 1px solid var(--gl-border);
+  border-radius: var(--r-card);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
+  backdrop-filter: blur(24px) saturate(160%);
   box-shadow:
-    0 4px 24px rgba(0, 0, 0, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.12),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+    inset 0 1px 0 var(--gl-shine),
+    0 1px 2px rgba(0,0,0,0.10);
+}
+.glass-card.strong {
+  background: var(--gl-bg-strong);
+  border-color: var(--gl-border-strong);
 }
 
-.dark .glass-card::before {
-  background: linear-gradient(90deg, transparent 5%, rgba(255,255,255,0.12) 50%, transparent 95%);
-}
-
-/* ── Glass Sidebar ───────────────────────────────────────── */
-.glass-sidebar {
-  background: rgba(18, 18, 28, 0.62);
-  backdrop-filter: blur(60px) saturate(200%);
-  -webkit-backdrop-filter: blur(60px) saturate(200%);
-  border-right: 1px solid rgba(255, 255, 255, 0.09);
-  box-shadow:
-    inset -1px 0 0 rgba(255,255,255,0.07),
-    4px 0 30px rgba(0, 0, 0, 0.15);
-}
-
-/* ── Glass Header ────────────────────────────────────────── */
+/* ── Glass header ────────────────────────────────────────── */
 .glass-header {
-  background: rgba(255, 255, 255, 0.4);
-  backdrop-filter: blur(30px) saturate(180%);
-  -webkit-backdrop-filter: blur(30px) saturate(180%);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.65);
-  box-shadow:
-    inset 0 -1px 0 rgba(0,0,0,0.04),
-    0 2px 16px rgba(0, 0, 0, 0.05);
+  background: var(--gl-bg);
+  border-bottom: 1px solid var(--gl-border);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  backdrop-filter: blur(28px) saturate(180%);
 }
 
-.dark .glass-header {
-  background: rgba(255, 255, 255, 0.04);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.2);
+/* ── Glass sidebar / bottom-nav ──────────────────────────── */
+.glass-sidebar {
+  background: var(--gl-bg-strong);
+  border-color: var(--gl-border);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  backdrop-filter: blur(28px) saturate(180%);
 }
 
-/* ── Glass Button ────────────────────────────────────────── */
+/* ── Glass buttons ───────────────────────────────────────── */
 .glass-btn {
-  background: rgba(255, 255, 255, 0.6);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.85);
-  box-shadow:
-    0 4px 14px rgba(0, 0, 0, 0.09),
-    inset 0 1px 0 rgba(255, 255, 255, 1),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
-  color: #1c6cf0;
+  background: var(--gl-bg);
+  border: 1px solid var(--gl-border);
+  color: var(--txt-1);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  backdrop-filter: blur(20px) saturate(160%);
+  box-shadow: inset 0 1px 0 var(--gl-shine);
   border-radius: 12px;
   font-weight: 600;
-  transition: all 0.2s;
+  transition: background 0.18s, transform 0.18s, box-shadow 0.18s;
 }
-
 .glass-btn:hover {
-  background: rgba(255, 255, 255, 0.78);
-  box-shadow:
-    0 6px 20px rgba(0, 0, 0, 0.12),
-    inset 0 1px 0 rgba(255, 255, 255, 1),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.05);
+  background: var(--gl-bg-strong);
   transform: translateY(-1px);
 }
 
-.dark .glass-btn {
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+.glass-btn-primary {
+  background: linear-gradient(180deg,
+    color-mix(in oklab, var(--c-accent) 75%, transparent),
+    color-mix(in oklab, var(--c-accent) 55%, transparent));
+  border: 1px solid color-mix(in oklab, var(--c-accent) 40%, white 10%);
+  color: white;
+  border-radius: 14px;
+  font-weight: 700;
   box-shadow:
-    0 4px 14px rgba(0, 0, 0, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.15);
-  color: #6eaaff;
+    inset 0 1px 0 rgba(255,255,255,0.35),
+    0 6px 20px var(--c-accent-glow),
+    0 1px 0 color-mix(in oklab, var(--c-accent) 25%, black);
+  transition: transform 0.18s, box-shadow 0.18s;
+}
+.glass-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.4),
+    0 8px 26px var(--c-accent-glow),
+    0 1px 0 color-mix(in oklab, var(--c-accent) 25%, black);
 }
 
-.dark .glass-btn:hover {
-  background: rgba(255, 255, 255, 0.13);
+/* ── Type helpers ────────────────────────────────────────── */
+.tnum { font-variant-numeric: tabular-nums; }
+.txt-muted { color: var(--txt-2); }
+.txt-soft  { color: var(--txt-3); }
+
+.eyebrow {
+  font-size: 12px;
+  color: var(--txt-3);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  font-weight: 700;
 }
 
-/* ── Native date/time inputs (iOS Safari): align like text inputs ── */
+/* ── Animations ──────────────────────────────────────────── */
+@keyframes fz-pop {
+  0% { transform: scale(0.92); opacity: 0; }
+  60% { transform: scale(1.04); opacity: 1; }
+  100% { transform: scale(1); }
+}
+.fz-pop { animation: fz-pop .18s cubic-bezier(.3,.7,.4,1.2); }
+
+@keyframes fz-rise {
+  from { transform: translateY(8px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+.fz-rise { animation: fz-rise .22s cubic-bezier(.2,.7,.3,1); }
+
+@keyframes fz-pr {
+  0%, 100% { box-shadow: 0 0 0 0 var(--c-accent-glow); }
+  50%      { box-shadow: 0 0 0 10px transparent; }
+}
+.fz-pr-flash { animation: fz-pr 1.2s ease-out 1; }
+
+@keyframes fz-shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.fz-shimmer {
+  background: linear-gradient(90deg,
+    var(--gl-bg) 0%, var(--gl-bg-strong) 50%, var(--gl-bg) 100%);
+  background-size: 200% 100%;
+  animation: fz-shimmer 1.6s linear infinite;
+}
+
+/* ── Native date/time inputs (iOS Safari) ────────────────── */
 input[type="date"],
 input[type="time"],
 input[type="datetime-local"] {
   -webkit-appearance: none;
   appearance: none;
-  min-height: 2.5rem; /* h-10, чтобы совпадало с обычными инпутами */
+  min-height: 2.5rem;
 }
 input[type="date"]::-webkit-date-and-time-value,
 input[type="time"]::-webkit-date-and-time-value,
@@ -204,19 +275,17 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
 }
 
 /* ── Scrollbar ───────────────────────────────────────────── */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
+
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 99px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.25); }
+.dark ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); }
+.dark ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.28); }
 
-/* Safe area insets for iOS PWA (notch / Dynamic Island / home bar) */
-.pt-safe {
-  padding-top: env(safe-area-inset-top, 0px);
-}
-.pb-safe {
-  padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px));
-}
-/* Отступ основного контента с учётом высоты нижней навигации + safe area */
-.pb-nav-safe {
-  padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
-}
+/* Safe area insets for iOS PWA */
+.pt-safe { padding-top: env(safe-area-inset-top, 0px); }
+.pb-safe { padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px)); }
+.pb-nav-safe { padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px)); }

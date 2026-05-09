@@ -3,14 +3,11 @@
 import { useMemo, useState } from 'react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
-import { Trophy, Lock } from 'lucide-react'
 import {
   useAchievements,
   type AchievementCategory,
   type AchievementWithProgress,
 } from '@/hooks/use-gamification'
-import { Card, CardContent } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
 
 type FilterTab = 'all' | 'unlocked' | 'locked'
 
@@ -21,6 +18,15 @@ const CATEGORY_LABELS: Record<AchievementCategory, string> = {
   volume: 'Объём',
   time: 'Время',
   comeback: 'Возвращение',
+}
+
+const CATEGORY_TINT: Record<AchievementCategory, string> = {
+  milestone: 'var(--c-blue)',
+  streak: 'var(--c-orange)',
+  pr: 'var(--c-green)',
+  volume: 'var(--c-accent)',
+  time: 'var(--c-yellow)',
+  comeback: 'var(--c-red)',
 }
 
 const CATEGORY_ORDER: AchievementCategory[] = [
@@ -70,73 +76,93 @@ export default function AchievementsPage() {
   }, [filtered])
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <Trophy className="h-6 w-6 text-yellow-500" />
+    <div className="space-y-6 fz-rise">
+      {/* ── Заголовок + общая статистика ── */}
+      <div className="flex items-baseline gap-3 flex-wrap">
+        <h1
+          style={{
+            fontSize: 'clamp(26px, 4.4vw, 32px)',
+            fontWeight: 800,
+            letterSpacing: -0.5,
+            lineHeight: 1,
+            color: 'var(--txt-1)',
+          }}
+        >
           Ачивки
         </h1>
         {!isLoading && !error && (
-          <p className="text-sm text-muted-foreground mt-1">
-            {stats.unlocked} из {stats.total} ачивок · {stats.points} очков
-          </p>
+          <span className="tnum text-sm font-bold txt-soft">
+            {stats.unlocked} / {stats.total}
+          </span>
+        )}
+        {!isLoading && !error && stats.points > 0 && (
+          <span
+            className="tnum text-xs font-bold ml-auto"
+            style={{
+              padding: '4px 10px',
+              borderRadius: 'var(--r-pill)',
+              background: 'color-mix(in oklab, var(--c-yellow) 20%, transparent)',
+              color: 'var(--c-yellow)',
+              border: '1px solid color-mix(in oklab, var(--c-yellow) 35%, transparent)',
+            }}
+          >
+            {stats.points} очков
+          </span>
         )}
       </div>
 
+      {/* ── Фильтры ── */}
       <div className="flex gap-2">
-        <Button
-          size="sm"
-          variant={filter === 'all' ? 'default' : 'outline'}
-          onClick={() => setFilter('all')}
-        >
-          Все
-        </Button>
-        <Button
-          size="sm"
-          variant={filter === 'unlocked' ? 'default' : 'outline'}
-          onClick={() => setFilter('unlocked')}
-        >
-          Получены
-        </Button>
-        <Button
-          size="sm"
-          variant={filter === 'locked' ? 'default' : 'outline'}
-          onClick={() => setFilter('locked')}
-        >
-          Закрыты
-        </Button>
+        {(['all', 'unlocked', 'locked'] as const).map((t) => {
+          const labels = { all: 'Все', unlocked: 'Получены', locked: 'В процессе' }
+          const active = filter === t
+          return (
+            <button
+              key={t}
+              onClick={() => setFilter(t)}
+              style={{
+                padding: '8px 14px',
+                borderRadius: 12,
+                background: active ? 'var(--gl-bg-strong)' : 'transparent',
+                border: '1px solid ' + (active ? 'var(--gl-border-strong)' : 'var(--gl-border)'),
+                color: active ? 'var(--txt-1)' : 'var(--txt-2)',
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: 'pointer',
+                transition: 'background 0.15s',
+              }}
+            >
+              {labels[t]}
+            </button>
+          )
+        })}
       </div>
 
       {isLoading && (
-        <Card>
-          <CardContent className="py-6 text-center text-muted-foreground text-sm">
-            Загрузка ачивок…
-          </CardContent>
-        </Card>
+        <div className="glass-card p-6 text-center text-sm txt-muted">Загрузка ачивок…</div>
       )}
 
       {error && (
-        <Card>
-          <CardContent className="py-6 text-center text-sm text-red-500">
-            Не удалось загрузить ачивки
-          </CardContent>
-        </Card>
+        <div className="glass-card p-6 text-center text-sm" style={{ color: 'var(--c-red)' }}>
+          Не удалось загрузить ачивки
+        </div>
       )}
 
       {!isLoading && !error && groups.length === 0 && (
-        <Card>
-          <CardContent className="py-6 text-center text-muted-foreground text-sm">
-            Здесь пока пусто
-          </CardContent>
-        </Card>
+        <div className="glass-card p-6 text-center text-sm txt-muted">Здесь пока пусто</div>
       )}
 
+      {/* ── Группы по категориям ── */}
       {groups.map((group) => (
         <div key={group.category}>
-          <h2 className="font-semibold mb-3">{CATEGORY_LABELS[group.category]}</h2>
-          <div className="flex flex-col gap-2">
+          <div className="eyebrow mb-3">{CATEGORY_LABELS[group.category]}</div>
+          <div className="grid gap-3 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
             {group.items.map((a) => (
-              <AchievementCard key={a.id} achievement={a} />
+              <AchievementCard
+                key={a.id}
+                achievement={a}
+                tint={CATEGORY_TINT[group.category]}
+              />
             ))}
           </div>
         </div>
@@ -145,7 +171,13 @@ export default function AchievementsPage() {
   )
 }
 
-function AchievementCard({ achievement: a }: { achievement: AchievementWithProgress }) {
+function AchievementCard({
+  achievement: a,
+  tint,
+}: {
+  achievement: AchievementWithProgress
+  tint: string
+}) {
   const showProgress =
     !a.unlocked &&
     a.progressCurrent != null &&
@@ -157,54 +189,106 @@ function AchievementCard({ achievement: a }: { achievement: AchievementWithProgr
     : 0
 
   return (
-    <Card className={a.unlocked ? '' : 'opacity-60'}>
-      <CardContent className="flex items-start gap-3 py-3 px-4">
-        <div className="text-3xl shrink-0 leading-none mt-0.5 relative">
-          <span>{a.emoji}</span>
-          {!a.unlocked && (
-            <Lock className="h-3 w-3 text-muted-foreground absolute -bottom-1 -right-1" />
-          )}
+    <div
+      className={'glass-card p-4 flex flex-col' + (a.unlocked ? '' : '')}
+      style={{ opacity: a.unlocked ? 1 : 0.92, minHeight: 168 }}
+    >
+      {/* Эмодзи + очки */}
+      <div className="flex items-start justify-between">
+        <div
+          style={{
+            fontSize: 36,
+            lineHeight: 1,
+            filter: a.unlocked ? 'none' : 'grayscale(0.6)',
+          }}
+        >
+          {a.emoji}
         </div>
+        <span
+          className="tnum"
+          style={{
+            fontSize: 11,
+            fontWeight: 800,
+            color: a.unlocked ? 'var(--c-yellow)' : 'var(--txt-3)',
+            padding: '2px 8px',
+            borderRadius: 'var(--r-pill)',
+            background: a.unlocked
+              ? 'color-mix(in oklab, var(--c-yellow) 18%, transparent)'
+              : 'var(--gl-bg)',
+            border: '1px solid ' + (a.unlocked
+              ? 'color-mix(in oklab, var(--c-yellow) 35%, transparent)'
+              : 'var(--gl-border)'),
+          }}
+        >
+          +{a.points}
+        </span>
+      </div>
 
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
-              <p className="font-semibold text-sm truncate">{a.title}</p>
-              <p className="text-xs text-muted-foreground">{a.description}</p>
-            </div>
-            <span className="text-xs font-semibold text-yellow-500 shrink-0">
-              +{a.points}
+      {/* Название + описание */}
+      <div className="mt-3 min-w-0 flex-1">
+        <div
+          style={{
+            fontSize: 14,
+            fontWeight: 800,
+            color: 'var(--txt-1)',
+            lineHeight: 1.25,
+          }}
+        >
+          {a.title}
+        </div>
+        <div className="mt-1 text-[12px] leading-snug txt-soft">{a.description}</div>
+      </div>
+
+      {/* Статус: получено или прогресс */}
+      {a.unlocked ? (
+        <div
+          className="mt-3"
+          style={{
+            fontSize: 11,
+            fontWeight: 800,
+            letterSpacing: 0.5,
+            textTransform: 'uppercase',
+            color: tint,
+          }}
+        >
+          ✓ Получено
+          {a.unlockedAt && (
+            <span className="ml-2 normal-case tracking-normal txt-soft" style={{ fontWeight: 600 }}>
+              {formatRu(a.unlockedAt)}
             </span>
-          </div>
-
-          {a.unlocked && (
-            <div className="mt-2 flex items-center gap-2 flex-wrap">
-              <span className="inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400">
-                Получено
-              </span>
-              {a.unlockedAt && (
-                <span className="text-[11px] text-muted-foreground">
-                  {formatRu(a.unlockedAt)}
-                </span>
-              )}
-            </div>
-          )}
-
-          {showProgress && (
-            <div className="mt-2">
-              <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
-                <div
-                  className="h-full bg-primary transition-all"
-                  style={{ width: `${pct}%` }}
-                />
-              </div>
-              <p className="text-[11px] text-muted-foreground mt-1">
-                {a.progressCurrent} / {a.progressTarget}
-              </p>
-            </div>
           )}
         </div>
-      </CardContent>
-    </Card>
+      ) : showProgress ? (
+        <div className="mt-3">
+          <div
+            style={{
+              height: 5,
+              borderRadius: 999,
+              background: 'var(--gl-bg)',
+              overflow: 'hidden',
+            }}
+          >
+            <div
+              style={{
+                height: '100%',
+                width: `${pct}%`,
+                background: tint,
+                borderRadius: 999,
+                transition: 'width 0.4s ease',
+              }}
+            />
+          </div>
+          <div className="tnum mt-1 flex items-center justify-between text-[11px] font-bold txt-soft">
+            <span>{a.progressCurrent} / {a.progressTarget}</span>
+            <span>{pct}%</span>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-3 text-[11px] font-bold uppercase tracking-wider txt-soft">
+          Закрыто
+        </div>
+      )}
+    </div>
   )
 }
+

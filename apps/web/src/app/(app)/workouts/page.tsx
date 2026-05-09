@@ -82,34 +82,60 @@ export default function WorkoutsPage() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 fz-rise">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl sm:text-3xl font-bold">Тренировки</h1>
-        <Button asChild size="sm" className="sm:size-default">
+      <div className="flex items-center justify-between gap-3">
+        <div>
+          <div className="eyebrow">Зал</div>
+          <h1
+            className="mt-1"
+            style={{
+              fontSize: 'clamp(26px, 4.4vw, 32px)',
+              fontWeight: 800,
+              letterSpacing: -0.5,
+              lineHeight: 1,
+              color: 'var(--txt-1)',
+            }}
+          >
+            Тренировки
+          </h1>
+        </div>
+        <Button asChild size="sm" className="sm:size-default glass-btn-primary border-0">
           <Link href="/workouts/new">
             <Plus className="h-4 w-4 sm:mr-2" />
-            <span className="hidden sm:inline">Новая тренировка</span>
+            <span className="hidden sm:inline">Новая</span>
           </Link>
         </Button>
       </div>
 
       {/* Status tabs */}
-      <div className="grid grid-cols-4 gap-1 p-1 bg-muted rounded-lg">
-        {TAB_OPTIONS.map((opt) => (
-          <button
-            key={opt.value}
-            onClick={() => handleTabChange(opt.value)}
-            className={`px-2 py-1.5 rounded-md text-xs sm:text-sm font-medium transition-colors text-center ${
-              tab === opt.value
-                ? 'bg-background text-foreground shadow-sm'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <span className="hidden sm:inline">{opt.label}</span>
-            <span className="sm:hidden">{opt.shortLabel}</span>
-          </button>
-        ))}
+      <div
+        className="grid grid-cols-4 gap-1 glass-card"
+        style={{ padding: 4, borderRadius: 14 }}
+      >
+        {TAB_OPTIONS.map((opt) => {
+          const active = tab === opt.value
+          return (
+            <button
+              key={opt.value}
+              onClick={() => handleTabChange(opt.value)}
+              style={{
+                padding: '8px 10px',
+                borderRadius: 10,
+                fontSize: 12,
+                fontWeight: 700,
+                background: active ? 'var(--gl-bg-strong)' : 'transparent',
+                border: '1px solid ' + (active ? 'var(--gl-border-strong)' : 'transparent'),
+                color: active ? 'var(--txt-1)' : 'var(--txt-2)',
+                transition: 'background 0.15s, color 0.15s',
+              }}
+              className="text-center"
+            >
+              <span className="hidden sm:inline">{opt.label}</span>
+              <span className="sm:hidden">{opt.shortLabel}</span>
+            </button>
+          )
+        })}
       </div>
 
       {/* Date filters */}

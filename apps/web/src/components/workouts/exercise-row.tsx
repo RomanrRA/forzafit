@@ -5,7 +5,6 @@ import { WorkoutExercise, useAddSet, useRemoveExerciseFromWorkout, useUpdateWork
 import { SetRow } from './set-row'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Plus, ChevronDown, ChevronUp, Trash2, Timer } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 
@@ -71,24 +70,94 @@ export function ExerciseRow({ workoutId, workoutExercise }: Props) {
     }
   }
 
+  const totalSets = workoutExercise.sets.length
+  const doneSets = workoutExercise.sets.filter((s) => s.completed).length
+  const nextSetIdx = workoutExercise.sets.findIndex((s) => !s.completed)
+  const allDone = totalSets > 0 && doneSets === totalSets
+
   return (
-    <Card>
+    <Card className={allDone ? 'strong' : ''}>
       <CardHeader className="pb-2 pt-3 sm:pt-4 px-3 sm:px-4">
-        <div className="flex items-start justify-between gap-1.5">
-          {/* Название + группа мышц */}
+        <div className="flex items-start justify-between gap-2">
+          {/* Название + группа мышц + set dots */}
           <div className="min-w-0 flex-1">
-            <span className="text-sm sm:text-base font-medium leading-snug">{workoutExercise.exercise.name}</span>
-            {workoutExercise.exercise.muscleGroups?.[0] && (
-              <Badge variant="secondary" className="text-[10px] sm:text-xs ml-1.5 align-middle">
-                {workoutExercise.exercise.muscleGroups[0]}
-              </Badge>
+            <div className="flex items-center gap-2 flex-wrap">
+              {workoutExercise.exercise.muscleGroups?.[0] && (
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 800,
+                    letterSpacing: 0.5,
+                    textTransform: 'uppercase',
+                    padding: '3px 8px',
+                    borderRadius: 'var(--r-pill)',
+                    background: 'var(--gl-bg)',
+                    border: '1px solid var(--gl-border)',
+                    color: 'var(--txt-2)',
+                  }}
+                >
+                  {workoutExercise.exercise.muscleGroups[0]}
+                </span>
+              )}
+              {allDone && (
+                <span
+                  style={{
+                    fontSize: 10,
+                    fontWeight: 800,
+                    letterSpacing: 0.5,
+                    textTransform: 'uppercase',
+                    padding: '3px 8px',
+                    borderRadius: 'var(--r-pill)',
+                    background: 'color-mix(in oklab, var(--c-green) 22%, transparent)',
+                    border: '1px solid color-mix(in oklab, var(--c-green) 36%, transparent)',
+                    color: 'var(--c-green)',
+                  }}
+                >
+                  ✓ закрыто
+                </span>
+              )}
+            </div>
+            <div
+              className="mt-1.5 leading-tight truncate"
+              style={{
+                fontSize: 'clamp(15px, 2.4vw, 18px)',
+                fontWeight: 800,
+                letterSpacing: -0.2,
+                color: 'var(--txt-1)',
+              }}
+            >
+              {workoutExercise.exercise.name}
+            </div>
+            {/* Set dots */}
+            {totalSets > 0 && (
+              <div className="flex gap-1 mt-2 items-center">
+                {workoutExercise.sets.map((s, i) => (
+                  <div
+                    key={s.id}
+                    style={{
+                      flex: 1,
+                      maxWidth: 40,
+                      height: 6,
+                      borderRadius: 999,
+                      background: s.completed
+                        ? 'color-mix(in oklab, var(--c-green) 60%, transparent)'
+                        : 'var(--gl-bg)',
+                      outline: !s.completed && i === nextSetIdx ? '1.5px solid var(--c-accent)' : 'none',
+                      outlineOffset: 2,
+                    }}
+                  />
+                ))}
+                <span
+                  className="tnum ml-1.5 text-[11px] font-bold"
+                  style={{ color: 'var(--txt-3)' }}
+                >
+                  {doneSets}/{totalSets}
+                </span>
+              </div>
             )}
           </div>
           {/* Правые кнопки */}
           <div className="flex items-center gap-1 shrink-0">
-            <span className="text-xs text-muted-foreground whitespace-nowrap">
-              {workoutExercise.sets.filter((s) => s.completed).length}/{workoutExercise.sets.length}
-            </span>
             <button
               onClick={() => setShowRestPicker((v) => !v)}
               className={`text-xs flex items-center gap-0.5 transition-colors ${
