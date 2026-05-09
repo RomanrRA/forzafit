@@ -11,8 +11,11 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
 import { toast } from '@/hooks/use-toast'
-import { LogOut, Sun, Moon, Monitor } from 'lucide-react'
+import { LogOut, Sun, Moon, Monitor, Dumbbell, Flame, Trophy, Star } from 'lucide-react'
 import { useThemeStore, type ThemeMode } from '@/store/theme.store'
+import { useGamificationOverview } from '@/hooks/use-gamification'
+import { useWorkouts } from '@/hooks/use-workouts'
+import { plural } from '@/lib/utils'
 
 interface UserProfile {
   id: string
@@ -43,6 +46,9 @@ export default function ProfilePage() {
       return data as UserProfile
     },
   })
+
+  const { data: gam } = useGamificationOverview()
+  const { data: workoutsData } = useWorkouts({ limit: 1, status: 'completed' })
 
   // --- Поля профиля ---
   const [name, setName] = useState('')
@@ -127,50 +133,184 @@ export default function ProfilePage() {
   if (isLoading) return <div className="text-muted-foreground">Загрузка...</div>
 
   const initial = (profile?.name ?? profile?.email ?? '?').trim().slice(0, 1).toUpperCase()
+  const displayName = profile?.name?.trim() || profile?.email?.split('@')[0] || 'Атлет'
+  const workoutsTotal = workoutsData?.total ?? 0
+  const streakCurrent = gam?.streak.current ?? 0
+  const prCount = gam?.prCount ?? 0
+  const achievementsUnlocked = gam?.achievementsUnlocked ?? 0
+  const achievementsTotal = gam?.achievementsTotal ?? 0
+
+  const stats: { value: string; label: string; tint: string; icon: React.ReactNode }[] = [
+    {
+      value: String(workoutsTotal),
+      label: plural(workoutsTotal, ['тренировка', 'тренировки', 'тренировок']),
+      tint: 'var(--c-accent)',
+      icon: <Dumbbell className="h-4 w-4" />,
+    },
+    {
+      value: String(streakCurrent),
+      label: plural(streakCurrent, ['день серии', 'дня серии', 'дней серии']),
+      tint: 'var(--c-orange)',
+      icon: <Flame className="h-4 w-4" />,
+    },
+    {
+      value: String(prCount),
+      label: plural(prCount, ['личный рекорд', 'личных рекорда', 'личных рекордов']),
+      tint: 'var(--c-green)',
+      icon: <Trophy className="h-4 w-4" />,
+    },
+    {
+      value: `${achievementsUnlocked}/${achievementsTotal}`,
+      label: plural(achievementsTotal, ['ачивка', 'ачивки', 'ачивок']),
+      tint: 'var(--c-yellow)',
+      icon: <Star className="h-4 w-4" />,
+    },
+  ]
 
   return (
     <div className="w-full max-w-md space-y-5 fz-rise">
-      <div>
-        <div className="eyebrow">Аккаунт</div>
-        <h1
-          className="mt-1"
+      <h1
+        style={{
+          fontSize: 'clamp(26px, 4.4vw, 32px)',
+          fontWeight: 800,
+          letterSpacing: -0.5,
+          lineHeight: 1,
+          color: 'var(--txt-1)',
+        }}
+      >
+        Профиль
+      </h1>
+
+      {/* ── Hero: avatar + name + meta ── */}
+      <div className="glass-card strong flex items-center gap-4" style={{ padding: 18 }}>
+        <div
+          className="grid place-items-center shrink-0 fz-pop"
           style={{
-            fontSize: 'clamp(26px, 4.4vw, 32px)',
+            width: 72,
+            height: 72,
+            borderRadius: '50%',
+            background:
+              'linear-gradient(135deg, oklch(0.62 0.18 30), oklch(0.50 0.20 290))',
+            color: 'white',
             fontWeight: 800,
-            letterSpacing: -0.5,
-            lineHeight: 1,
-            color: 'var(--txt-1)',
+            fontSize: 30,
+            boxShadow: '0 6px 20px rgba(0,0,0,0.20)',
           }}
         >
-          Профиль
-        </h1>
+          {initial}
+        </div>
+        <div className="min-w-0 flex-1">
+          <div
+            className="truncate"
+            style={{
+              fontSize: 20,
+              fontWeight: 800,
+              color: 'var(--txt-1)',
+              letterSpacing: -0.3,
+              lineHeight: 1.15,
+            }}
+          >
+            {displayName}
+          </div>
+          <p
+            className="truncate"
+            style={{ fontSize: 12, color: 'var(--txt-3)', marginTop: 2 }}
+          >
+            {profile?.email}
+          </p>
+          <div className="mt-1.5 flex items-center gap-2 flex-wrap" style={{ fontSize: 12 }}>
+            <span style={{ color: 'var(--txt-2)' }}>
+              <span className="tnum font-bold" style={{ color: 'var(--txt-1)' }}>
+                {workoutsTotal}
+              </span>{' '}
+              тренировок
+            </span>
+            {streakCurrent > 0 && (
+              <>
+                <span style={{ color: 'var(--txt-3)' }}>·</span>
+                <span
+                  className="inline-flex items-center gap-1"
+                  style={{ color: 'var(--c-orange)', fontWeight: 700 }}
+                >
+                  <Flame className="h-3 w-3" />
+                  <span className="tnum">{streakCurrent}</span>
+                </span>
+              </>
+            )}
+            {prCount > 0 && (
+              <>
+                <span style={{ color: 'var(--txt-3)' }}>·</span>
+                <span
+                  className="inline-flex items-center gap-1"
+                  style={{ color: 'var(--c-green)', fontWeight: 700 }}
+                >
+                  <Trophy className="h-3 w-3" />
+                  <span className="tnum">{prCount}</span>
+                </span>
+              </>
+            )}
+          </div>
+        </div>
       </div>
 
-      {/* Личные данные */}
-      <Card className="strong">
-        <CardHeader>
-          <div className="flex items-center gap-4">
-            <div
-              className="grid place-items-center shrink-0 fz-pop"
-              style={{
-                width: 64,
-                height: 64,
-                borderRadius: '50%',
-                background:
-                  'linear-gradient(135deg, oklch(0.55 0.15 30), oklch(0.45 0.18 280))',
-                color: 'white',
-                fontWeight: 800,
-                fontSize: 26,
-                boxShadow: '0 6px 20px rgba(0,0,0,0.18)',
-              }}
-            >
-              {initial}
-            </div>
-            <div className="min-w-0">
-              <CardTitle>{profile?.name ?? 'Пользователь'}</CardTitle>
-              <p className="text-sm txt-muted truncate">{profile?.email}</p>
-            </div>
+      {/* ── Statistics ── */}
+      <Card>
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base">Статистика</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 gap-4">
+            {stats.map((s) => (
+              <div key={s.label} className="flex items-start gap-2.5">
+                <div
+                  className="grid place-items-center shrink-0"
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 10,
+                    background: `color-mix(in oklab, ${s.tint} 18%, transparent)`,
+                    border: `1px solid color-mix(in oklab, ${s.tint} 30%, transparent)`,
+                    color: s.tint,
+                  }}
+                >
+                  {s.icon}
+                </div>
+                <div className="min-w-0">
+                  <div
+                    className="tnum"
+                    style={{
+                      fontSize: 22,
+                      fontWeight: 800,
+                      color: s.tint,
+                      letterSpacing: -0.5,
+                      lineHeight: 1,
+                    }}
+                  >
+                    {s.value}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: 11,
+                      color: 'var(--txt-3)',
+                      textTransform: 'uppercase',
+                      letterSpacing: 0.4,
+                      fontWeight: 700,
+                      marginTop: 4,
+                    }}
+                  >
+                    {s.label}
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Личные данные */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Личные данные</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSaveProfile} className="space-y-4">

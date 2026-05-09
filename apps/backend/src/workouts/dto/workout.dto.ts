@@ -8,6 +8,7 @@ import {
   IsUUID,
   IsInt,
   Min,
+  Max,
   IsArray,
   ValidateNested,
 } from 'class-validator';
@@ -105,6 +106,12 @@ export class UpdateWorkoutExerciseDto {
   @Min(0)
   restTimerSec?: number;
 
+  @ApiPropertyOptional({ description: 'Порядок упражнения в тренировке (0-based)' })
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  orderIndex?: number;
+
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
@@ -135,4 +142,11 @@ export class AddSetDto {
   @IsInt()
   @Min(0)
   restTimerSec?: number;
+
+  @ApiPropertyOptional({ description: 'RPE — субъективная тяжесть подхода (1..10)', minimum: 1, maximum: 10 })
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(10)
+  rpe?: number;
 }

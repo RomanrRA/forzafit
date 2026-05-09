@@ -29,6 +29,7 @@ export interface WorkoutSet {
   id: string
   reps: number | null
   weightKg: number | null
+  rpe: number | null
   completed: boolean
 }
 
@@ -105,10 +106,24 @@ export function useAddExerciseToWorkout(workoutId: string) {
 export function useUpdateWorkoutExercise(workoutId: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (body: { workoutExerciseId: string; restTimerSec?: number; notes?: string }) => {
+    mutationFn: async (body: { workoutExerciseId: string; restTimerSec?: number; orderIndex?: number; notes?: string }) => {
       const { workoutExerciseId, ...rest } = body
       const { data } = await api.patch(`/workouts/${workoutId}/exercises/${workoutExerciseId}`, rest)
       return data
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['workouts', workoutId] }),
+  })
+}
+
+export function useReorderWorkoutExercises(workoutId: string) {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (orderedIds: string[]) => {
+      await Promise.all(
+        orderedIds.map((id, idx) =>
+          api.patch(`/workouts/${workoutId}/exercises/${id}`, { orderIndex: idx }),
+        ),
+      )
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ['workouts', workoutId] }),
   })
@@ -127,7 +142,7 @@ export function useRemoveExerciseFromWorkout(workoutId: string) {
 export function useAddSet(workoutId: string, workoutExerciseId: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (body: { reps?: number; weightKg?: number }) => {
+    mutationFn: async (body: { reps?: number; weightKg?: number; rpe?: number; completed?: boolean }) => {
       const { data } = await api.post(
         `/workouts/${workoutId}/exercises/${workoutExerciseId}/sets`,
         body
@@ -141,7 +156,7 @@ export function useAddSet(workoutId: string, workoutExerciseId: string) {
 export function useUpdateSet(workoutId: string, workoutExerciseId: string) {
   const qc = useQueryClient()
   return useMutation({
-    mutationFn: async (body: { setId: string; reps?: number; weightKg?: number; completed?: boolean; _silent?: boolean }) => {
+    mutationFn: async (body: { setId: string; reps?: number; weightKg?: number; rpe?: number; completed?: boolean; _silent?: boolean }) => {
       const { setId, _silent, ...rest } = body
       const { data } = await api.patch(
         `/workouts/${workoutId}/exercises/${workoutExerciseId}/sets/${setId}`,

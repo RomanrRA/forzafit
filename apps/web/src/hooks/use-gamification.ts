@@ -3,11 +3,11 @@ import { api } from '@/lib/api'
 
 export type AchievementCategory =
   | 'milestone'
-  | 'streak'
-  | 'pr'
+  | 'consistency'
+  | 'strength'
   | 'volume'
   | 'time'
-  | 'comeback'
+  | 'social'
 
 export type PrType = 'one_rm' | 'working_weight' | 'volume_session'
 

@@ -223,7 +223,7 @@ export class WorkoutsService {
     sessionId: string,
     workoutExerciseId: string,
     userId: string,
-    dto: { restTimerSec?: number; notes?: string },
+    dto: { restTimerSec?: number; orderIndex?: number; notes?: string },
   ) {
     await this.assertOwner(sessionId, userId);
 
@@ -231,6 +231,7 @@ export class WorkoutsService {
       .update(workoutExercises)
       .set({
         ...(dto.restTimerSec !== undefined ? { restTimerSec: dto.restTimerSec } : {}),
+        ...(dto.orderIndex !== undefined ? { orderIndex: dto.orderIndex } : {}),
         ...(dto.notes !== undefined ? { notes: dto.notes } : {}),
       })
       .where(eq(workoutExercises.id, workoutExerciseId))
@@ -266,6 +267,7 @@ export class WorkoutsService {
         workoutExerciseId,
         weightKg: dto.weightKg,
         reps: dto.reps,
+        rpe: dto.rpe,
         completed: dto.completed ?? false,
         restTimerSec: dto.restTimerSec,
       })

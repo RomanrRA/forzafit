@@ -9,6 +9,7 @@ import { useWorkout, useUpdateWorkout, useDeleteWorkout } from '@/hooks/use-work
 import type { WorkoutCompletedGamification } from '@/hooks/use-gamification'
 import { AddExerciseDialog } from '@/components/workouts/add-exercise-dialog'
 import { ExerciseRow } from '@/components/workouts/exercise-row'
+import { SortableWorkoutExercises } from '@/components/workouts/sortable-workout-exercises'
 import { CelebrationDialog } from '@/components/gamification/celebration-dialog'
 import { Button } from '@/components/ui/button'
 import {
@@ -20,7 +21,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import { toast } from '@/hooks/use-toast'
-import { ArrowLeft, Dumbbell, CheckCircle2, Timer, Trash2 } from 'lucide-react'
+import { ArrowLeft, Dumbbell, CheckCircle2, Timer, Trash2, Play } from 'lucide-react'
 
 function fmtClock(totalSec: number): string {
   const h = Math.floor(totalSec / 3600)
@@ -238,21 +239,45 @@ export default function WorkoutDetailPage({ params }: Props) {
         )}
       </div>
 
+      {isActive && totalEx > 0 && (() => {
+        const hasStarted = exercises.some((ex) => ex.sets.some((s) => s.completed))
+        return (
+          <Link
+            href={`/workouts/${workout.id}/active`}
+            className="glass-btn-primary inline-flex items-center justify-center gap-2"
+            style={{
+              padding: '14px 22px',
+              minHeight: 52,
+              borderRadius: 16,
+              fontSize: 15,
+              fontWeight: 800,
+              width: '100%',
+            }}
+          >
+            <Play className="h-4 w-4" strokeWidth={2.4} />
+            {hasStarted ? 'Продолжить тренировку' : 'Начать тренировку'}
+          </Link>
+        )
+      })()}
+
       {workout.notes && (
         <p className="glass-card p-3 text-sm txt-muted">{workout.notes}</p>
       )}
 
-      <div className="space-y-3">
-        {exercises.length === 0 && (
-          <div className="glass-card text-center py-10 txt-muted">
-            <Dumbbell className="h-10 w-10 mx-auto mb-2 opacity-30" />
-            <p>Добавьте первое упражнение</p>
-          </div>
-        )}
-        {exercises.map((ex) => (
-          <ExerciseRow key={ex.id} workoutId={workout.id} workoutExercise={ex} />
-        ))}
-      </div>
+      {exercises.length === 0 ? (
+        <div className="glass-card text-center py-10 txt-muted">
+          <Dumbbell className="h-10 w-10 mx-auto mb-2 opacity-30" />
+          <p>Добавьте первое упражнение</p>
+        </div>
+      ) : isActive ? (
+        <SortableWorkoutExercises workoutId={workout.id} exercises={exercises} />
+      ) : (
+        <div className="space-y-3">
+          {exercises.map((ex) => (
+            <ExerciseRow key={ex.id} workoutId={workout.id} workoutExercise={ex} />
+          ))}
+        </div>
+      )}
 
       <div className="flex gap-3 pt-2 flex-wrap">
         <AddExerciseDialog workoutId={workout.id} currentCount={exercises.length} />

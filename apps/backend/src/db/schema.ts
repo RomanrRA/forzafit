@@ -193,6 +193,7 @@ export const workoutSets = pgTable(
       .references(() => workoutExercises.id, { onDelete: 'cascade' }),
     weightKg: real('weight_kg'),
     reps: integer('reps'),
+    rpe: integer('rpe'),
     completed: boolean('completed').default(false).notNull(),
     restTimerSec: integer('rest_timer_sec'),
     createdAt: timestamp('created_at').defaultNow().notNull(),

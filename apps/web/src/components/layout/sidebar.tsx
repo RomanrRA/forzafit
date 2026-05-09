@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { Flame, LayoutDashboard, ListChecks, ClipboardList, TrendingUp, Scale, Trophy, User } from 'lucide-react'
 import { useAuthStore } from '@/store/auth.store'
 import { useGamificationOverview } from '@/hooks/use-gamification'
+import { plural } from '@/lib/utils'
 
 const navItems = [
   { href: '/dashboard', label: 'Дашборд', icon: LayoutDashboard },
@@ -134,7 +135,7 @@ export function Sidebar() {
               <Flame className="h-3 w-3" strokeWidth={2.4} />
               <span className="tnum">{streakCurrent}</span>{' '}
               <span style={{ color: 'var(--c-orange)' }}>
-                {streakCurrent === 1 ? 'день' : streakCurrent >= 2 && streakCurrent <= 4 ? 'дня' : 'дней'}
+                {plural(streakCurrent, ['день', 'дня', 'дней'])}
               </span>
             </div>
           ) : (

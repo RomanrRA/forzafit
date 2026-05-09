@@ -8,7 +8,25 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Search, X, Coffee, Dumbbell, Copy, User } from 'lucide-react'
+import { Search, X, Coffee, Dumbbell, Copy, User, GripVertical } from 'lucide-react'
+import {
+  DndContext,
+  DragEndEvent,
+  PointerSensor,
+  TouchSensor,
+  KeyboardSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -152,6 +170,24 @@ function TrainingDayCard({ day, onUpdate, otherTrainingDays, onCopyTo }: DayCard
     onUpdate({ ...day, exercises: day.exercises.filter((_, idx) => idx !== i) })
   }
 
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
+    useSensor(TouchSensor, { activationConstraint: { delay: 200, tolerance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  )
+
+  // Stable IDs within a single render — survives one drag, list re-renders after onUpdate
+  const exerciseIds = day.exercises.map((ex, i) => `${i}::${ex.exerciseId ?? ex.name}`)
+
+  function handleDragEnd(e: DragEndEvent) {
+    const { active, over } = e
+    if (!over || active.id === over.id) return
+    const oldIndex = exerciseIds.indexOf(String(active.id))
+    const newIndex = exerciseIds.indexOf(String(over.id))
+    if (oldIndex < 0 || newIndex < 0) return
+    onUpdate({ ...day, exercises: arrayMove(day.exercises, oldIndex, newIndex) })
+  }
+
   return (
     <Card className="border-primary/30 overflow-visible">
       <CardHeader className="pb-2 pt-3 px-4">
@@ -209,117 +245,174 @@ function TrainingDayCard({ day, onUpdate, otherTrainingDays, onCopyTo }: DayCard
 
       <CardContent className="px-4 pb-4 pt-0 space-y-3 overflow-visible">
         {day.exercises.length > 0 && (
-          <div className="space-y-4">
-            {day.exercises.map((ex, i) => (
-              <div key={i} className="space-y-1.5 border-b border-border/40 pb-3 last:border-0 last:pb-0">
-                {/* Exercise name — full width, wraps */}
-                <div className="flex items-start gap-2">
-                  <p className="text-sm font-medium leading-snug flex-1 break-words">{ex.name}</p>
-                  <button
-                    type="button"
-                    onClick={() => removeExercise(i)}
-                    className="text-muted-foreground hover:text-destructive transition-colors mt-0.5 shrink-0"
-                    title="Удалить упражнение"
-                  >
-                    <X className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-                <div className="grid grid-cols-12 gap-1.5">
-                  <span className="col-span-3 text-[10px] text-muted-foreground text-center">Кг (старт)</span>
-                  <span className="col-span-2 text-[10px] text-muted-foreground text-center">Подх.</span>
-                  <span className="col-span-3 text-[10px] text-muted-foreground text-center">Повт.</span>
-                  <span className="col-span-4 text-[10px] text-muted-foreground text-center">Отдых</span>
-                </div>
-                <div className="grid grid-cols-12 gap-1.5 items-center">
-                  <div className="col-span-3">
-                    {ex.weightKg === 0 ? (
-                      <button
-                        type="button"
-                        onClick={() => updateExercise(i, 'weightKg', undefined)}
-                        title="Свой вес — нажмите для ввода кг"
-                        className="h-7 w-full rounded-md border border-primary/50 bg-primary/10 text-[11px] font-medium text-primary flex items-center justify-center gap-1"
-                      >
-                        <User className="h-3 w-3 shrink-0" />
-                        <span>свой вес</span>
-                      </button>
-                    ) : (
-                      <div className="flex gap-0.5">
-                        <Input
-                          value={ex.weightKg ?? ''}
-                          onChange={(e) => updateExercise(i, 'weightKg', e.target.value === '' ? '' : Number(e.target.value))}
-                          type="number"
-                          inputMode="decimal"
-                          min={0}
-                          step={0.5}
-                          placeholder="кг"
-                          className="h-7 text-xs text-center flex-1 min-w-0"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => updateExercise(i, 'weightKg', 0)}
-                          title="Свой вес"
-                          className="h-7 w-6 shrink-0 rounded-md border border-border text-muted-foreground hover:text-primary hover:border-primary/50 flex items-center justify-center transition-colors"
-                        >
-                          <User className="h-3 w-3" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                  <div className="col-span-2">
-                    <Input
-                      value={ex.sets}
-                      onChange={(e) => updateExercise(i, 'sets', Number(e.target.value))}
-                      type="number"
-                      inputMode="numeric"
-                      min={1}
-                      placeholder="—"
-                      className="h-7 text-xs text-center"
-                    />
-                  </div>
-                  <div className="col-span-3">
-                    <Input
-                      value={ex.reps}
-                      onChange={(e) => updateExercise(i, 'reps', e.target.value)}
-                      placeholder="—"
-                      className="h-7 text-xs text-center"
-                    />
-                  </div>
-                  <div className="col-span-4">
-                    <Input
-                      value={ex.rest}
-                      onChange={(e) => updateExercise(i, 'rest', e.target.value)}
-                      placeholder="—"
-                      className="h-7 text-xs text-center"
-                    />
-                  </div>
-                </div>
-                <textarea
-                  value={ex.note ?? ''}
-                  onChange={(e) => {
-                    updateExercise(i, 'note', e.target.value)
-                    // Auto-grow to fit content
-                    const ta = e.currentTarget
-                    ta.style.height = 'auto'
-                    ta.style.height = `${ta.scrollHeight}px`
-                  }}
-                  ref={(el) => {
-                    if (el) {
-                      el.style.height = 'auto'
-                      el.style.height = `${el.scrollHeight}px`
-                    }
-                  }}
-                  placeholder="Заметка к упражнению..."
-                  rows={1}
-                  className="w-full resize-none rounded-md border border-input bg-background px-3 py-1.5 text-xs shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring leading-relaxed"
-                />
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext items={exerciseIds} strategy={verticalListSortingStrategy}>
+              <div className="space-y-4">
+                {day.exercises.map((ex, i) => (
+                  <SortablePlanExercise
+                    key={exerciseIds[i]}
+                    id={exerciseIds[i]}
+                    ex={ex}
+                    onChange={(field, value) => updateExercise(i, field, value)}
+                    onRemove={() => removeExercise(i)}
+                  />
+                ))}
               </div>
-            ))}
-          </div>
+            </SortableContext>
+          </DndContext>
         )}
 
         <ExerciseSearch onSelect={addExercise} />
       </CardContent>
     </Card>
+  )
+}
+
+// ─── Sortable plan exercise row ───────────────────────────────────────────────
+
+function SortablePlanExercise({
+  id,
+  ex,
+  onChange,
+  onRemove,
+}: {
+  id: string
+  ex: PlanExercise
+  onChange: (field: keyof PlanExercise, value: string | number | undefined) => void
+  onRemove: () => void
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id })
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 30 : undefined,
+    opacity: isDragging ? 0.85 : 1,
+  }
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="space-y-1.5 border-b border-border/40 pb-3 last:border-0 last:pb-0"
+    >
+      {/* Header: handle + name + remove */}
+      <div className="flex items-start gap-2">
+        <button
+          type="button"
+          {...attributes}
+          {...listeners}
+          aria-label="Перетащить"
+          className="text-muted-foreground hover:text-foreground transition-colors mt-0.5 shrink-0 cursor-grab touch-none"
+          title="Перетащить упражнение"
+        >
+          <GripVertical className="h-4 w-4" />
+        </button>
+        <p className="text-sm font-medium leading-snug flex-1 break-words">{ex.name}</p>
+        <button
+          type="button"
+          onClick={onRemove}
+          className="text-muted-foreground hover:text-destructive transition-colors mt-0.5 shrink-0"
+          title="Удалить упражнение"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      </div>
+      <div className="grid grid-cols-12 gap-1.5">
+        <span className="col-span-3 text-[10px] text-muted-foreground text-center">Кг (старт)</span>
+        <span className="col-span-2 text-[10px] text-muted-foreground text-center">Подх.</span>
+        <span className="col-span-3 text-[10px] text-muted-foreground text-center">Повт.</span>
+        <span className="col-span-4 text-[10px] text-muted-foreground text-center">Отдых</span>
+      </div>
+      <div className="grid grid-cols-12 gap-1.5 items-center">
+        <div className="col-span-3">
+          {ex.weightKg === 0 ? (
+            <button
+              type="button"
+              onClick={() => onChange('weightKg', undefined)}
+              title="Свой вес — нажмите для ввода кг"
+              className="h-7 w-full rounded-md border border-primary/50 bg-primary/10 text-[11px] font-medium text-primary flex items-center justify-center gap-1"
+            >
+              <User className="h-3 w-3 shrink-0" />
+              <span>свой вес</span>
+            </button>
+          ) : (
+            <div className="flex gap-0.5">
+              <Input
+                value={ex.weightKg ?? ''}
+                onChange={(e) =>
+                  onChange('weightKg', e.target.value === '' ? undefined : Number(e.target.value))
+                }
+                type="number"
+                inputMode="decimal"
+                min={0}
+                step={0.5}
+                placeholder="кг"
+                className="h-7 text-xs text-center flex-1 min-w-0"
+              />
+              <button
+                type="button"
+                onClick={() => onChange('weightKg', 0)}
+                title="Свой вес"
+                className="h-7 w-6 shrink-0 rounded-md border border-border text-muted-foreground hover:text-primary hover:border-primary/50 flex items-center justify-center transition-colors"
+              >
+                <User className="h-3 w-3" />
+              </button>
+            </div>
+          )}
+        </div>
+        <div className="col-span-2">
+          <Input
+            value={ex.sets}
+            onChange={(e) => onChange('sets', Number(e.target.value))}
+            type="number"
+            inputMode="numeric"
+            min={1}
+            placeholder="—"
+            className="h-7 text-xs text-center"
+          />
+        </div>
+        <div className="col-span-3">
+          <Input
+            value={ex.reps}
+            onChange={(e) => onChange('reps', e.target.value)}
+            placeholder="—"
+            className="h-7 text-xs text-center"
+          />
+        </div>
+        <div className="col-span-4">
+          <Input
+            value={ex.rest}
+            onChange={(e) => onChange('rest', e.target.value)}
+            placeholder="—"
+            className="h-7 text-xs text-center"
+          />
+        </div>
+      </div>
+      <textarea
+        value={ex.note ?? ''}
+        onChange={(e) => {
+          onChange('note', e.target.value)
+          const ta = e.currentTarget
+          ta.style.height = 'auto'
+          ta.style.height = `${ta.scrollHeight}px`
+        }}
+        ref={(el) => {
+          if (el) {
+            el.style.height = 'auto'
+            el.style.height = `${el.scrollHeight}px`
+          }
+        }}
+        placeholder="Заметка к упражнению..."
+        rows={1}
+        className="w-full resize-none rounded-md border border-input bg-background px-3 py-1.5 text-xs shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring leading-relaxed"
+      />
+    </div>
   )
 }
 
