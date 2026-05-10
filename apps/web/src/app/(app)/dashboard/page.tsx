@@ -39,6 +39,10 @@ export default function DashboardPage() {
   const ADJUST_THRESHOLD = 6
   const canAdjust = !!latestPlan && recentCompletedCount >= ADJUST_THRESHOLD
 
+  // Первый заход — у юзера нет ни одного плана и ни одной завершённой тренировки
+  const isFirstTime =
+    !latestPlan && (completedData?.items?.length ?? 0) === 0
+
   // Разделяем на ближайшую и пропущенные
   const { nextWorkout, missedWorkouts } = useMemo(() => {
     const today = startOfDay(new Date())
@@ -126,7 +130,65 @@ export default function DashboardPage() {
                 </Link>
               </div>
             )
-          })() : (
+          })() : isFirstTime ? (
+            <div
+              className="glass-card strong p-5 sm:p-6 fz-rise flex flex-col gap-3"
+              style={{
+                background: 'color-mix(in oklab, var(--c-accent) 12%, transparent)',
+                border: '1px solid color-mix(in oklab, var(--c-accent) 40%, var(--gl-border))',
+                boxShadow: '0 8px 24px var(--c-accent-glow)',
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <div
+                  className="grid place-items-center shrink-0"
+                  style={{
+                    width: 36, height: 36, borderRadius: 11,
+                    background:
+                      'linear-gradient(135deg, var(--c-accent), color-mix(in oklab, var(--c-accent) 60%, black))',
+                    boxShadow: '0 4px 12px var(--c-accent-glow)',
+                    color: 'white',
+                  }}
+                >
+                  <Sparkles className="h-[18px] w-[18px]" strokeWidth={2.4} />
+                </div>
+                <div className="eyebrow" style={{ color: 'var(--c-accent)' }}>
+                  Старт за 5 минут
+                </div>
+              </div>
+              <div
+                style={{
+                  fontSize: 'clamp(22px, 4.4vw, 28px)',
+                  fontWeight: 800,
+                  letterSpacing: -0.5,
+                  lineHeight: 1.1,
+                  color: 'var(--txt-1)',
+                }}
+              >
+                Соберите план с AI-тренером
+              </div>
+              <div className="text-[13px] sm:text-[14px] txt-muted leading-snug">
+                Расскажите про цели и опыт — AI составит программу под вас, расставит дни и упражнения. Дальше — просто отмечайте подходы.
+              </div>
+              <div className="flex flex-wrap gap-2 mt-2">
+                <Link
+                  href="/plans/new?ai=1"
+                  className="glass-btn-primary inline-flex items-center gap-2"
+                  style={{ padding: '13px 20px', minHeight: 48, fontSize: 14, fontWeight: 800 }}
+                >
+                  <Sparkles className="h-4 w-4" strokeWidth={2.4} />
+                  Собрать план с ИИ
+                </Link>
+                <Link
+                  href="/plans/new?mode=manual"
+                  className="glass-btn inline-flex items-center gap-2"
+                  style={{ padding: '13px 18px', minHeight: 48, fontSize: 14 }}
+                >
+                  Создать вручную
+                </Link>
+              </div>
+            </div>
+          ) : (
             <div className="glass-card p-5 sm:p-6 fz-rise flex flex-col gap-3">
               <div className="eyebrow">Свободный день</div>
               <div

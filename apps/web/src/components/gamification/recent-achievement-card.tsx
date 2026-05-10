@@ -37,7 +37,54 @@ export function RecentAchievementCard() {
     )[0]
   }, [data])
 
-  if (isLoading || !latest) return null
+  if (isLoading) return null
+
+  if (!latest) {
+    return (
+      <Link
+        href="/achievements"
+        className="glass-card p-5 fz-rise block hover:opacity-90 transition-opacity"
+      >
+        <div className="flex items-center gap-2 mb-3">
+          <Trophy
+            className="h-4 w-4 opacity-60"
+            style={{ color: 'var(--c-yellow)' }}
+            strokeWidth={2.4}
+          />
+          <span className="eyebrow opacity-70" style={{ color: 'var(--c-yellow)' }}>
+            Ачивки
+          </span>
+        </div>
+        <div className="flex items-center gap-3">
+          <div
+            className="grid place-items-center shrink-0"
+            style={{
+              width: 52,
+              height: 52,
+              borderRadius: 16,
+              background: 'color-mix(in oklab, var(--c-yellow) 22%, transparent)',
+              border: '1px solid color-mix(in oklab, var(--c-yellow) 40%, transparent)',
+              fontSize: 26,
+              lineHeight: 1,
+            }}
+          >
+            🎯
+          </div>
+          <div className="min-w-0">
+            <div
+              className="font-bold truncate"
+              style={{ fontSize: 16, letterSpacing: -0.2, color: 'var(--txt-1)' }}
+            >
+              Получи первую ачивку
+            </div>
+            <div className="text-[12px] txt-soft mt-1">
+              Тренируйся регулярно — 20 ачивок ждут
+            </div>
+          </div>
+        </div>
+      </Link>
+    )
+  }
 
   const accent = CATEGORY_COLOR[latest.category] ?? 'var(--c-yellow)'
 

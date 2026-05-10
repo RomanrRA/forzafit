@@ -110,11 +110,12 @@ export class PlanTemplatesService {
 
       if (trainingDayNums.has(planDayNum)) {
         const dayConfig = trainingDays.find((d: any) => Number(d.dayNumber) === planDayNum);
+        const dayName = typeof dayConfig?.name === 'string' ? dayConfig.name.trim() : '';
         const [workout] = await this.drizzle.db
           .insert(workoutSessions)
           .values({
             userId,
-            title: `${plan.name} — ${dayConfig.name}`,
+            title: dayName ? `${plan.name} — ${dayName}` : plan.name,
             startedAt: new Date(current),
           })
           .returning();

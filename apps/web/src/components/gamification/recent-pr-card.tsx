@@ -27,7 +27,34 @@ export function RecentPrCard() {
     return [...prs].sort((a, b) => new Date(b.achievedAt).getTime() - new Date(a.achievedAt).getTime())[0]
   }, [prs])
 
-  if (isLoading || !latest) return null
+  if (isLoading) return null
+
+  if (!latest) {
+    return (
+      <div className="glass-card p-5 fz-rise">
+        <div className="flex items-center gap-2 mb-2">
+          <Trophy className="h-4 w-4 opacity-60" style={{ color: 'var(--c-green)' }} strokeWidth={2.4} />
+          <span className="eyebrow opacity-70" style={{ color: 'var(--c-green)' }}>
+            Личный рекорд
+          </span>
+        </div>
+        <div
+          style={{
+            fontSize: 'clamp(20px, 3.6vw, 24px)',
+            fontWeight: 800,
+            letterSpacing: -0.4,
+            lineHeight: 1.1,
+            color: 'var(--txt-1)',
+          }}
+        >
+          Поставь первый PR
+        </div>
+        <div className="mt-2 text-[13px] txt-muted">
+          Заверши тренировку — мы зафиксируем рекорд и покажем его здесь.
+        </div>
+      </div>
+    )
+  }
 
   const value = typeof latest.valueKg === 'string' ? Number(latest.valueKg) : latest.valueKg
 
