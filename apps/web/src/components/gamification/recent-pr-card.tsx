@@ -39,7 +39,7 @@ export function RecentPrCard() {
           className="eyebrow"
           style={{ color: 'var(--c-green)' }}
         >
-          Свежий PR
+          Новый рекорд
         </span>
       </div>
       <div

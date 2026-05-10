@@ -14,6 +14,7 @@ import {
   Trash2,
   Edit3,
   User,
+  Flag,
 } from 'lucide-react'
 import {
   WorkoutSession,
@@ -26,6 +27,7 @@ import {
   useLastSetsForExercise,
   useRemoveExerciseFromWorkout,
   useReorderWorkoutExercises,
+  usePersonalRecords,
 } from '@/hooks/use-workouts'
 import type { WorkoutCompletedGamification } from '@/hooks/use-gamification'
 import { CelebrationDialog } from '@/components/gamification/celebration-dialog'
@@ -69,9 +71,41 @@ export function ActiveWorkout({ workout }: Props) {
   // Workout-level
   const updateWorkout = useUpdateWorkout(workout.id)
   const reorder = useReorderWorkoutExercises(workout.id)
+  const { data: personalRecords } = usePersonalRecords()
   const [now, setNow] = useState(() => Date.now())
   const [paused, setPaused] = useState(false)
   const [celebration, setCelebration] = useState<WorkoutCompletedGamification | null>(null)
+  // Сколько кг уже показывали как PR в этой активной сессии — чтобы не дублировать toast
+  const [prShown, setPrShown] = useState<Map<string, number>>(new Map())
+
+  const prMaxByExercise = useMemo(() => {
+    const map = new Map<string, number>()
+    for (const r of personalRecords ?? []) {
+      if (r.maxWeightKg != null) map.set(r.exerciseId, r.maxWeightKg)
+    }
+    return map
+  }, [personalRecords])
+
+  const handlePrCheck = useCallback(
+    (exerciseId: string, exerciseName: string, weight: number, reps: number) => {
+      if (weight <= 0) return
+      const prevMax = prMaxByExercise.get(exerciseId) ?? 0
+      const lastShown = prShown.get(exerciseId) ?? 0
+      if (weight > prevMax && weight > lastShown) {
+        toast({
+          title: '🏆 Новый рекорд!',
+          description: `${exerciseName} · ${weight % 1 === 0 ? weight : weight.toFixed(1)} кг × ${reps}`,
+          duration: 4500,
+        })
+        setPrShown((m) => {
+          const next = new Map(m)
+          next.set(exerciseId, weight)
+          return next
+        })
+      }
+    },
+    [prMaxByExercise, prShown],
+  )
 
   useEffect(() => {
     if (workout.finishedAt || paused) return
@@ -252,6 +286,9 @@ export function ActiveWorkout({ workout }: Props) {
           isLast={exIdx === exercises.length - 1}
           onPrev={() => setExIdx((i) => Math.max(0, i - 1))}
           onNext={() => setExIdx((i) => Math.min(exercises.length - 1, i + 1))}
+          onFinish={handleFinish}
+          isFinishing={updateWorkout.isPending}
+          onPrCheck={(w, r) => handlePrCheck(ex.exerciseId, ex.exercise.name, w, r)}
         />
       ) : null}
 
@@ -310,9 +347,22 @@ interface StageProps {
   isLast: boolean
   onPrev: () => void
   onNext: () => void
+  onFinish: () => void
+  isFinishing?: boolean
+  onPrCheck: (weight: number, reps: number) => void
 }
 
-function ExerciseStage({ workoutId, ex, isFirst, isLast, onPrev, onNext }: StageProps) {
+function ExerciseStage({
+  workoutId,
+  ex,
+  isFirst,
+  isLast,
+  onPrev,
+  onNext,
+  onFinish,
+  isFinishing,
+  onPrCheck,
+}: StageProps) {
   const addSet = useAddSet(workoutId, ex.id)
   const updateSet = useUpdateSet(workoutId, ex.id)
   const removeExercise = useRemoveExerciseFromWorkout(workoutId)
@@ -408,10 +458,11 @@ function ExerciseStage({ workoutId, ex, isFirst, isLast, onPrev, onNext }: Stage
       setRpe(null)
       const restSec = ex.restTimerSec && ex.restTimerSec > 0 ? ex.restTimerSec : 90
       setRestAt(restSec)
+      onPrCheck(finalWeight, reps)
     } catch {
       toast({ variant: 'destructive', title: 'Не удалось сохранить подход' })
     }
-  }, [addSet, updateSet, nextPlanned, bodyweight, weight, reps, rpe, ex.restTimerSec])
+  }, [addSet, updateSet, nextPlanned, bodyweight, weight, reps, rpe, ex.restTimerSec, onPrCheck])
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -618,43 +669,58 @@ function ExerciseStage({ workoutId, ex, isFirst, isLast, onPrev, onNext }: Stage
         </div>
 
         {/* CTA */}
-        <button
-          type="button"
-          onClick={completeSet}
-          disabled={allDone || addSet.isPending || updateSet.isPending}
-          className="glass-btn-primary mt-5 flex w-full items-center justify-center gap-2"
-          style={{
-            minHeight: 60,
-            borderRadius: 18,
-            fontSize: 17,
-            fontWeight: 800,
-            letterSpacing: 0.1,
-            cursor:
-              allDone || addSet.isPending || updateSet.isPending
-                ? 'not-allowed'
-                : 'pointer',
-            opacity: allDone ? 0.55 : 1,
-          }}
-        >
-          <Check className="h-[22px] w-[22px]" strokeWidth={2.4} />
-          <span>{allDone ? 'Все подходы сделаны' : 'Подход выполнен'}</span>
-          {!allDone && (
-            <kbd
-              className="ml-2 hidden sm:inline-block"
+        {(() => {
+          const inFlight = addSet.isPending || updateSet.isPending || (allDone && !!isFinishing)
+          const ctaAction = allDone ? (isLast ? onFinish : onNext) : completeSet
+          const ctaLabel = allDone
+            ? isLast
+              ? 'Все подходы сделаны · завершить тренировку'
+              : 'Все подходы сделаны · следующее упражнение'
+            : 'Подход выполнен'
+          return (
+            <button
+              type="button"
+              onClick={ctaAction}
+              disabled={inFlight}
+              className="glass-btn-primary mt-5 flex w-full items-center justify-center gap-2"
               style={{
-                padding: '2px 8px',
-                borderRadius: 6,
-                background: 'rgba(0,0,0,0.18)',
-                color: 'rgba(255,255,255,0.85)',
-                fontSize: 11,
-                fontWeight: 600,
-                fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace',
+                minHeight: 60,
+                borderRadius: 18,
+                fontSize: 17,
+                fontWeight: 800,
+                letterSpacing: 0.1,
+                cursor: inFlight ? 'wait' : 'pointer',
+                opacity: inFlight ? 0.6 : 1,
               }}
             >
-              Space
-            </kbd>
-          )}
-        </button>
+              <Check className="h-[22px] w-[22px]" strokeWidth={2.4} />
+              <span>{ctaLabel}</span>
+              {!allDone && (
+                <kbd
+                  className="ml-2 hidden sm:inline-block"
+                  style={{
+                    padding: '2px 8px',
+                    borderRadius: 6,
+                    background: 'rgba(0,0,0,0.18)',
+                    color: 'rgba(255,255,255,0.85)',
+                    fontSize: 11,
+                    fontWeight: 600,
+                    fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace',
+                  }}
+                >
+                  Space
+                </kbd>
+              )}
+              {allDone && (
+                isLast ? (
+                  <Flag className="h-[20px] w-[20px]" strokeWidth={2.4} />
+                ) : (
+                  <ChevronRight className="h-[22px] w-[22px]" strokeWidth={2.4} />
+                )
+              )}
+            </button>
+          )
+        })()}
       </div>
 
       {/* Rest timer */}
@@ -801,7 +867,7 @@ function BodyweightToggle({
         onClick={onClear}
         className="grid place-items-center"
         style={{
-          height: 92,
+          height: 76,
           borderRadius: 18,
           background:
             'color-mix(in oklab, var(--c-accent) 14%, var(--in-bg))',
@@ -840,9 +906,8 @@ function DoneSetsTable({
     <div className="flex flex-col gap-1">
       {/* desktop header */}
       <div
-        className="hidden sm:grid"
+        className="hidden sm:grid sm:[grid-template-columns:34px_1fr_80px_70px_60px_64px]"
         style={{
-          gridTemplateColumns: '34px 1fr 80px 70px 60px 64px',
           padding: '4px 12px',
           gap: 12,
         }}
@@ -857,11 +922,10 @@ function DoneSetsTable({
       {sets.map((s, i) => (
         <div
           key={s.id}
-          className={`glass-card grid items-center ${
+          className={`glass-card grid items-center [grid-template-columns:34px_minmax(0,1fr)_64px] sm:[grid-template-columns:34px_minmax(0,1fr)_80px_70px_60px_64px] ${
             s.id === justDoneId ? 'fz-rise' : ''
           }`}
           style={{
-            gridTemplateColumns: '34px 1fr 80px 70px 60px 64px',
             padding: '10px 12px',
             gap: 12,
           }}
@@ -997,3 +1061,4 @@ function DoneSetsTable({
     </div>
   )
 }
+

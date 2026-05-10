@@ -6,7 +6,7 @@ import { usePlanTemplates, useDeletePlanTemplate } from '@/hooks/use-plan-templa
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Calendar, Clock, Dumbbell, Flame, ChevronRight, Plus, Trash2, Pencil } from 'lucide-react'
+import { Calendar, Clock, Dumbbell, Flame, ChevronRight, Trash2, Pencil, Sparkles, Plus } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 
 const DIFFICULTY_LABEL = { beginner: 'Начинающий', intermediate: 'Средний', advanced: 'Продвинутый' }
@@ -29,18 +29,107 @@ export default function PlansPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <h1 className="text-2xl sm:text-3xl font-bold">Планы тренировок</h1>
-          <p className="text-sm text-muted-foreground mt-0.5 hidden sm:block">Готовые программы и ваши собственные</p>
-        </div>
-        <Button asChild size="sm" className="shrink-0 sm:size-default">
-          <Link href="/plans/new">
-            <Plus className="h-4 w-4 sm:mr-1" />
-            <span className="hidden sm:inline">Создать план</span>
-          </Link>
-        </Button>
+    <div className="space-y-8 fz-rise">
+      <div className="min-w-0">
+        <h1 className="text-2xl sm:text-3xl font-bold">Планы тренировок</h1>
+        <p className="text-sm text-muted-foreground mt-0.5 hidden sm:block">Готовые программы и ваши собственные</p>
+      </div>
+
+      {/* ── Hero: создать план (manual / AI) ─────────────────── */}
+      <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
+        {/* AI — акцентная */}
+        <Link
+          href="/plans/new?ai=1"
+          className="glass-card strong p-5 sm:p-6 flex flex-col gap-3 hover:scale-[1.01] transition-transform cursor-pointer fz-rise"
+          style={{
+            background: 'color-mix(in oklab, var(--c-accent) 10%, transparent)',
+            border: '1px solid color-mix(in oklab, var(--c-accent) 35%, var(--gl-border))',
+          }}
+        >
+          <div className="flex items-center gap-3">
+            <div
+              className="grid place-items-center shrink-0"
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: 14,
+                background:
+                  'linear-gradient(135deg, var(--c-accent), color-mix(in oklab, var(--c-accent) 60%, black))',
+                boxShadow: '0 6px 18px var(--c-accent-glow)',
+                color: 'white',
+              }}
+            >
+              <Sparkles className="h-5 w-5" strokeWidth={2.4} />
+            </div>
+            <div className="min-w-0">
+              <div className="eyebrow" style={{ color: 'var(--c-accent)' }}>
+                AI-тренер
+              </div>
+              <div
+                className="mt-0.5"
+                style={{
+                  fontSize: 18,
+                  fontWeight: 800,
+                  letterSpacing: -0.2,
+                  color: 'var(--txt-1)',
+                }}
+              >
+                Собрать план с ИИ
+              </div>
+            </div>
+          </div>
+          <p className="text-sm txt-muted leading-snug">
+            Расскажите про цели и опыт — AI составит программу под вас
+          </p>
+          <span
+            className="mt-auto inline-flex items-center gap-1 text-sm font-semibold"
+            style={{ color: 'var(--c-accent)' }}
+          >
+            Начать диалог →
+          </span>
+        </Link>
+
+        {/* Manual */}
+        <Link
+          href="/plans/new?mode=manual"
+          className="glass-card p-5 sm:p-6 flex flex-col gap-3 hover:scale-[1.01] transition-transform cursor-pointer fz-rise"
+        >
+          <div className="flex items-center gap-3">
+            <div
+              className="grid place-items-center shrink-0"
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: 14,
+                background: 'var(--gl-bg)',
+                border: '1px solid var(--gl-border)',
+                color: 'var(--txt-1)',
+              }}
+            >
+              <Pencil className="h-5 w-5" strokeWidth={2.2} />
+            </div>
+            <div className="min-w-0">
+              <div className="eyebrow">Конструктор</div>
+              <div
+                className="mt-0.5"
+                style={{
+                  fontSize: 18,
+                  fontWeight: 800,
+                  letterSpacing: -0.2,
+                  color: 'var(--txt-1)',
+                }}
+              >
+                Создать вручную
+              </div>
+            </div>
+          </div>
+          <p className="text-sm txt-muted leading-snug">
+            Выберите дни и упражнения сами — полный контроль над программой
+          </p>
+          <span className="mt-auto inline-flex items-center gap-1 text-sm font-semibold txt-muted">
+            Открыть конструктор →
+          </span>
+        </Link>
       </div>
 
       {/* Мои планы */}

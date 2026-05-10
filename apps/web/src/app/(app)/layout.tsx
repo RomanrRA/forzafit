@@ -21,11 +21,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   if (isInitializing || !accessToken) return null
 
   return (
-    <div className="lg-bg flex min-h-screen">
+    <div className="lg-bg flex min-h-screen w-full overflow-x-hidden">
       <Sidebar />
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 min-w-0 flex flex-col min-h-screen">
         <Header />
-        <main className="flex-1 px-3 py-4 pb-nav-safe md:px-6 md:py-6 md:pb-6">{children}</main>
+        <main className="flex-1 min-w-0 w-full px-3 py-4 pb-nav-safe md:px-6 md:py-6 md:pb-6 overflow-x-hidden">
+          {children}
+        </main>
       </div>
       <BottomNav />
     </div>

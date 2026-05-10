@@ -54,7 +54,7 @@ export function ExerciseFilters({
   return (
     <div className="flex gap-3 flex-wrap items-center">
       <Select value={muscleGroup} onValueChange={onChangeMuscle}>
-        <SelectTrigger className="w-44">
+        <SelectTrigger className="w-full sm:w-44">
           <SelectValue placeholder="Группа мышц" />
         </SelectTrigger>
         <SelectContent>
@@ -66,7 +66,7 @@ export function ExerciseFilters({
       </Select>
 
       <Select value={equipment} onValueChange={onChangeEquip}>
-        <SelectTrigger className="w-44">
+        <SelectTrigger className="w-full sm:w-44">
           <SelectValue placeholder="Инвентарь" />
         </SelectTrigger>
         <SelectContent>
@@ -78,7 +78,7 @@ export function ExerciseFilters({
       </Select>
 
       <Select value={difficulty} onValueChange={onChangeDiff}>
-        <SelectTrigger className="w-40">
+        <SelectTrigger className="w-full sm:w-40">
           <SelectValue placeholder="Сложность" />
         </SelectTrigger>
         <SelectContent>
