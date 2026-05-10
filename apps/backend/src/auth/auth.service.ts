@@ -14,6 +14,7 @@ import { DrizzleService } from '../db/db.service';
 import { users, refreshTokens, passwordResets } from '../db/schema';
 import { AuthResponseDto } from './dto/login.dto';
 import { MailService } from '../mail/mail.service';
+import { UsersService } from '../users/users.service';
 
 const BCRYPT_COST = 12;
 const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1 час
@@ -51,6 +52,7 @@ export class AuthService {
     private jwtService: JwtService,
     private config: ConfigService,
     private mail: MailService,
+    private usersService: UsersService,
   ) {}
 
   async register(
@@ -72,6 +74,7 @@ export class AuthService {
     }
 
     const passwordHash = await bcrypt.hash(password, BCRYPT_COST);
+    const username = await this.usersService.generateUniqueUsername(normalized);
 
     const [user] = await db
       .insert(users)
@@ -79,6 +82,8 @@ export class AuthService {
         email: normalized,
         passwordHash,
         name: name ?? null,
+        username,
+        displayName: name ?? null,
       })
       .returning();
 

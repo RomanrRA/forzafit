@@ -25,6 +25,11 @@ interface UserProfile {
   dob: string | null
   heightCm: number | null
   weightKg: number | null
+  username: string | null
+  displayName: string | null
+  bio: string | null
+  avatarUrl: string | null
+  isProfilePublic: boolean
 }
 
 export default function ProfilePage() {
@@ -55,11 +60,19 @@ export default function ProfilePage() {
   const [gender, setGender] = useState('')
   const [dob, setDob] = useState('')
 
+  // --- Соц. профиль ---
+  const [username, setUsername] = useState('')
+  const [bio, setBio] = useState('')
+  const [isProfilePublic, setIsProfilePublic] = useState(true)
+
   useEffect(() => {
     if (profile) {
       setName(profile.name ?? '')
       setGender(profile.gender ?? '')
       setDob(profile.dob ? profile.dob.split('T')[0] : '')
+      setUsername(profile.username ?? '')
+      setBio(profile.bio ?? '')
+      setIsProfilePublic(profile.isProfilePublic ?? true)
     }
   }, [profile])
 
@@ -86,6 +99,18 @@ export default function ProfilePage() {
     if (name.trim()) patch.name = name.trim()
     if (gender) patch.gender = gender
     if (dob) patch.dob = new Date(dob).toISOString()
+    updateProfile.mutate(patch)
+  }
+
+  function handleSaveSocial(e: React.FormEvent) {
+    e.preventDefault()
+    const patch: Record<string, unknown> = {
+      bio: bio.trim() || null,
+      isProfilePublic,
+    }
+    if (username.trim() && username.trim() !== profile?.username) {
+      patch.username = username.trim().toLowerCase()
+    }
     updateProfile.mutate(patch)
   }
 
@@ -352,6 +377,61 @@ export default function ProfilePage() {
                 />
               </div>
             </div>
+            <Button type="submit" className="w-full" disabled={updateProfile.isPending}>
+              {updateProfile.isPending ? 'Сохранение...' : 'Сохранить'}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+
+      {/* Социальный профиль */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Соц. профиль</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSaveSocial} className="space-y-4">
+            <div className="space-y-1">
+              <Label htmlFor="username">@username</Label>
+              <Input
+                id="username"
+                placeholder="latin+цифры+_, 3-24 символа"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                maxLength={24}
+              />
+              <p className="text-xs text-muted-foreground">
+                Используется для добавления в друзья и публичной ссылки на профиль.
+              </p>
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="bio">О себе</Label>
+              <textarea
+                id="bio"
+                placeholder="Коротко о ваших целях и опыте"
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
+                maxLength={200}
+                rows={3}
+                className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 resize-none"
+              />
+              <p className="text-xs text-muted-foreground text-right">{bio.length}/200</p>
+            </div>
+            <label className="flex items-start gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={isProfilePublic}
+                onChange={(e) => setIsProfilePublic(e.target.checked)}
+                className="mt-1"
+              />
+              <span className="text-sm">
+                <strong>Публичный профиль</strong>
+                <br />
+                <span className="text-muted-foreground text-xs">
+                  Видно другим юзерам в топе и по прямой ссылке. Друзьям видно всегда.
+                </span>
+              </span>
+            </label>
             <Button type="submit" className="w-full" disabled={updateProfile.isPending}>
               {updateProfile.isPending ? 'Сохранение...' : 'Сохранить'}
             </Button>

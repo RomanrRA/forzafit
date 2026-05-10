@@ -76,10 +76,19 @@ export const users = pgTable(
     subscriptionTier: subscriptionTierEnum('subscription_tier')
       .default('free')
       .notNull(),
+    // Соц. профиль (Этап 2 геймификации)
+    username: text('username'),
+    displayName: text('display_name'),
+    avatarUrl: text('avatar_url'),
+    bio: text('bio'),
+    isProfilePublic: boolean('is_profile_public').default(true).notNull(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
-  (t) => [uniqueIndex('users_email_idx').on(t.email)],
+  (t) => [
+    uniqueIndex('users_email_idx').on(t.email),
+    uniqueIndex('users_username_idx').on(t.username),
+  ],
 );
 
 // ─── Refresh Tokens ───────────────────────────────────────────────────────────
@@ -406,6 +415,61 @@ export const prHistory = pgTable(
   ],
 );
 
+// ─── Social: Friendships ──────────────────────────────────────────────────────
+
+export const friendshipStatusEnum = pgEnum('friendship_status', [
+  'pending',
+  'accepted',
+  'blocked',
+]);
+
+export const friendships = pgTable(
+  'friendships',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    requesterId: uuid('requester_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    addresseeId: uuid('addressee_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    status: friendshipStatusEnum('status').notNull().default('pending'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex('friendships_pair_idx').on(t.requesterId, t.addresseeId),
+    index('friendships_addressee_status_idx').on(t.addresseeId, t.status),
+    index('friendships_requester_status_idx').on(t.requesterId, t.status),
+  ],
+);
+
+// ─── Social: Activity Feed ────────────────────────────────────────────────────
+
+export const feedEventTypeEnum = pgEnum('feed_event_type', [
+  'workout_completed',
+  'pr_set',
+  'achievement_unlocked',
+]);
+
+export const activityFeed = pgTable(
+  'activity_feed',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    type: feedEventTypeEnum('type').notNull(),
+    data: jsonb('data').notNull().default({}),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (t) => [
+    index('activity_feed_user_id_idx').on(t.userId),
+    index('activity_feed_created_at_idx').on(t.createdAt),
+    index('activity_feed_user_created_idx').on(t.userId, t.createdAt),
+  ],
+);
+
 // ─── AI Conversations ─────────────────────────────────────────────────────────
 
 export const aiConversationStatusEnum = pgEnum('ai_conversation_status', [
@@ -452,6 +516,27 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   }),
   achievements: many(userAchievements),
   personalRecords: many(personalRecords),
+  activityFeed: many(activityFeed),
+}));
+
+export const friendshipsRelations = relations(friendships, ({ one }) => ({
+  requester: one(users, {
+    fields: [friendships.requesterId],
+    references: [users.id],
+    relationName: 'friendshipRequester',
+  }),
+  addressee: one(users, {
+    fields: [friendships.addresseeId],
+    references: [users.id],
+    relationName: 'friendshipAddressee',
+  }),
+}));
+
+export const activityFeedRelations = relations(activityFeed, ({ one }) => ({
+  user: one(users, {
+    fields: [activityFeed.userId],
+    references: [users.id],
+  }),
 }));
 
 export const streaksRelations = relations(streaks, ({ one }) => ({

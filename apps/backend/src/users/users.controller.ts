@@ -4,6 +4,7 @@ import {
   Patch,
   Delete,
   Body,
+  Param,
   UseGuards,
   HttpCode,
   HttpStatus,
@@ -39,6 +40,15 @@ export class UsersController {
     @Body() dto: UpdateUserDto,
   ) {
     return this.users.update(userId, dto);
+  }
+
+  @Get('by-username/:username')
+  @ApiOperation({ summary: 'Публичный профиль по username (соцка)' })
+  getPublic(
+    @CurrentUser('userId') requesterId: string,
+    @Param('username') username: string,
+  ) {
+    return this.users.findByUsername(username, requesterId);
   }
 
   @Delete('me')

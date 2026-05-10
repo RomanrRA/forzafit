@@ -8,6 +8,7 @@ import {
   AchievementsService,
   UnlockedAchievement,
 } from './achievements.service';
+import { FeedService } from '../feed/feed.service';
 
 export interface WorkoutCompletedResult {
   streak: { current: number; longest: number; isNewLongest: boolean };
@@ -24,12 +25,14 @@ export class GamificationService {
     private streaks: StreakService,
     private prs: PrDetectorService,
     private achievements: AchievementsService,
+    private feed: FeedService,
   ) {}
 
   /** Точка входа — вызывается из WorkoutsService после установки finishedAt. */
   async onWorkoutCompleted(
     sessionId: string,
     userId: string,
+    options: { writeFeed?: boolean } = { writeFeed: true },
   ): Promise<WorkoutCompletedResult> {
     const [session] = await this.drizzle.db
       .select()
@@ -63,6 +66,37 @@ export class GamificationService {
       streakCurrent: streakUpdate.currentCount,
       daysSincePreviousActivity: streakUpdate.daysSincePrevious,
     });
+
+    if (options.writeFeed) {
+      try {
+        await this.feed.writeEvent(userId, 'workout_completed', {
+          sessionId: session.id,
+          title: session.title ?? null,
+        });
+        for (const pr of newPrs) {
+          await this.feed.writeEvent(userId, 'pr_set', {
+            exerciseId: pr.exerciseId,
+            exerciseName: pr.exerciseName ?? undefined,
+            prType: pr.type,
+            valueKg: pr.valueKg,
+            reps: pr.reps,
+            previousValueKg: pr.previousValueKg,
+          });
+        }
+        for (const ach of newAchievements) {
+          await this.feed.writeEvent(userId, 'achievement_unlocked', {
+            achievementId: ach.id,
+            achievementCode: ach.code,
+            achievementTitle: ach.title,
+            achievementEmoji: ach.emoji,
+          });
+        }
+      } catch (e) {
+        this.logger.warn(
+          `Не удалось записать события в feed: ${(e as Error).message}`,
+        );
+      }
+    }
 
     return {
       streak: {
@@ -120,7 +154,8 @@ export class GamificationService {
     let processed = 0;
     for (const s of sessions) {
       try {
-        await this.onWorkoutCompleted(s.id, userId);
+        // Backfill — без записи в feed (иначе лента залипнет историей).
+        await this.onWorkoutCompleted(s.id, userId, { writeFeed: false });
         processed++;
       } catch (e) {
         this.logger.warn(

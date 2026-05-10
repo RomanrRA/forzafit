@@ -12,6 +12,9 @@ import { PlanTemplatesModule } from './plan-templates/plan-templates.module';
 import { BodyMeasurementsModule } from './body-measurements/body-measurements.module';
 import { AiModule } from './ai/ai.module';
 import { GamificationModule } from './gamification/gamification.module';
+import { FriendsModule } from './friends/friends.module';
+import { FeedModule } from './feed/feed.module';
+import { LeaderboardModule } from './leaderboard/leaderboard.module';
 
 @Module({
   imports: [
@@ -35,6 +38,9 @@ import { GamificationModule } from './gamification/gamification.module';
     BodyMeasurementsModule,
     AiModule,
     GamificationModule,
+    FriendsModule,
+    FeedModule,
+    LeaderboardModule,
   ],
   providers: [
     {

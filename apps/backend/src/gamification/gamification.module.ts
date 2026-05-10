@@ -4,8 +4,10 @@ import { GamificationService } from './gamification.service';
 import { StreakService } from './streak.service';
 import { PrDetectorService } from './pr-detector.service';
 import { AchievementsService } from './achievements.service';
+import { FeedModule } from '../feed/feed.module';
 
 @Module({
+  imports: [FeedModule],
   controllers: [GamificationController],
   providers: [
     GamificationService,

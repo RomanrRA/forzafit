@@ -57,6 +57,13 @@
       "when": 1778363696555,
       "tag": "0007_add_rpe_to_workout_sets",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1778447879010,
+      "tag": "0008_quick_supreme_intelligence",
+      "breakpoints": true
     }
   ]
 }

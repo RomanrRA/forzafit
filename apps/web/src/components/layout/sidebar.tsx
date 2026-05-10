@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   Flame, LayoutDashboard, ListChecks, ClipboardList, TrendingUp, Scale, Trophy, User,
-  ChevronsLeft, ChevronsRight,
+  ChevronsLeft, ChevronsRight, Newspaper, Users, Medal,
 } from 'lucide-react'
 import { useAuthStore } from '@/store/auth.store'
 import { useSidebarStore } from '@/store/sidebar.store'
@@ -26,7 +26,10 @@ const navItems: NavItem[] = [
   { href: '/progress', label: 'Прогресс', icon: TrendingUp, shortcut: 4 },
   { href: '/body', label: 'Замеры', icon: Scale, shortcut: 5 },
   { href: '/achievements', label: 'Достижения', icon: Trophy, shortcut: 6 },
-  { href: '/profile', label: 'Профиль', icon: User, shortcut: 7 },
+  { href: '/feed', label: 'Лента', icon: Newspaper, shortcut: 7 },
+  { href: '/friends', label: 'Друзья', icon: Users, shortcut: 8 },
+  { href: '/leaderboard', label: 'Топ', icon: Medal, shortcut: 9 },
+  { href: '/profile', label: 'Профиль', icon: User },
 ]
 
 export function Sidebar() {
