@@ -167,8 +167,8 @@ export default function DashboardPage() {
       </div>
 
       {/* ── PR/Achievement (left) + Body weight (right) ───── */}
-      <div className="grid gap-4 sm:gap-5 grid-cols-1 lg:[grid-template-columns:1fr_1.4fr]">
-        <div className="flex flex-col gap-4 sm:gap-5">
+      <div className="grid gap-4 sm:gap-5 grid-cols-1 lg:[grid-template-columns:1fr_1.4fr] items-stretch">
+        <div className="flex h-full flex-col gap-4 sm:gap-5 [&>*]:flex-1">
           <RecentPrCard />
           <RecentAchievementCard />
         </div>

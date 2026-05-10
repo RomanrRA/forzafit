@@ -157,14 +157,14 @@ export default function PlansPage() {
         {myPlans.length > 0 && (
           <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
             {myPlans.map((plan) => (
-              <Card key={plan.id} className="flex flex-col hover:border-primary transition-colors">
-                <CardHeader className="p-3 sm:p-6 pb-2 sm:pb-3">
-                  <div className="flex items-start justify-between gap-2">
+              <Card key={plan.id} className="flex flex-col min-w-0 max-w-full overflow-hidden hover:border-primary transition-colors">
+                <CardHeader className="p-3 sm:p-6 pb-2 sm:pb-3 min-w-0">
+                  <div className="flex items-start justify-between gap-2 min-w-0">
                     <div className="flex flex-1 items-center gap-2 min-w-0">
                       <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                         <Dumbbell className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                       </div>
-                      <CardTitle className="text-base sm:text-lg leading-tight truncate">{plan.name}</CardTitle>
+                      <CardTitle className="text-base sm:text-lg leading-tight truncate min-w-0">{plan.name}</CardTitle>
                     </div>
                     <div className="flex items-center gap-0.5 shrink-0">
                       <Link
@@ -225,14 +225,14 @@ export default function PlansPage() {
           {WORKOUT_PLANS.map((plan) => {
             const Icon = TYPE_ICON[plan.type]
             return (
-              <Card key={plan.id} className="flex flex-col hover:border-primary transition-colors">
-                <CardHeader className="p-3 sm:p-6 pb-2 sm:pb-3">
-                  <div className="flex items-start justify-between gap-2">
+              <Card key={plan.id} className="flex flex-col min-w-0 max-w-full overflow-hidden hover:border-primary transition-colors">
+                <CardHeader className="p-3 sm:p-6 pb-2 sm:pb-3 min-w-0">
+                  <div className="flex items-start justify-between gap-2 min-w-0">
                     <div className="flex flex-1 items-center gap-2 min-w-0">
                       <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                         <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                       </div>
-                      <CardTitle className="text-base sm:text-lg leading-tight truncate">{plan.name}</CardTitle>
+                      <CardTitle className="text-base sm:text-lg leading-tight truncate min-w-0">{plan.name}</CardTitle>
                     </div>
                   </div>
                   <p className="text-xs sm:text-sm text-muted-foreground mt-1.5 line-clamp-2">{plan.description}</p>
