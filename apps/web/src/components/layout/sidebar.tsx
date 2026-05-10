@@ -25,8 +25,8 @@ const navItems: NavItem[] = [
   { href: '/plans', label: 'Планы', icon: ClipboardList, shortcut: 3 },
   { href: '/progress', label: 'Прогресс', icon: TrendingUp, shortcut: 4 },
   { href: '/body', label: 'Замеры', icon: Scale, shortcut: 5 },
-  { href: '/achievements', label: 'Достижения', icon: Trophy },
-  { href: '/profile', label: 'Профиль', icon: User },
+  { href: '/achievements', label: 'Достижения', icon: Trophy, shortcut: 6 },
+  { href: '/profile', label: 'Профиль', icon: User, shortcut: 7 },
 ]
 
 export function Sidebar() {
@@ -70,10 +70,12 @@ export function Sidebar() {
 
   return (
     <aside
-      className="glass-sidebar hidden md:flex flex-col min-h-screen relative z-10"
+      className="glass-sidebar hidden md:flex flex-col sticky top-0 self-start z-10 overflow-y-auto"
       style={{
         width,
         minWidth: width,
+        height: '100vh',
+        maxHeight: '100vh',
         borderRight: '1px solid var(--gl-border)',
         padding: '20px 12px 16px',
         transition: 'width 0.18s ease, min-width 0.18s ease',
