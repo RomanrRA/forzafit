@@ -160,7 +160,7 @@ export default function PlansPage() {
               <Card key={plan.id} className="flex flex-col hover:border-primary transition-colors">
                 <CardHeader className="p-3 sm:p-6 pb-2 sm:pb-3">
                   <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
+                    <div className="flex flex-1 items-center gap-2 min-w-0">
                       <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                         <Dumbbell className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                       </div>
@@ -228,7 +228,7 @@ export default function PlansPage() {
               <Card key={plan.id} className="flex flex-col hover:border-primary transition-colors">
                 <CardHeader className="p-3 sm:p-6 pb-2 sm:pb-3">
                   <div className="flex items-start justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
+                    <div className="flex flex-1 items-center gap-2 min-w-0">
                       <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                         <Icon className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                       </div>
