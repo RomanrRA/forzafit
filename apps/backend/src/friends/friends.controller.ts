@@ -32,6 +32,15 @@ export class FriendsController {
     return this.friends.createRequest(userId, dto.username);
   }
 
+  @Post('block')
+  @ApiOperation({ summary: 'Заблокировать пользователя по username' })
+  block(
+    @CurrentUser('userId') userId: string,
+    @Body() dto: CreateFriendRequestDto,
+  ) {
+    return this.friends.block(userId, dto.username);
+  }
+
   @Post('requests/:friendshipId/accept')
   @ApiOperation({ summary: 'Принять входящий запрос' })
   accept(

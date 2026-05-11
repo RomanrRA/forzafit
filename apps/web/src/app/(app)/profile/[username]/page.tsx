@@ -2,13 +2,14 @@
 
 import { use } from 'react'
 import Link from 'next/link'
-import { ArrowLeft, UserPlus, Lock } from 'lucide-react'
+import { ArrowLeft, UserPlus, Lock, ShieldOff } from 'lucide-react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import {
   usePublicProfile,
   useFriends,
   useSendFriendRequest,
+  useBlockUser,
 } from '@/hooks/use-social'
 import { useAuthStore } from '@/store/auth.store'
 import { toast } from '@/hooks/use-toast'
@@ -24,6 +25,7 @@ export default function PublicProfilePage({
   const { data: friends } = useFriends('accepted')
   const { data: pending } = useFriends('pending')
   const send = useSendFriendRequest()
+  const block = useBlockUser()
 
   const isMe = me && profile && (me.email === username || me.id === profile.id)
   const alreadyFriend = profile && (friends ?? []).some((f) => f.friend?.id === profile.id)
@@ -34,6 +36,23 @@ export default function PublicProfilePage({
     try {
       await send.mutateAsync(profile.username)
       toast({ title: 'Запрос отправлен' })
+    } catch (e: unknown) {
+      const err = e as { response?: { data?: { message?: string } } }
+      toast({
+        variant: 'destructive',
+        title: 'Не удалось',
+        description: err?.response?.data?.message ?? 'Попробуйте ещё раз',
+      })
+    }
+  }
+
+  async function handleBlock() {
+    if (!profile?.username) return
+    if (!confirm(`Заблокировать ${profile.displayName ?? profile.username}? Он не сможет добавить вас в друзья.`))
+      return
+    try {
+      await block.mutateAsync(profile.username)
+      toast({ title: 'Пользователь заблокирован' })
     } catch (e: unknown) {
       const err = e as { response?: { data?: { message?: string } } }
       toast({
@@ -131,7 +150,7 @@ export default function PublicProfilePage({
         )}
 
         {!isMe && profile.username && (
-          <div className="mt-4">
+          <div className="mt-4 flex flex-wrap items-center gap-2">
             {alreadyFriend ? (
               <span
                 className="inline-flex items-center gap-1.5"
@@ -170,6 +189,20 @@ export default function PublicProfilePage({
                 Добавить в друзья
               </button>
             )}
+            <button
+              onClick={handleBlock}
+              disabled={block.isPending}
+              className="glass-btn inline-flex items-center gap-1.5"
+              style={{
+                padding: '8px 12px', height: 38, borderRadius: 11,
+                fontSize: 12, fontWeight: 600,
+                color: 'var(--c-red)',
+              }}
+              title="Заблокировать"
+            >
+              <ShieldOff className="h-4 w-4" />
+              <span className="hidden sm:inline">Заблокировать</span>
+            </button>
           </div>
         )}
       </div>

@@ -178,6 +178,64 @@ export class FriendsService {
     }));
   }
 
+  /** Заблокировать пользователя по username. */
+  async block(userId: string, targetUsername: string) {
+    const db = this.drizzle.db;
+    const normalized = targetUsername.trim().toLowerCase();
+
+    const [target] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.username, normalized))
+      .limit(1);
+
+    if (!target) throw new NotFoundException('Пользователь не найден');
+    if (target.id === userId) {
+      throw new BadRequestException('Нельзя заблокировать самого себя');
+    }
+
+    const [existing] = await db
+      .select()
+      .from(friendships)
+      .where(
+        or(
+          and(
+            eq(friendships.requesterId, userId),
+            eq(friendships.addresseeId, target.id),
+          ),
+          and(
+            eq(friendships.requesterId, target.id),
+            eq(friendships.addresseeId, userId),
+          ),
+        ),
+      )
+      .limit(1);
+
+    if (existing) {
+      const [updated] = await db
+        .update(friendships)
+        .set({
+          status: 'blocked',
+          requesterId: userId,
+          addresseeId: target.id,
+          updatedAt: new Date(),
+        })
+        .where(eq(friendships.id, existing.id))
+        .returning();
+      return updated;
+    }
+
+    const [created] = await db
+      .insert(friendships)
+      .values({
+        requesterId: userId,
+        addresseeId: target.id,
+        status: 'blocked',
+      })
+      .returning();
+    return created;
+  }
+
   /** Получить ID всех принятых друзей (используется feed/leaderboard). */
   async getAcceptedFriendIds(userId: string): Promise<string[]> {
     const db = this.drizzle.db;

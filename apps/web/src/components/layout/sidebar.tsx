@@ -7,9 +7,12 @@ import {
   Flame, LayoutDashboard, ListChecks, ClipboardList, TrendingUp, Scale, Trophy, User,
   ChevronsLeft, ChevronsRight, Newspaper, Users, Medal,
 } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
+import { api } from '@/lib/api'
 import { useAuthStore } from '@/store/auth.store'
 import { useSidebarStore } from '@/store/sidebar.store'
 import { useGamificationOverview } from '@/hooks/use-gamification'
+import { useFriends } from '@/hooks/use-social'
 import { plural } from '@/lib/utils'
 
 interface NavItem {
@@ -37,6 +40,19 @@ export function Sidebar() {
   const router = useRouter()
   const user = useAuthStore((s) => s.user)
   const { data: gam } = useGamificationOverview()
+  const { data: me } = useQuery({
+    queryKey: ['users', 'me'],
+    queryFn: async () => {
+      const { data } = await api.get('/users/me')
+      return data as { avatarUrl: string | null }
+    },
+    staleTime: 30_000,
+  })
+  const avatarUrl = me?.avatarUrl ?? null
+
+  // Бейдж входящих заявок на дружбу
+  const { data: pendingFriends } = useFriends('pending')
+  const incomingCount = (pendingFriends ?? []).filter((f) => f.direction === 'incoming').length
   const collapsed = useSidebarStore((s) => s.collapsed)
   const toggleCollapsed = useSidebarStore((s) => s.toggle)
 
@@ -127,6 +143,7 @@ export function Sidebar() {
               href={href}
               title={collapsed ? `${label}${shortcut ? ` (${modKey}${shortcut})` : ''}` : undefined}
               style={{
+                position: 'relative',
                 display: 'flex',
                 alignItems: 'center',
                 gap: collapsed ? 0 : 12,
@@ -149,6 +166,26 @@ export function Sidebar() {
               {!collapsed && (
                 <>
                   <span className="flex-1 truncate text-left">{label}</span>
+                  {href === '/friends' && incomingCount > 0 && (
+                    <span
+                      className="tnum shrink-0"
+                      style={{
+                        minWidth: 18,
+                        height: 18,
+                        padding: '0 6px',
+                        borderRadius: 999,
+                        background: 'var(--c-red)',
+                        color: 'white',
+                        fontSize: 10,
+                        fontWeight: 800,
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                      }}
+                    >
+                      {incomingCount}
+                    </span>
+                  )}
                   {shortcut && (
                     <kbd
                       className="tnum shrink-0"
@@ -169,6 +206,30 @@ export function Sidebar() {
                   )}
                 </>
               )}
+              {collapsed && href === '/friends' && incomingCount > 0 && (
+                <span
+                  className="tnum"
+                  style={{
+                    position: 'absolute',
+                    top: 2,
+                    right: 2,
+                    minWidth: 16,
+                    height: 16,
+                    padding: '0 4px',
+                    borderRadius: 999,
+                    background: 'var(--c-red)',
+                    color: 'white',
+                    fontSize: 9,
+                    fontWeight: 800,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    pointerEvents: 'none',
+                  }}
+                >
+                  {incomingCount}
+                </span>
+              )}
             </Link>
           )
         })}
@@ -184,21 +245,32 @@ export function Sidebar() {
         style={{ padding: collapsed ? '8px' : '10px 12px' }}
         title={collapsed ? displayName : undefined}
       >
-        <div
-          className="grid place-items-center shrink-0"
-          style={{
-            width: 32,
-            height: 32,
-            borderRadius: '50%',
-            background:
-              'linear-gradient(135deg, oklch(0.55 0.15 30), oklch(0.45 0.18 280))',
-            color: 'white',
-            fontWeight: 700,
-            fontSize: 13,
-          }}
-        >
-          {initial || <User className="h-4 w-4" />}
-        </div>
+        {avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={avatarUrl}
+            alt=""
+            width={32}
+            height={32}
+            style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }}
+          />
+        ) : (
+          <div
+            className="grid place-items-center shrink-0"
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: '50%',
+              background:
+                'linear-gradient(135deg, oklch(0.55 0.15 30), oklch(0.45 0.18 280))',
+              color: 'white',
+              fontWeight: 700,
+              fontSize: 13,
+            }}
+          >
+            {initial || <User className="h-4 w-4" />}
+          </div>
+        )}
         {!collapsed && (
           <div className="min-w-0 flex-1">
             <div

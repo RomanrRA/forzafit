@@ -47,7 +47,7 @@ export function RecentPrCard() {
             color: 'var(--txt-1)',
           }}
         >
-          Поставь первый PR
+          Поставь первый рекорд
         </div>
         <div className="mt-2 text-[13px] txt-muted">
           Заверши тренировку — мы зафиксируем рекорд и покажем его здесь.

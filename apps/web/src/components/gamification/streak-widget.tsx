@@ -6,6 +6,7 @@ import { format, startOfDay, subDays } from 'date-fns'
 import { Flame, Trophy, Medal } from 'lucide-react'
 import { useGamificationOverview } from '@/hooks/use-gamification'
 import { useWorkouts } from '@/hooks/use-workouts'
+import { plural } from '@/lib/utils'
 
 export function StreakWidget() {
   const { data, isLoading } = useGamificationOverview()
@@ -183,11 +184,10 @@ export function StreakWidget() {
               }}
             >
               {prCount}
-              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--txt-2)', marginLeft: 6 }}>
-                PR
-              </span>
             </div>
-            <div className="text-[11px] mt-1 txt-soft">личных рекордов</div>
+            <div className="text-[11px] mt-1 txt-soft">
+              {plural(prCount, ['рекорд', 'рекорда', 'рекордов'])}
+            </div>
           </div>
         </div>
       </div>

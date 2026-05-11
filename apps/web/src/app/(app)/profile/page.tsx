@@ -63,6 +63,7 @@ export default function ProfilePage() {
   // --- Соц. профиль ---
   const [username, setUsername] = useState('')
   const [bio, setBio] = useState('')
+  const [avatarUrl, setAvatarUrl] = useState('')
   const [isProfilePublic, setIsProfilePublic] = useState(true)
 
   useEffect(() => {
@@ -72,6 +73,7 @@ export default function ProfilePage() {
       setDob(profile.dob ? profile.dob.split('T')[0] : '')
       setUsername(profile.username ?? '')
       setBio(profile.bio ?? '')
+      setAvatarUrl(profile.avatarUrl ?? '')
       setIsProfilePublic(profile.isProfilePublic ?? true)
     }
   }, [profile])
@@ -106,6 +108,7 @@ export default function ProfilePage() {
     e.preventDefault()
     const patch: Record<string, unknown> = {
       bio: bio.trim() || null,
+      avatarUrl: avatarUrl.trim() || null,
       isProfilePublic,
     }
     if (username.trim() && username.trim() !== profile?.username) {
@@ -391,6 +394,46 @@ export default function ProfilePage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSaveSocial} className="space-y-4">
+            <div className="space-y-1">
+              <Label htmlFor="avatarUrl">Аватар (URL картинки)</Label>
+              <div className="flex items-center gap-3">
+                {avatarUrl.trim() ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={avatarUrl.trim()}
+                    alt=""
+                    width={48}
+                    height={48}
+                    style={{
+                      width: 48, height: 48, borderRadius: '50%', objectFit: 'cover',
+                      border: '1px solid var(--gl-border)', flexShrink: 0,
+                    }}
+                    onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0.3' }}
+                  />
+                ) : (
+                  <div
+                    className="grid place-items-center shrink-0"
+                    style={{
+                      width: 48, height: 48, borderRadius: '50%',
+                      background: 'linear-gradient(135deg, oklch(0.55 0.15 30), oklch(0.45 0.18 280))',
+                      color: 'white', fontWeight: 700, fontSize: 18,
+                    }}
+                  >
+                    {(profile?.name ?? profile?.email ?? '?').trim().slice(0, 1).toUpperCase()}
+                  </div>
+                )}
+                <Input
+                  id="avatarUrl"
+                  type="url"
+                  placeholder="https://..."
+                  value={avatarUrl}
+                  onChange={(e) => setAvatarUrl(e.target.value)}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Вставьте ссылку на квадратное изображение (например, из Telegram-канала или хостинга).
+              </p>
+            </div>
             <div className="space-y-1">
               <Label htmlFor="username">@username</Label>
               <Input

@@ -14,7 +14,7 @@ import { plural } from '@/lib/utils'
 const METRICS: { key: LeaderboardMetric; label: string; icon: typeof Flame; tone: string }[] = [
   { key: 'streak', label: 'Серии', icon: Flame, tone: 'var(--c-orange)' },
   { key: 'achievements', label: 'Ачивки', icon: Trophy, tone: 'var(--c-yellow)' },
-  { key: 'prCount', label: 'PR', icon: Medal, tone: 'var(--c-green)' },
+  { key: 'prCount', label: 'Рекорды', icon: Medal, tone: 'var(--c-green)' },
 ]
 
 const SCOPES: { key: LeaderboardScope; label: string; icon: typeof Users }[] = [

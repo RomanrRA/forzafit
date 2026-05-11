@@ -133,6 +133,17 @@ export function useUnfriend() {
   })
 }
 
+export function useBlockUser() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (username: string) => {
+      const { data } = await api.post('/friends/block', { username })
+      return data
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['friends'] }),
+  })
+}
+
 // ─── Feed ─────────────────────────────────────────────────────────────────────
 
 export function useFeed(limit = 30) {
