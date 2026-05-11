@@ -102,7 +102,10 @@ export function StreakWidget() {
             {days14.map((d) => (
               <div
                 key={d.key}
-                title={`${d.date} · ${d.done ? 'тренировка' : 'нет'}`}
+                title={
+                  (d.today ? 'сегодня · ' : '') +
+                  `${d.date} · ${d.done ? 'тренировка' : 'нет'}`
+                }
                 style={{
                   flex: 1,
                   height: 22,
@@ -110,7 +113,7 @@ export function StreakWidget() {
                   background: d.done
                     ? 'color-mix(in oklab, var(--c-green) 38%, transparent)'
                     : 'var(--gl-bg)',
-                  outline: d.today ? '1.5px solid var(--c-accent)' : 'none',
+                  outline: d.today ? '1.5px solid color-mix(in oklab, var(--txt-2) 60%, transparent)' : 'none',
                   outlineOffset: 1,
                   transition: 'background 0.2s',
                 }}

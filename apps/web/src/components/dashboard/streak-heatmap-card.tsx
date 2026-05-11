@@ -86,7 +86,10 @@ export function StreakHeatmapCard() {
         {days14.map((d) => (
           <div
             key={d.key}
-            title={`${d.date} · ${d.done ? 'тренировка' : 'нет'}`}
+            title={
+              (d.today ? 'сегодня · ' : '') +
+              `${d.date} · ${d.done ? 'тренировка' : 'нет'}`
+            }
             style={{
               flex: 1,
               height: 24,
@@ -94,7 +97,7 @@ export function StreakHeatmapCard() {
               background: d.done
                 ? 'color-mix(in oklab, var(--c-green) 32%, transparent)'
                 : 'var(--gl-bg)',
-              outline: d.today ? '1.5px solid var(--c-accent)' : 'none',
+              outline: d.today ? '1.5px solid color-mix(in oklab, var(--txt-2) 60%, transparent)' : 'none',
               outlineOffset: 1,
               transition: 'background 0.2s',
             }}
