@@ -189,7 +189,7 @@ export default function ProfilePage() {
     },
     {
       value: `${achievementsUnlocked}/${achievementsTotal}`,
-      label: plural(achievementsTotal, ['ачивка', 'ачивки', 'ачивок']),
+      label: plural(achievementsTotal, ['достижение', 'достижения', 'достижений']),
       tint: 'var(--c-yellow)',
       icon: <Star className="h-4 w-4" />,
     },

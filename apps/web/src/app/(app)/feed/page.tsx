@@ -56,7 +56,7 @@ function FeedRow({ item }: { item: FeedItem }) {
     body = (
       <div>
         <span className="font-semibold" style={{ color: 'var(--txt-1)' }}>{name}</span>{' '}
-        получил ачивку{' '}
+        получил достижение{' '}
         <span style={{ fontSize: 16 }}>{item.data.achievementEmoji ?? '🏆'}</span>{' '}
         <span style={{ color: 'var(--txt-1)' }}>«{item.data.achievementTitle ?? 'Достижение'}»</span>
       </div>

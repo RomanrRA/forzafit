@@ -121,7 +121,7 @@ export function CelebrationDialog({ open, onOpenChange, data, onClose }: Props) 
             <div>
               <p className="text-xs font-semibold text-muted-foreground mb-1.5 flex items-center gap-1">
                 <Trophy className="h-3.5 w-3.5 text-yellow-500" />
-                Получены ачивки ({data.newAchievements.length})
+                Получены достижения ({data.newAchievements.length})
               </p>
               <div className="space-y-1.5">
                 {data.newAchievements.map((a) => (

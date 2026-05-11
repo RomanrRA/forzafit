@@ -122,7 +122,7 @@ export function StreakWidget() {
           </div>
         </div>
 
-        {/* ── Ачивки ── */}
+        {/* ── Достижения ── */}
         <Link
           href="/achievements"
           className="glass-card p-4 sm:p-5 flex items-center gap-3 hover:opacity-90 transition-opacity"

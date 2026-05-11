@@ -76,7 +76,7 @@ export default function AchievementsPage() {
             color: 'var(--txt-1)',
           }}
         >
-          Ачивки
+          Достижения
         </h1>
         {!isLoading && !error && (
           <span className="tnum text-sm font-bold txt-soft">
@@ -152,12 +152,12 @@ export default function AchievementsPage() {
       )}
 
       {isLoading && (
-        <div className="glass-card p-6 text-center text-sm txt-muted">Загрузка ачивок…</div>
+        <div className="glass-card p-6 text-center text-sm txt-muted">Загрузка достижений…</div>
       )}
 
       {error && (
         <div className="glass-card p-6 text-center text-sm" style={{ color: 'var(--c-red)' }}>
-          Не удалось загрузить ачивки
+          Не удалось загрузить достижения
         </div>
       )}
 

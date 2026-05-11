@@ -1,8 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import {
   Flame, LayoutDashboard, ListChecks, ClipboardList, TrendingUp, Scale, Trophy, User,
   ChevronsLeft, ChevronsRight, Newspaper, Users, Medal,
@@ -19,25 +18,23 @@ interface NavItem {
   href: string
   label: string
   icon: typeof LayoutDashboard
-  shortcut?: number // 1..9 — Cmd/Ctrl + N
 }
 
 const navItems: NavItem[] = [
-  { href: '/dashboard', label: 'Дашборд', icon: LayoutDashboard, shortcut: 1 },
-  { href: '/workouts', label: 'Тренировки', icon: ListChecks, shortcut: 2 },
-  { href: '/plans', label: 'Планы', icon: ClipboardList, shortcut: 3 },
-  { href: '/progress', label: 'Прогресс', icon: TrendingUp, shortcut: 4 },
-  { href: '/body', label: 'Замеры', icon: Scale, shortcut: 5 },
-  { href: '/achievements', label: 'Достижения', icon: Trophy, shortcut: 6 },
-  { href: '/feed', label: 'Лента', icon: Newspaper, shortcut: 7 },
-  { href: '/friends', label: 'Друзья', icon: Users, shortcut: 8 },
-  { href: '/leaderboard', label: 'Топ', icon: Medal, shortcut: 9 },
+  { href: '/dashboard', label: 'Дашборд', icon: LayoutDashboard },
+  { href: '/workouts', label: 'Тренировки', icon: ListChecks },
+  { href: '/plans', label: 'Планы', icon: ClipboardList },
+  { href: '/progress', label: 'Прогресс', icon: TrendingUp },
+  { href: '/body', label: 'Замеры', icon: Scale },
+  { href: '/achievements', label: 'Достижения', icon: Trophy },
+  { href: '/feed', label: 'Лента', icon: Newspaper },
+  { href: '/friends', label: 'Друзья', icon: Users },
+  { href: '/leaderboard', label: 'Топ', icon: Medal },
   { href: '/profile', label: 'Профиль', icon: User },
 ]
 
 export function Sidebar() {
   const pathname = usePathname()
-  const router = useRouter()
   const user = useAuthStore((s) => s.user)
   const { data: gam } = useGamificationOverview()
   const { data: me } = useQuery({
@@ -59,31 +56,6 @@ export function Sidebar() {
   const initial = (user?.name ?? user?.email ?? '?').trim().slice(0, 1).toUpperCase()
   const displayName = user?.name ?? user?.email?.split('@')[0] ?? 'Атлет'
   const streakCurrent = gam?.streak.current ?? 0
-
-  // Mac vs Win — для отображения хинтов (⌘ vs Ctrl)
-  const [isMac, setIsMac] = useState(false)
-  useEffect(() => {
-    setIsMac(/Mac|iPhone|iPad/i.test(navigator.platform))
-  }, [])
-  const modKey = isMac ? '⌘' : 'Ctrl'
-
-  // Глобальные шорткаты: Cmd/Ctrl + 1..5
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (!(e.metaKey || e.ctrlKey)) return
-      if (e.shiftKey || e.altKey) return
-      const tag = (e.target as HTMLElement)?.tagName
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || (e.target as HTMLElement)?.isContentEditable) return
-      const n = Number(e.key)
-      if (!Number.isInteger(n) || n < 1) return
-      const item = navItems.find((it) => it.shortcut === n)
-      if (!item) return
-      e.preventDefault()
-      router.push(item.href)
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [router])
 
   const width = collapsed ? 68 : 240
 
@@ -135,13 +107,13 @@ export function Sidebar() {
 
       {/* ── Nav ── */}
       <nav className="flex flex-col gap-0.5">
-        {navItems.map(({ href, label, icon: Icon, shortcut }) => {
+        {navItems.map(({ href, label, icon: Icon }) => {
           const active = pathname === href || pathname.startsWith(href + '/')
           return (
             <Link
               key={href}
               href={href}
-              title={collapsed ? `${label}${shortcut ? ` (${modKey}${shortcut})` : ''}` : undefined}
+              title={collapsed ? label : undefined}
               style={{
                 position: 'relative',
                 display: 'flex',
@@ -185,24 +157,6 @@ export function Sidebar() {
                     >
                       {incomingCount}
                     </span>
-                  )}
-                  {shortcut && (
-                    <kbd
-                      className="tnum shrink-0"
-                      style={{
-                        padding: '2px 6px',
-                        borderRadius: 6,
-                        background: 'var(--gl-bg)',
-                        border: '1px solid var(--gl-border)',
-                        color: active ? 'var(--txt-2)' : 'var(--txt-3)',
-                        fontSize: 10,
-                        fontWeight: 600,
-                        letterSpacing: 0.2,
-                        fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace',
-                      }}
-                    >
-                      {modKey}{shortcut}
-                    </kbd>
                   )}
                 </>
               )}

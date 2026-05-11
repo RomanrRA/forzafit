@@ -13,7 +13,7 @@ import { plural } from '@/lib/utils'
 
 const METRICS: { key: LeaderboardMetric; label: string; icon: typeof Flame; tone: string }[] = [
   { key: 'streak', label: 'Серии', icon: Flame, tone: 'var(--c-orange)' },
-  { key: 'achievements', label: 'Ачивки', icon: Trophy, tone: 'var(--c-yellow)' },
+  { key: 'achievements', label: 'Достижения', icon: Trophy, tone: 'var(--c-yellow)' },
   { key: 'prCount', label: 'Рекорды', icon: Medal, tone: 'var(--c-green)' },
 ]
 

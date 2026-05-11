@@ -52,7 +52,7 @@ export function RecentAchievementCard() {
             strokeWidth={2.4}
           />
           <span className="eyebrow opacity-70" style={{ color: 'var(--c-yellow)' }}>
-            Ачивки
+            Достижения
           </span>
         </div>
         <div className="flex items-center gap-3">
@@ -75,10 +75,10 @@ export function RecentAchievementCard() {
               className="font-bold truncate"
               style={{ fontSize: 16, letterSpacing: -0.2, color: 'var(--txt-1)' }}
             >
-              Получи первую ачивку
+              Получи первое достижение
             </div>
             <div className="text-[12px] txt-soft mt-1">
-              Тренируйся регулярно — 20 ачивок ждут
+              Тренируйся регулярно — 20 достижений ждут
             </div>
           </div>
         </div>
@@ -96,7 +96,7 @@ export function RecentAchievementCard() {
       <div className="flex items-center gap-2 mb-3">
         <Trophy className="h-4 w-4" style={{ color: accent }} strokeWidth={2.4} />
         <span className="eyebrow" style={{ color: accent }}>
-          Новая ачивка
+          Новое достижение
         </span>
         <span
           className="tnum ml-auto text-[12px] font-bold"
