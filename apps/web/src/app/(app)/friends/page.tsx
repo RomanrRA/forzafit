@@ -192,13 +192,13 @@ export default function FriendsPage() {
           onChange={(e) => setUsername(e.target.value)}
           placeholder="Добавить по @username"
           autoComplete="off"
-          className="flex-1 bg-transparent outline-none text-[14px]"
+          className="flex-1 min-w-0 bg-transparent outline-none text-[14px]"
           style={{ color: 'var(--txt-1)' }}
         />
         <button
           type="submit"
           disabled={!username.trim() || send.isPending}
-          className="glass-btn-primary inline-flex items-center gap-1"
+          className="glass-btn-primary inline-flex items-center gap-1 shrink-0 whitespace-nowrap"
           style={{
             padding: '8px 14px', fontSize: 13, height: 38, borderRadius: 11,
             opacity: !username.trim() || send.isPending ? 0.5 : 1,
