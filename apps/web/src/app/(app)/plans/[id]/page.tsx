@@ -282,14 +282,25 @@ function StaticPlanPage({ id }: { id: string }) {
   }
 
   return (
-    <div className="max-w-2xl space-y-5">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" asChild>
+    <div className="max-w-3xl space-y-5 fz-rise">
+      <div className="flex items-start gap-3">
+        <Button variant="ghost" size="icon" asChild className="shrink-0">
           <Link href="/plans"><ArrowLeft className="h-4 w-4" /></Link>
         </Button>
-        <div>
-          <h1 className="text-2xl font-bold">{plan.name}</h1>
-          <p className="text-sm text-muted-foreground">{plan.description}</p>
+        <div className="flex-1 min-w-0">
+          <h1
+            style={{
+              fontSize: 'clamp(22px, 4vw, 28px)',
+              fontWeight: 800,
+              letterSpacing: -0.4,
+              lineHeight: 1.15,
+              color: 'var(--txt-1)',
+              margin: 0,
+            }}
+          >
+            {plan.name}
+          </h1>
+          <p className="text-sm txt-muted mt-1 leading-snug">{plan.description}</p>
         </div>
       </div>
 
@@ -300,21 +311,57 @@ function StaticPlanPage({ id }: { id: string }) {
         <Badge variant="secondary">{plan.goal}</Badge>
       </div>
 
-      {/* Schedule buttons */}
-      <div className="flex flex-wrap gap-2 p-3 bg-muted/50 rounded-lg border">
-        <div className="flex items-center gap-1.5 w-full mb-1">
-          <CalendarPlus className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-medium">Запланировать тренировки</span>
+      {/* Schedule — акцентный CTA */}
+      <div
+        className="glass-card strong p-4 sm:p-5 fz-rise"
+        style={{
+          background: 'color-mix(in oklab, var(--c-accent) 10%, transparent)',
+          border: '1px solid color-mix(in oklab, var(--c-accent) 35%, var(--gl-border))',
+          boxShadow: '0 6px 20px var(--c-accent-glow)',
+        }}
+      >
+        <div className="flex items-center gap-2 mb-2">
+          <CalendarPlus className="h-4 w-4" style={{ color: 'var(--c-accent)' }} strokeWidth={2.4} />
+          <span className="eyebrow" style={{ color: 'var(--c-accent)' }}>
+            Запланировать тренировки
+          </span>
         </div>
-        <Button variant="outline" size="sm" disabled={scheduling} onClick={() => handleSchedule(2)}>
-          2 недели
-        </Button>
-        <Button variant="outline" size="sm" disabled={scheduling} onClick={() => handleSchedule(4)}>
-          4 недели
-        </Button>
-        <Button variant="outline" size="sm" disabled={scheduling} onClick={() => handleSchedule(fullPlanWeeks)}>
-          Весь план ({fullPlanWeeks} нед.)
-        </Button>
+        <p className="text-[13px] txt-muted leading-snug mb-3">
+          Создадим тренировки в календаре — открывайте по дням и просто отмечайте подходы.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            disabled={scheduling}
+            onClick={() => handleSchedule(fullPlanWeeks)}
+            className="glass-btn-primary inline-flex items-center gap-1.5"
+            style={{
+              padding: '11px 18px', height: 44, borderRadius: 12,
+              fontSize: 14, fontWeight: 700,
+              opacity: scheduling ? 0.6 : 1,
+            }}
+          >
+            Весь план ({fullPlanWeeks} нед.)
+          </button>
+          <button
+            type="button"
+            disabled={scheduling}
+            onClick={() => handleSchedule(4)}
+            className="glass-btn"
+            style={{ padding: '10px 16px', height: 44, borderRadius: 12, fontSize: 13, fontWeight: 600 }}
+          >
+            4 недели
+          </button>
+          <button
+            type="button"
+            disabled={scheduling}
+            onClick={() => handleSchedule(2)}
+            className="glass-btn"
+            style={{ padding: '10px 16px', height: 44, borderRadius: 12, fontSize: 13, fontWeight: 600 }}
+          >
+            2 недели
+          </button>
+        </div>
       </div>
 
       <PlanDays plan={plan as PlanLike} exercises={exercises} onWorkoutCreated={(wid) => router.push(`/workouts/${wid}`)} />
@@ -366,31 +413,37 @@ function UserPlanPage({ id }: { id: string }) {
   const fullPlanWeeks = parseDurationWeeks(plan.duration)
 
   return (
-    <div className="max-w-2xl space-y-5">
-      <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" asChild>
+    <div className="max-w-3xl space-y-5 fz-rise">
+      {/* Header: back + title — full width, без сжатия кнопками */}
+      <div className="flex items-start gap-3">
+        <Button variant="ghost" size="icon" asChild className="shrink-0">
           <Link href="/plans"><ArrowLeft className="h-4 w-4" /></Link>
         </Button>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold">{plan.name}</h1>
-          {plan.description && <p className="text-sm text-muted-foreground">{plan.description}</p>}
+        <div className="flex-1 min-w-0">
+          <h1
+            style={{
+              fontSize: 'clamp(22px, 4vw, 28px)',
+              fontWeight: 800,
+              letterSpacing: -0.4,
+              lineHeight: 1.15,
+              color: 'var(--txt-1)',
+              margin: 0,
+            }}
+          >
+            {plan.name}
+          </h1>
+          {plan.description && (
+            <p className="text-sm txt-muted mt-1 leading-snug">{plan.description}</p>
+          )}
         </div>
-        <div className="flex items-center gap-2 flex-wrap">
-          <Button variant="outline" size="sm" onClick={() => setAdjustOpen(true)}>
-            <Sparkles className="h-3.5 w-3.5 mr-1" />
-            AI-корректировка
-          </Button>
-          <Button variant="outline" size="sm" asChild>
-            <Link href={`/plans/${id}/edit`}>
-              <Pencil className="h-3.5 w-3.5 mr-1" />
-              Редактировать
-            </Link>
-          </Button>
-          <Button variant="outline" size="sm" onClick={handleDelete} className="text-destructive hover:text-destructive">
-            <Trash2 className="h-3.5 w-3.5 mr-1" />
-            Удалить
-          </Button>
-        </div>
+      </div>
+
+      {/* Badges */}
+      <div className="flex flex-wrap gap-2">
+        {plan.difficulty && <Badge variant="outline">{DIFFICULTY_LABEL[plan.difficulty]}</Badge>}
+        <Badge variant="outline">{plan.daysPerWeek} дн/нед</Badge>
+        {plan.duration && <Badge variant="outline">{plan.duration}</Badge>}
+        {plan.goal && <Badge variant="secondary">{plan.goal}</Badge>}
       </div>
 
       <PlanAdjustDialog
@@ -399,39 +452,80 @@ function UserPlanPage({ id }: { id: string }) {
         planTemplateId={id}
       />
 
-      <div className="flex flex-wrap gap-2">
-        {plan.difficulty && <Badge variant="outline">{DIFFICULTY_LABEL[plan.difficulty]}</Badge>}
-        <Badge variant="outline">{plan.daysPerWeek} дн/нед</Badge>
-        {plan.duration && <Badge variant="outline">{plan.duration}</Badge>}
-        {plan.goal && <Badge variant="secondary">{plan.goal}</Badge>}
+      {/* Schedule — акцентный CTA */}
+      <div
+        className="glass-card strong p-4 sm:p-5 fz-rise"
+        style={{
+          background: 'color-mix(in oklab, var(--c-accent) 10%, transparent)',
+          border: '1px solid color-mix(in oklab, var(--c-accent) 35%, var(--gl-border))',
+          boxShadow: '0 6px 20px var(--c-accent-glow)',
+        }}
+      >
+        <div className="flex items-center gap-2 mb-2">
+          <CalendarPlus className="h-4 w-4" style={{ color: 'var(--c-accent)' }} strokeWidth={2.4} />
+          <span className="eyebrow" style={{ color: 'var(--c-accent)' }}>
+            Запланировать тренировки
+          </span>
+        </div>
+        <p className="text-[13px] txt-muted leading-snug mb-3">
+          Создадим тренировки в календаре — открывайте по дням и просто отмечайте подходы.
+        </p>
+        <div className="flex flex-wrap gap-2">
+          <button
+            type="button"
+            disabled={scheduleMutation.isPending}
+            onClick={() => handleSchedule(fullPlanWeeks)}
+            className="glass-btn-primary inline-flex items-center gap-1.5"
+            style={{
+              padding: '11px 18px', height: 44, borderRadius: 12,
+              fontSize: 14, fontWeight: 700,
+              opacity: scheduleMutation.isPending ? 0.6 : 1,
+            }}
+          >
+            Весь план ({fullPlanWeeks} нед.)
+          </button>
+          <button
+            type="button"
+            disabled={scheduleMutation.isPending}
+            onClick={() => handleSchedule(4)}
+            className="glass-btn"
+            style={{
+              padding: '10px 16px', height: 44, borderRadius: 12,
+              fontSize: 13, fontWeight: 600,
+            }}
+          >
+            4 недели
+          </button>
+          <button
+            type="button"
+            disabled={scheduleMutation.isPending}
+            onClick={() => handleSchedule(2)}
+            className="glass-btn"
+            style={{
+              padding: '10px 16px', height: 44, borderRadius: 12,
+              fontSize: 13, fontWeight: 600,
+            }}
+          >
+            2 недели
+          </button>
+        </div>
       </div>
 
-      {/* Schedule buttons */}
-      <div className="flex flex-wrap gap-2 p-3 bg-muted/50 rounded-lg border">
-        <div className="flex items-center gap-1.5 w-full mb-1">
-          <CalendarPlus className="h-4 w-4 text-muted-foreground" />
-          <span className="text-sm font-medium">Запланировать тренировки</span>
-        </div>
-        <Button
-          variant="outline" size="sm"
-          disabled={scheduleMutation.isPending}
-          onClick={() => handleSchedule(2)}
-        >
-          2 недели
+      {/* Actions: AI / Edit / Delete — отдельной строкой */}
+      <div className="flex flex-wrap gap-2">
+        <Button variant="outline" size="sm" onClick={() => setAdjustOpen(true)}>
+          <Sparkles className="h-3.5 w-3.5 mr-1" />
+          AI-корректировка
         </Button>
-        <Button
-          variant="outline" size="sm"
-          disabled={scheduleMutation.isPending}
-          onClick={() => handleSchedule(4)}
-        >
-          4 недели
+        <Button variant="outline" size="sm" asChild>
+          <Link href={`/plans/${id}/edit`}>
+            <Pencil className="h-3.5 w-3.5 mr-1" />
+            Редактировать
+          </Link>
         </Button>
-        <Button
-          variant="outline" size="sm"
-          disabled={scheduleMutation.isPending}
-          onClick={() => handleSchedule(fullPlanWeeks)}
-        >
-          Весь план ({fullPlanWeeks} нед.)
+        <Button variant="outline" size="sm" onClick={handleDelete} className="text-destructive hover:text-destructive ml-auto">
+          <Trash2 className="h-3.5 w-3.5 mr-1" />
+          Удалить
         </Button>
       </div>
 
