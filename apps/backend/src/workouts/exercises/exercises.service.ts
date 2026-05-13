@@ -1,12 +1,55 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, OnModuleInit, Logger } from '@nestjs/common';
 import { eq, and, or, ilike, sql } from 'drizzle-orm';
 import { DrizzleService } from '../../db/db.service';
 import { exercises } from '../../db/schema';
 import { CreateExerciseDto, ExerciseFilterDto } from './dto/exercise.dto';
+import { SEED_PUBLIC_EXERCISES } from './seed-data';
 
 @Injectable()
-export class ExercisesService {
+export class ExercisesService implements OnModuleInit {
+  private readonly logger = new Logger(ExercisesService.name);
+
   constructor(private drizzle: DrizzleService) {}
+
+  async onModuleInit() {
+    await this.seedPublicExercises();
+  }
+
+  /**
+   * Идемпотентно досевает публичные упражнения (crossfit, swimming и т.п.).
+   * Для каждого из SEED_PUBLIC_EXERCISES проверяет наличие по lower(name)
+   * среди isCustom=false и вставляет недостающие.
+   */
+  private async seedPublicExercises() {
+    let inserted = 0;
+    for (const seed of SEED_PUBLIC_EXERCISES) {
+      const [existing] = await this.drizzle.db
+        .select({ id: exercises.id })
+        .from(exercises)
+        .where(
+          and(
+            eq(exercises.isCustom, false),
+            sql`lower(${exercises.name}) = lower(${seed.name})`,
+          ),
+        )
+        .limit(1);
+      if (existing) continue;
+
+      await this.drizzle.db.insert(exercises).values({
+        name: seed.name,
+        muscleGroups: seed.muscleGroups,
+        equipment: seed.equipment,
+        difficulty: seed.difficulty as any,
+        description: seed.description ?? null,
+        isCustom: false,
+        userId: null,
+      });
+      inserted++;
+    }
+    if (inserted > 0) {
+      this.logger.log(`Посеяно ${inserted} публичных упражнений`);
+    }
+  }
 
   async findAll(userId: string, filters: ExerciseFilterDto) {
     const db = this.drizzle.db;
