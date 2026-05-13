@@ -30,7 +30,7 @@ export const GENERATE_PLAN_TOOL = {
         },
         type: {
           type: 'string',
-          enum: ['fullbody', 'split', 'cardio', 'beginner'],
+          enum: ['fullbody', 'split', 'cardio', 'crossfit', 'swimming', 'hybrid', 'beginner'],
           description: 'Тип программы',
         },
         weeksDuration: {
@@ -115,7 +115,7 @@ export type GeneratePlanArgs = {
   description?: string;
   goal?: string;
   difficulty?: 'beginner' | 'intermediate' | 'advanced';
-  type?: 'fullbody' | 'split' | 'cardio' | 'beginner';
+  type?: 'fullbody' | 'split' | 'cardio' | 'crossfit' | 'swimming' | 'hybrid' | 'beginner';
   weeksDuration: number;
   daysPerWeek: number;
   days: Array<{

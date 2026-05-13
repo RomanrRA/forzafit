@@ -27,6 +27,16 @@ const GENDER_LABEL: Record<string, string> = {
   other: 'другой',
 }
 
+const WISH_EXAMPLES = [
+  'Бассейн 2 раза в неделю',
+  'Кроссфит-комплексы по пятницам',
+  'Упор на спину',
+  'Беречь левое колено',
+  'Не люблю кардио на дорожке',
+  'Короткие тренировки (до 45 мин)',
+  'Утром только разминка',
+]
+
 function calcAge(dob: string | null): number | null {
   if (!dob) return null
   const d = new Date(dob)
@@ -206,17 +216,22 @@ function compile(state: WizardState, profile: UserProfile | undefined): string {
     lines.push(`- Рабочие веса: ${state.workingWeightsText.trim()}`)
   }
 
-  // 9. Wishes
-  if (state.wishes === 'yes' && state.wishesText.trim()) {
-    lines.push(`- Пожелания: ${state.wishesText.trim()}`)
-  }
-
   // 10. Program type
   const prog =
     state.programType === 'custom'
       ? state.programTypeCustom.trim()
       : state.programType
   if (prog) lines.push(`- Тип программы: ${prog}`)
+
+  // 9. Wishes — отдельным акцентным блоком, чтобы AI не игнорировал
+  const wishesText = state.wishesText.trim()
+  if (wishesText) {
+    lines.push(
+      '',
+      '## Свободные пожелания пользователя — учитывать СТРОГО',
+      wishesText,
+    )
+  }
 
   lines.push('', 'Составь план на основе этих данных и вызови tool generate_plan.')
   return lines.join('\n')
@@ -262,9 +277,8 @@ function isStepComplete(step: number, s: WizardState, hasProfile: boolean): bool
     case 10: // program type
       if (s.programType === 'custom') return s.programTypeCustom.trim().length > 0
       return s.programType !== ''
-    case 11: // wishes
-      if (s.wishes === 'yes') return s.wishesText.trim().length > 0
-      return s.wishes !== null
+    case 11: // wishes — необязательный, всегда completed
+      return true
     default:
       return true
   }
@@ -786,34 +800,46 @@ export function AiPlanWizard() {
         </StepContainer>
       )}
 
-      {/* Step 11: Wishes */}
+      {/* Step 11: Wishes (свободный промпт — необязательный) */}
       {step === 11 && (
-        <StepContainer title="Есть ли особые пожелания по тренировкам?">
-          <div className="grid grid-cols-1 gap-2">
-            <Chip
-              label="Нет"
-              selected={state.wishes === 'no'}
-              onClick={() =>
-                setState((s) => ({ ...s, wishes: 'no', wishesText: '' }))
-              }
-            />
-            <Chip
-              label="Да"
-              selected={state.wishes === 'yes'}
-              onClick={() => setState((s) => ({ ...s, wishes: 'yes' }))}
-            />
+        <StepContainer
+          title="Свободные пожелания тренеру"
+          hint="Необязательно — но всё, что напишешь, AI учтёт строго. Можно пропустить."
+        >
+          <textarea
+            value={state.wishesText}
+            onChange={(e) =>
+              setState((s) => ({
+                ...s,
+                wishes: e.target.value.trim() ? 'yes' : 'no',
+                wishesText: e.target.value,
+              }))
+            }
+            placeholder="Например: бассейн 2 раза в неделю, упор на спину, беречь колено..."
+            rows={6}
+            className="w-full resize-y rounded-xl border border-input bg-background/70 px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring leading-relaxed"
+          />
+          <div>
+            <p className="text-xs text-muted-foreground mb-2">Можно нажать на пример — добавится в поле:</p>
+            <div className="flex flex-wrap gap-1.5">
+              {WISH_EXAMPLES.map((ex) => (
+                <button
+                  key={ex}
+                  type="button"
+                  onClick={() =>
+                    setState((s) => {
+                      const sep = s.wishesText.trim() ? '\n' : ''
+                      const next = `${s.wishesText}${sep}${ex}`
+                      return { ...s, wishes: 'yes', wishesText: next }
+                    })
+                  }
+                  className="text-xs rounded-full border border-border bg-background/60 px-2.5 py-1 hover:border-primary/60 hover:text-primary transition-colors"
+                >
+                  + {ex}
+                </button>
+              ))}
+            </div>
           </div>
-          {state.wishes === 'yes' && (
-            <textarea
-              value={state.wishesText}
-              onChange={(e) =>
-                setState((s) => ({ ...s, wishesText: e.target.value }))
-              }
-              placeholder="Например: больше работы на спину, короче тренировки, кардио..."
-              rows={2}
-              className="w-full resize-none rounded-xl border border-input bg-background/70 px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            />
-          )}
         </StepContainer>
       )}
 
@@ -827,6 +853,9 @@ export function AiPlanWizard() {
               'Upper/Lower (верх/низ)',
               'Push-Pull-Legs',
               'Сплит по группам мышц',
+              'Кроссфит / функционалка',
+              'Плавание / бассейн',
+              'Гибрид (силовая + кардио)',
             ].map((opt) => (
               <Chip
                 key={opt}

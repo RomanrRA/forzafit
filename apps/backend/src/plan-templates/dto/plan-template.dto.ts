@@ -29,7 +29,7 @@ export class CreatePlanTemplateDto {
   @IsString()
   difficulty?: string;
 
-  @ApiPropertyOptional({ enum: ['fullbody', 'split', 'cardio', 'beginner'] })
+  @ApiPropertyOptional({ enum: ['fullbody', 'split', 'cardio', 'crossfit', 'swimming', 'hybrid', 'beginner'] })
   @IsOptional()
   @IsString()
   type?: string;

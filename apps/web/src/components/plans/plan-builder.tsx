@@ -52,6 +52,9 @@ const TYPE_OPTIONS = [
   { value: 'fullbody', label: 'Фул Боди' },
   { value: 'split', label: 'Сплит' },
   { value: 'cardio', label: 'Кардио' },
+  { value: 'crossfit', label: 'Кроссфит / функционалка' },
+  { value: 'swimming', label: 'Плавание / бассейн' },
+  { value: 'hybrid', label: 'Гибрид (силовая + кардио)' },
   { value: 'beginner', label: 'Для начинающих' },
 ]
 
