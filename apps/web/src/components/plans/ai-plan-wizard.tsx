@@ -353,7 +353,7 @@ export function AiPlanWizard() {
     void (async () => {
       try {
         const planTemplateId = await finalize()
-        router.push(`/plans/${planTemplateId}/edit`)
+        router.push(`/plans/${planTemplateId}`)
       } catch (err) {
         setLocalError(err instanceof Error ? err.message : 'Не удалось создать план')
         setFinalizing(false)
