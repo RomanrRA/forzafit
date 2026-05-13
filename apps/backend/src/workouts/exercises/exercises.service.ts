@@ -72,6 +72,41 @@ export class ExercisesService {
     return exercise;
   }
 
+  /**
+   * Найти упражнение по имени (case-insensitive) среди публичных + кастомных юзера.
+   * Если не найдено — создать custom от имени юзера, чтобы AI-сгенерированные имена
+   * не «терялись» при scheduling/Start Day. Возвращает id или null, если имя пустое.
+   */
+  async resolveByName(userId: string, name: string): Promise<string | null> {
+    const trimmed = (name ?? '').trim().replace(/\s+/g, ' ');
+    if (!trimmed) return null;
+
+    const [found] = await this.drizzle.db
+      .select({ id: exercises.id })
+      .from(exercises)
+      .where(
+        and(
+          or(eq(exercises.isCustom, false), eq(exercises.userId, userId)),
+          sql`lower(${exercises.name}) = lower(${trimmed})`,
+        ),
+      )
+      .limit(1);
+
+    if (found) return found.id;
+
+    const [created] = await this.drizzle.db
+      .insert(exercises)
+      .values({
+        name: trimmed,
+        muscleGroups: [],
+        isCustom: true,
+        userId,
+      })
+      .returning({ id: exercises.id });
+
+    return created.id;
+  }
+
   async delete(id: string, userId: string): Promise<void> {
     const exercise = await this.findById(id);
 

@@ -10,6 +10,7 @@ import * as path from 'path';
 import { DrizzleService } from '../db/db.service';
 import { aiConversations, planTemplates, users } from '../db/schema';
 import { PlanTemplatesService } from '../plan-templates/plan-templates.service';
+import { ExercisesService } from '../workouts/exercises/exercises.service';
 import { OpenRouterService, ChatMessage, ToolCall } from './openrouter.service';
 import { GENERATE_PLAN_TOOL, GeneratePlanArgs } from './tools/generate-plan.tool';
 import {
@@ -66,6 +67,7 @@ export class AiService {
     private drizzle: DrizzleService,
     private openRouter: OpenRouterService,
     private planTemplatesService: PlanTemplatesService,
+    private exercisesService: ExercisesService,
   ) {
     const promptPath = path.join(__dirname, 'prompts', 'plan-wizard.md');
     this.systemPrompt = fs.readFileSync(promptPath, 'utf-8').trim();
@@ -248,19 +250,27 @@ export class AiService {
     const canonical =
       CANONICAL_DAYS[Math.min(trainingDays.length, 7)] ?? trainingDays.map((d) => d.dayNumber);
 
-    const planDays = trainingDays.map((d, idx) => ({
-      dayNumber: canonical[idx] ?? d.dayNumber,
-      focus: d.name,
-      exercises: (d.exercises ?? []).map((ex) => ({
-        exerciseId: ex.exerciseId,
-        name: ex.exerciseName,
-        sets: ex.targetSets,
-        reps: ex.targetReps,
-        weightKg: ex.weightKg,
-        note: ex.notes ?? '',
-        rest: '60 сек',
+    // AI обычно не знает UUID существующих упражнений и присылает только exerciseName.
+    // Резолвим имя → id (находим в БД или создаём custom), чтобы scheduling и Start Day
+    // не получали пустые тренировки. Игнорируем ex.exerciseId от AI как ненадёжный.
+    const planDays = await Promise.all(
+      trainingDays.map(async (d, idx) => ({
+        dayNumber: canonical[idx] ?? d.dayNumber,
+        focus: d.name,
+        exercises: await Promise.all(
+          (d.exercises ?? []).map(async (ex) => ({
+            exerciseId:
+              (await this.exercisesService.resolveByName(userId, ex.exerciseName)) ?? undefined,
+            name: ex.exerciseName,
+            sets: ex.targetSets,
+            reps: ex.targetReps,
+            weightKg: ex.weightKg,
+            note: ex.notes ?? '',
+            rest: '60 сек',
+          })),
+        ),
       })),
-    }));
+    );
 
     const plan = await this.planTemplatesService.create(userId, {
       name: args.name,
@@ -406,39 +416,43 @@ export class AiService {
     const days = Array.isArray(plan.days) ? (plan.days as any[]) : [];
     let appliedCount = 0;
 
-    const updatedDays = days.map((day) => {
-      const dayAdjustments = picked.filter(
-        (a) => Number(a.dayNumber) === Number(day.dayNumber),
-      );
-      if (dayAdjustments.length === 0) return day;
-
-      const exs = Array.isArray(day.exercises) ? [...day.exercises] : [];
-      for (const adj of dayAdjustments) {
-        const idx = exs.findIndex(
-          (ex: any) =>
-            typeof ex?.name === 'string' &&
-            ex.name.trim().toLowerCase() === adj.exerciseName.trim().toLowerCase(),
+    const updatedDays = await Promise.all(
+      days.map(async (day) => {
+        const dayAdjustments = picked.filter(
+          (a) => Number(a.dayNumber) === Number(day.dayNumber),
         );
-        if (idx === -1) continue;
+        if (dayAdjustments.length === 0) return day;
 
-        const current = exs[idx] ?? {};
-        const next: Record<string, any> = { ...current };
+        const exs = Array.isArray(day.exercises) ? [...day.exercises] : [];
+        for (const adj of dayAdjustments) {
+          const idx = exs.findIndex(
+            (ex: any) =>
+              typeof ex?.name === 'string' &&
+              ex.name.trim().toLowerCase() === adj.exerciseName.trim().toLowerCase(),
+          );
+          if (idx === -1) continue;
 
-        if (adj.action === 'replace' && adj.newExerciseName) {
-          next.name = adj.newExerciseName;
-          // Drop exerciseId since the name changed; user can re-link on edit.
-          next.exerciseId = undefined;
+          const current = exs[idx] ?? {};
+          const next: Record<string, any> = { ...current };
+
+          if (adj.action === 'replace' && adj.newExerciseName) {
+            next.name = adj.newExerciseName;
+            // Резолвим новое имя в реальный exerciseId — иначе тренировка из этого
+            // плана создастся пустой (см. plan-templates.schedule + Start Day).
+            next.exerciseId =
+              (await this.exercisesService.resolveByName(userId, adj.newExerciseName)) ?? undefined;
+          }
+          if (adj.newSets != null) next.sets = adj.newSets;
+          if (adj.newReps != null) next.reps = adj.newReps;
+          if (adj.newWeightKg != null) next.weightKg = adj.newWeightKg;
+
+          exs[idx] = next;
+          appliedCount++;
         }
-        if (adj.newSets != null) next.sets = adj.newSets;
-        if (adj.newReps != null) next.reps = adj.newReps;
-        if (adj.newWeightKg != null) next.weightKg = adj.newWeightKg;
 
-        exs[idx] = next;
-        appliedCount++;
-      }
-
-      return { ...day, exercises: exs };
-    });
+        return { ...day, exercises: exs };
+      }),
+    );
 
     await this.planTemplatesService.update(plan.id, userId, { days: updatedDays });
 

@@ -4,12 +4,14 @@ import { DrizzleService } from '../db/db.service';
 import { planTemplates, workoutSessions, workoutExercises, workoutSets } from '../db/schema';
 import { CreatePlanTemplateDto, UpdatePlanTemplateDto } from './dto/plan-template.dto';
 import { WorkoutsService } from '../workouts/workouts.service';
+import { ExercisesService } from '../workouts/exercises/exercises.service';
 
 @Injectable()
 export class PlanTemplatesService {
   constructor(
     private drizzle: DrizzleService,
     private workoutsService: WorkoutsService,
+    private exercisesService: ExercisesService,
   ) {}
 
   async findAll(userId: string) {
@@ -123,15 +125,22 @@ export class PlanTemplatesService {
         const exercises = (dayConfig.exercises ?? []) as any[];
         for (let i = 0; i < exercises.length; i++) {
           const ex = exercises[i];
-          if (ex.exerciseId) {
+          // Defensive: для старых планов, сохранённых до фикса AI finalize, exerciseId
+          // может быть пустым — резолвим по имени, иначе тренировка получится пустой.
+          let exerciseId: string | undefined = ex.exerciseId;
+          if (!exerciseId && ex.name) {
+            exerciseId =
+              (await this.exercisesService.resolveByName(userId, ex.name)) ?? undefined;
+          }
+          if (exerciseId) {
             const [we] = await this.drizzle.db.insert(workoutExercises).values({
               sessionId: workout.id,
-              exerciseId: ex.exerciseId,
+              exerciseId,
               orderIndex: i,
             }).returning();
 
             // Copy sets from last completed workout; fallback to plan's sets count
-            const lastSets = await this.workoutsService.getLastSetsForExercise(userId, ex.exerciseId);
+            const lastSets = await this.workoutsService.getLastSetsForExercise(userId, exerciseId);
             if (lastSets.length > 0) {
               await this.drizzle.db.insert(workoutSets).values(
                 lastSets.map((s) => ({
