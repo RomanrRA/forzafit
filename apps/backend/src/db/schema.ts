@@ -82,12 +82,15 @@ export const users = pgTable(
     avatarUrl: text('avatar_url'),
     bio: text('bio'),
     isProfilePublic: boolean('is_profile_public').default(true).notNull(),
+    // Токен для webcal-подписки на расписание тренировок (lazy-init)
+    calendarToken: uuid('calendar_token'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
   (t) => [
     uniqueIndex('users_email_idx').on(t.email),
     uniqueIndex('users_username_idx').on(t.username),
+    uniqueIndex('users_calendar_token_idx').on(t.calendarToken),
   ],
 );
 

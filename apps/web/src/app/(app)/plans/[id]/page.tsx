@@ -13,9 +13,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/hooks/use-toast'
-import { ArrowLeft, Play, Dumbbell, Coffee, ChevronDown, ChevronUp, Pencil, Trash2, CalendarPlus, Sparkles } from 'lucide-react'
+import { ArrowLeft, Play, Dumbbell, Coffee, ChevronDown, ChevronUp, Pencil, Trash2, CalendarPlus, Sparkles, CalendarDays } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { PlanAdjustDialog } from '@/components/plans/plan-adjust-dialog'
+import { CalendarSubscribeDialog } from '@/components/plans/calendar-subscribe-dialog'
 
 const DIFFICULTY_LABEL = { beginner: 'Начинающий', intermediate: 'Средний', advanced: 'Продвинутый' }
 
@@ -199,6 +200,7 @@ function StaticPlanPage({ id }: { id: string }) {
   const { data: exercisesData } = useExercises()
   const exercises = exercisesData?.items ?? []
   const [scheduling, setScheduling] = useState(false)
+  const [calendarOpen, setCalendarOpen] = useState(false)
 
   if (!plan) return notFound()
 
@@ -361,8 +363,19 @@ function StaticPlanPage({ id }: { id: string }) {
           >
             2 недели
           </button>
+          <button
+            type="button"
+            onClick={() => setCalendarOpen(true)}
+            className="glass-btn inline-flex items-center gap-1.5"
+            style={{ padding: '10px 16px', height: 44, borderRadius: 12, fontSize: 13, fontWeight: 600 }}
+          >
+            <CalendarDays className="h-3.5 w-3.5" />
+            В календарь
+          </button>
         </div>
       </div>
+
+      <CalendarSubscribeDialog open={calendarOpen} onOpenChange={setCalendarOpen} />
 
       <PlanDays plan={plan as PlanLike} exercises={exercises} onWorkoutCreated={(wid) => router.push(`/workouts/${wid}`)} />
     </div>
@@ -385,6 +398,7 @@ function UserPlanPage({ id }: { id: string }) {
   const { data: exercisesData } = useExercises()
   const exercises = exercisesData?.items ?? []
   const [adjustOpen, setAdjustOpen] = useState(false)
+  const [calendarOpen, setCalendarOpen] = useState(false)
 
   async function handleDelete() {
     if (!plan) return
@@ -508,8 +522,22 @@ function UserPlanPage({ id }: { id: string }) {
           >
             2 недели
           </button>
+          <button
+            type="button"
+            onClick={() => setCalendarOpen(true)}
+            className="glass-btn inline-flex items-center gap-1.5"
+            style={{
+              padding: '10px 16px', height: 44, borderRadius: 12,
+              fontSize: 13, fontWeight: 600,
+            }}
+          >
+            <CalendarDays className="h-3.5 w-3.5" />
+            В календарь
+          </button>
         </div>
       </div>
+
+      <CalendarSubscribeDialog open={calendarOpen} onOpenChange={setCalendarOpen} />
 
       {/* Actions: AI / Edit / Delete — отдельной строкой */}
       <div className="flex flex-wrap gap-2">

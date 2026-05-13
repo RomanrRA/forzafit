@@ -15,6 +15,7 @@ import { GamificationModule } from './gamification/gamification.module';
 import { FriendsModule } from './friends/friends.module';
 import { FeedModule } from './feed/feed.module';
 import { LeaderboardModule } from './leaderboard/leaderboard.module';
+import { CalendarModule } from './calendar/calendar.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { LeaderboardModule } from './leaderboard/leaderboard.module';
     FriendsModule,
     FeedModule,
     LeaderboardModule,
+    CalendarModule,
   ],
   providers: [
     {
