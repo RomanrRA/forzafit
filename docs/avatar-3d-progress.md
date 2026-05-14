@@ -144,10 +144,18 @@ fallback-имён target.
 
 ## Где остановились / следующий шаг
 
-**2026-05-14:**
+**2026-05-14 (вечер, конец дня):**
 - ✅ Этап 1 закоммичен
 - ✅ Этап 2 закоммичен (скрипт + инструкция)
-- ⏳ **Пользователь сейчас ставит Blender 5.0.1 + MPFB2 и прогоняет скрипт.**
+- ⏳ **Пользователь:** Blender 5.0.1 установлен, MPFB2 активирован (`Build info: FROM_SOURCE, Blender (5,0,1), Python (3,11,13)`).
+- ⛔ **Текущий блокер:** MakeHuman system assets не установлены — в панели «Apply assets» висит предупреждение «It seems the makehuman system... have not been installed». Без них `bpy.ops.mpfb.create_human` упадёт.
+- 🔜 **Следующий шаг (на завтра):**
+  1. В Blender → панель MPFB → `System and resources` → `Web resources` → кнопка `Asset packs`.
+  2. Скачать пакеты «MakeHuman system data» и «MakeHuman target packs» (см. https://github.com/makehumancommunity/mpfb2/wiki/Installing-MPFB → секция «Installing system assets»).
+  3. Распаковать в каталог `System data` (видно в `Directories` → кнопка `System data`).
+  4. Перезапустить Blender.
+  5. Проверить через `New human` → `From scratch` — должен создаться базовый человек.
+  6. Запустить `scripts/avatar/generate_avatar_glb.py` через Scripting workspace.
 - 🔜 После получения `male.glb` + `female.glb`:
   1. Закоммитить GLB-файлы в `apps/web/public/avatar/`
   2. Перейти к Этапу 3 (cm → morph weights)
