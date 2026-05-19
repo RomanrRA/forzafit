@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   Flame, LayoutDashboard, ListChecks, ClipboardList, TrendingUp, Scale, Trophy, User,
-  ChevronsLeft, ChevronsRight, Newspaper, Users, Medal,
+  ChevronsLeft, ChevronsRight, Newspaper, Users, Medal, Sparkles,
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
@@ -26,6 +26,7 @@ const navItems: NavItem[] = [
   { href: '/plans', label: 'Планы', icon: ClipboardList },
   { href: '/progress', label: 'Прогресс', icon: TrendingUp },
   { href: '/body', label: 'Замеры', icon: Scale },
+  { href: '/avatar', label: 'Аватар', icon: Sparkles },
   { href: '/achievements', label: 'Достижения', icon: Trophy },
   { href: '/feed', label: 'Лента', icon: Newspaper },
   { href: '/friends', label: 'Друзья', icon: Users },
