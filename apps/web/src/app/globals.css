@@ -298,3 +298,22 @@ input[type="datetime-local"]::-webkit-calendar-picker-indicator {
 .pt-safe { padding-top: env(safe-area-inset-top, 0px); }
 .pb-safe { padding-bottom: max(1rem, env(safe-area-inset-bottom, 0px)); }
 .pb-nav-safe { padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px)); }
+
+/* ── Avatar viewer responsive layout ─────────────────────── */
+.avatar-canvas-card {
+  /* Базовая высота для grid; на мобиле перебивается media-rule ниже. */
+  height: 100%;
+}
+@media (max-width: 880px) {
+  .avatar-grid {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+  }
+  .avatar-canvas-card {
+    height: 60vh !important;
+    min-height: 360px !important;
+  }
+  .avatar-grid > :last-child {
+    max-height: none !important;
+  }
+}

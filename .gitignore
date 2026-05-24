@@ -61,8 +61,15 @@ apps/backend/playwright-tests/
 mockups/
 *.png
 !apps/web/public/icons/*.png
+!apps/web/public/avatar/eyes/*.png
 *.html
 !apps/web/src/**/*.html
+
+# 3D-аватар: skin-текстуры тяжёлые (~150 МБ) — копируются из MakeHuman.
+# GLB-файлы (male.glb ~5 МБ, female.glb ~10 МБ) теперь в репо: оптимизированы
+# через `gltf-transform resize 1024 → webp q=80`. Eye-текстуры (~6 МБ) тоже
+# в репо (см. *.png whitelist выше).
+apps/web/public/avatar/skins/
 
 # PWA generated files (created at build time)
 apps/web/public/sw.js

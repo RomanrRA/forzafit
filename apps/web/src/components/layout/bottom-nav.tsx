@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, ListChecks, ClipboardList, Scale, Trophy, User,
-  MoreHorizontal, TrendingUp, Newspaper, Users, Medal, X,
+  MoreHorizontal, TrendingUp, Newspaper, Users, Medal, X, Sparkles,
 } from 'lucide-react'
 import { useFriends } from '@/hooks/use-social'
 
@@ -24,6 +24,7 @@ const primaryItems: NavItem[] = [
 ]
 
 const moreItems: NavItem[] = [
+  { href: '/avatar', label: 'Аватар', icon: Sparkles },
   { href: '/progress', label: 'Прогресс', icon: TrendingUp },
   { href: '/feed', label: 'Лента', icon: Newspaper },
   { href: '/friends', label: 'Друзья', icon: Users },

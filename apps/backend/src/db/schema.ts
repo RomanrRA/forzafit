@@ -264,6 +264,24 @@ export const bodyMeasurements = pgTable(
   ],
 );
 
+// ─── Body Goals ───────────────────────────────────────────────────────────
+
+export const bodyGoals = pgTable('body_goals', {
+  userId: uuid('user_id')
+    .primaryKey()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  weightKg: real('weight_kg'),
+  bodyFatPct: real('body_fat_pct'),
+  chestCm: real('chest_cm'),
+  waistCm: real('waist_cm'),
+  hipsCm: real('hips_cm'),
+  armCm: real('arm_cm'),
+  thighCm: real('thigh_cm'),
+  targetDate: timestamp('target_date', { mode: 'date' }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
 // ─── Sync Events ──────────────────────────────────────────────────────────────
 
 export const syncEvents = pgTable(
@@ -512,6 +530,10 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   syncEvents: many(syncEvents),
   planTemplates: many(planTemplates),
   bodyMeasurements: many(bodyMeasurements),
+  bodyGoal: one(bodyGoals, {
+    fields: [users.id],
+    references: [bodyGoals.userId],
+  }),
   aiConversations: many(aiConversations),
   streak: one(streaks, {
     fields: [users.id],
@@ -665,6 +687,13 @@ export const exercisesRelations = relations(exercises, ({ one }) => ({
 export const bodyMeasurementsRelations = relations(bodyMeasurements, ({ one }) => ({
   user: one(users, {
     fields: [bodyMeasurements.userId],
+    references: [users.id],
+  }),
+}));
+
+export const bodyGoalsRelations = relations(bodyGoals, ({ one }) => ({
+  user: one(users, {
+    fields: [bodyGoals.userId],
     references: [users.id],
   }),
 }));

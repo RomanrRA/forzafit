@@ -10,6 +10,7 @@ import { WorkoutsModule } from './workouts/workouts.module';
 import { SyncModule } from './sync/sync.module';
 import { PlanTemplatesModule } from './plan-templates/plan-templates.module';
 import { BodyMeasurementsModule } from './body-measurements/body-measurements.module';
+import { BodyGoalsModule } from './body-goals/body-goals.module';
 import { AiModule } from './ai/ai.module';
 import { GamificationModule } from './gamification/gamification.module';
 import { FriendsModule } from './friends/friends.module';
@@ -37,6 +38,7 @@ import { CalendarModule } from './calendar/calendar.module';
     SyncModule,
     PlanTemplatesModule,
     BodyMeasurementsModule,
+    BodyGoalsModule,
     AiModule,
     GamificationModule,
     FriendsModule,
