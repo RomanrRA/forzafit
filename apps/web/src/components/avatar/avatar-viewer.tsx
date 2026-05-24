@@ -64,43 +64,43 @@ const SKIN_PRESETS: {
   src: string
 }[] = [
   // ── Женские (skins01_cc0) ──
-  { key: 'light_f',          label: 'Светлая',        gender: 'female', src: '/avatar/skins/light_f.png' },
-  { key: 'fair_f',           label: 'Бледная',        gender: 'female', src: '/avatar/skins/fair_f.png' },
-  { key: 'creamy_f',         label: 'Кремовая',       gender: 'female', src: '/avatar/skins/creamy_f.png' },
-  { key: 'uniform_f',        label: 'Ровная',         gender: 'female', src: '/avatar/skins/uniform_f.png' },
-  { key: 'genuine_f',        label: 'Натуральная',    gender: 'female', src: '/avatar/skins/genuine_f.png' },
-  { key: 'alana_f',          label: 'Алана',          gender: 'female', src: '/avatar/skins/alana_f.png' },
-  { key: 'zoey_f',           label: 'Зои',            gender: 'female', src: '/avatar/skins/zoey_f.png' },
-  { key: 'redhead_f',        label: 'Рыжая',          gender: 'female', src: '/avatar/skins/redhead_f.png' },
-  { key: 'freckles_f',       label: 'Веснушки',       gender: 'female', src: '/avatar/skins/freckles_f.png' },
-  { key: 'ginger_f',         label: 'Имбирная',       gender: 'female', src: '/avatar/skins/ginger_f.png' },
-  { key: 'ginger2_f',        label: 'Имбирная 2',     gender: 'female', src: '/avatar/skins/ginger2_f.png' },
-  { key: 'ginger_makeup_f',  label: 'Имб. макияж',    gender: 'female', src: '/avatar/skins/ginger_makeup_f.png' },
-  { key: 'makeup_f',         label: 'С макияжем',     gender: 'female', src: '/avatar/skins/makeup_f.png' },
-  { key: 'natural_makeup_f', label: 'Натур. макияж',  gender: 'female', src: '/avatar/skins/natural_makeup_f.png' },
-  { key: 'violet_makeup_f',  label: 'Фиол. макияж',   gender: 'female', src: '/avatar/skins/violet_makeup_f.png' },
-  { key: 'midtoned_f',       label: 'Средний',        gender: 'female', src: '/avatar/skins/midtoned_f.png' },
-  { key: 'eurasian_young_f', label: 'Евразийка мол.', gender: 'female', src: '/avatar/skins/eurasian_young_f.png' },
-  { key: 'eurasian_mid_f',   label: 'Евразийка сред.',gender: 'female', src: '/avatar/skins/eurasian_mid_f.png' },
-  { key: 'eurasian_old_f',   label: 'Евразийка возр.',gender: 'female', src: '/avatar/skins/eurasian_old_f.png' },
-  { key: 'bronze_f',         label: 'Загорелая',      gender: 'female', src: '/avatar/skins/bronze_f.png' },
-  { key: 'bronze_makeup_f',  label: 'Загар + макияж', gender: 'female', src: '/avatar/skins/bronze_makeup_f.png' },
-  { key: 'indian_f',         label: 'Индийская',      gender: 'female', src: '/avatar/skins/indian_f.png' },
-  { key: 'indian2_f',        label: 'Индийская 2',    gender: 'female', src: '/avatar/skins/indian2_f.png' },
+  { key: 'light_f',          label: 'Светлая',        gender: 'female', src: '/avatar/skins/light_f.webp' },
+  { key: 'fair_f',           label: 'Бледная',        gender: 'female', src: '/avatar/skins/fair_f.webp' },
+  { key: 'creamy_f',         label: 'Кремовая',       gender: 'female', src: '/avatar/skins/creamy_f.webp' },
+  { key: 'uniform_f',        label: 'Ровная',         gender: 'female', src: '/avatar/skins/uniform_f.webp' },
+  { key: 'genuine_f',        label: 'Натуральная',    gender: 'female', src: '/avatar/skins/genuine_f.webp' },
+  { key: 'alana_f',          label: 'Алана',          gender: 'female', src: '/avatar/skins/alana_f.webp' },
+  { key: 'zoey_f',           label: 'Зои',            gender: 'female', src: '/avatar/skins/zoey_f.webp' },
+  { key: 'redhead_f',        label: 'Рыжая',          gender: 'female', src: '/avatar/skins/redhead_f.webp' },
+  { key: 'freckles_f',       label: 'Веснушки',       gender: 'female', src: '/avatar/skins/freckles_f.webp' },
+  { key: 'ginger_f',         label: 'Имбирная',       gender: 'female', src: '/avatar/skins/ginger_f.webp' },
+  { key: 'ginger2_f',        label: 'Имбирная 2',     gender: 'female', src: '/avatar/skins/ginger2_f.webp' },
+  { key: 'ginger_makeup_f',  label: 'Имб. макияж',    gender: 'female', src: '/avatar/skins/ginger_makeup_f.webp' },
+  { key: 'makeup_f',         label: 'С макияжем',     gender: 'female', src: '/avatar/skins/makeup_f.webp' },
+  { key: 'natural_makeup_f', label: 'Натур. макияж',  gender: 'female', src: '/avatar/skins/natural_makeup_f.webp' },
+  { key: 'violet_makeup_f',  label: 'Фиол. макияж',   gender: 'female', src: '/avatar/skins/violet_makeup_f.webp' },
+  { key: 'midtoned_f',       label: 'Средний',        gender: 'female', src: '/avatar/skins/midtoned_f.webp' },
+  { key: 'eurasian_young_f', label: 'Евразийка мол.', gender: 'female', src: '/avatar/skins/eurasian_young_f.webp' },
+  { key: 'eurasian_mid_f',   label: 'Евразийка сред.',gender: 'female', src: '/avatar/skins/eurasian_mid_f.webp' },
+  { key: 'eurasian_old_f',   label: 'Евразийка возр.',gender: 'female', src: '/avatar/skins/eurasian_old_f.webp' },
+  { key: 'bronze_f',         label: 'Загорелая',      gender: 'female', src: '/avatar/skins/bronze_f.webp' },
+  { key: 'bronze_makeup_f',  label: 'Загар + макияж', gender: 'female', src: '/avatar/skins/bronze_makeup_f.webp' },
+  { key: 'indian_f',         label: 'Индийская',      gender: 'female', src: '/avatar/skins/indian_f.webp' },
+  { key: 'indian2_f',        label: 'Индийская 2',    gender: 'female', src: '/avatar/skins/indian2_f.webp' },
   // ── Мужские (skins02_cc0) ──
-  { key: 'light_m',          label: 'Светлая',        gender: 'male',   src: '/avatar/skins/light_m.png' },
-  { key: 'freckles_m',       label: 'Веснушки',       gender: 'male',   src: '/avatar/skins/freckles_m.png' },
-  { key: 'ginger_m',         label: 'Имбирный',       gender: 'male',   src: '/avatar/skins/ginger_m.png' },
-  { key: 'aksel_m',          label: 'Аксель',         gender: 'male',   src: '/avatar/skins/aksel_m.png' },
-  { key: 'slavic_mid_m',     label: 'Славянин сред.', gender: 'male',   src: '/avatar/skins/slavic_mid_m.png' },
-  { key: 'slavic_old_m',     label: 'Славянин возр.', gender: 'male',   src: '/avatar/skins/slavic_old_m.png' },
-  { key: 'eurasian_old_m',   label: 'Евразиец возр.', gender: 'male',   src: '/avatar/skins/eurasian_old_m.png' },
-  { key: 'emo_m',            label: 'Эмо',            gender: 'male',   src: '/avatar/skins/emo_m.png' },
-  { key: 'eyeliner_m',       label: 'С подводкой',    gender: 'male',   src: '/avatar/skins/eyeliner_m.png' },
-  { key: 'goth_m',           label: 'Готический',     gender: 'male',   src: '/avatar/skins/goth_m.png' },
-  { key: 'viking_m',         label: 'Викинг (тату)',  gender: 'male',   src: '/avatar/skins/viking_m.png' },
-  { key: 'tattooed_m',       label: 'С тату',         gender: 'male',   src: '/avatar/skins/tattooed_m.png' },
-  { key: 'african_m',        label: 'Тёмная',         gender: 'male',   src: '/avatar/skins/african_m.png' },
+  { key: 'light_m',          label: 'Светлая',        gender: 'male',   src: '/avatar/skins/light_m.webp' },
+  { key: 'freckles_m',       label: 'Веснушки',       gender: 'male',   src: '/avatar/skins/freckles_m.webp' },
+  { key: 'ginger_m',         label: 'Имбирный',       gender: 'male',   src: '/avatar/skins/ginger_m.webp' },
+  { key: 'aksel_m',          label: 'Аксель',         gender: 'male',   src: '/avatar/skins/aksel_m.webp' },
+  { key: 'slavic_mid_m',     label: 'Славянин сред.', gender: 'male',   src: '/avatar/skins/slavic_mid_m.webp' },
+  { key: 'slavic_old_m',     label: 'Славянин возр.', gender: 'male',   src: '/avatar/skins/slavic_old_m.webp' },
+  { key: 'eurasian_old_m',   label: 'Евразиец возр.', gender: 'male',   src: '/avatar/skins/eurasian_old_m.webp' },
+  { key: 'emo_m',            label: 'Эмо',            gender: 'male',   src: '/avatar/skins/emo_m.webp' },
+  { key: 'eyeliner_m',       label: 'С подводкой',    gender: 'male',   src: '/avatar/skins/eyeliner_m.webp' },
+  { key: 'goth_m',           label: 'Готический',     gender: 'male',   src: '/avatar/skins/goth_m.webp' },
+  { key: 'viking_m',         label: 'Викинг (тату)',  gender: 'male',   src: '/avatar/skins/viking_m.webp' },
+  { key: 'tattooed_m',       label: 'С тату',         gender: 'male',   src: '/avatar/skins/tattooed_m.webp' },
+  { key: 'african_m',        label: 'Тёмная',         gender: 'male',   src: '/avatar/skins/african_m.webp' },
 ]
 
 // Причёски — должны совпадать с ключами `hair_<key>` из Blender pipeline
@@ -306,18 +306,24 @@ function ModelMesh({
         if (!mesh.isMesh || !mesh.name) return
         const n = mesh.name.toLowerCase()
         if (n === 'base') return
+        // Hair, clothes — точно не глаза. Иначе эвристика по имени материала
+        // (brown.mhmat для глаз) ловит «Hair_bun_brown.mhmat» и текстура глаза
+        // покрывает причёску.
+        if (n.startsWith('hair_') || n.startsWith('clothes_')) return
         const mats = Array.isArray(mesh.material)
           ? (mesh.material as THREE.Material[])
           : [mesh.material as THREE.Material]
-        const matNames = mats
-          .map((m) => (m as { name?: string })?.name?.toLowerCase() ?? '')
-          .join('|')
+        const matNamesArr = mats.map(
+          (m) => (m as { name?: string })?.name?.toLowerCase() ?? '',
+        )
+        const matNames = matNamesArr.join('|')
         const isEye =
           (n.includes('eye') && !n.includes('eyelash')) ||
           n === 'low-poly' ||
           n === 'low_poly' ||
           (matNames.includes('eye') && !matNames.includes('eyelash')) ||
-          matNames.includes('brown')
+          // Exact-match по eye-material имени, без includes — иначе ловит hair.
+          matNamesArr.some((mn) => mn === 'brown' || mn === 'brown.mhmat')
         if (!isEye) return
         for (const m of mats) {
           const mat = m as THREE.MeshStandardMaterial

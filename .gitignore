@@ -65,11 +65,10 @@ mockups/
 *.html
 !apps/web/src/**/*.html
 
-# 3D-аватар: skin-текстуры тяжёлые (~150 МБ) — копируются из MakeHuman.
-# GLB-файлы (male.glb ~5 МБ, female.glb ~10 МБ) теперь в репо: оптимизированы
-# через `gltf-transform resize 1024 → webp q=80`. Eye-текстуры (~6 МБ) тоже
-# в репо (см. *.png whitelist выше).
-apps/web/public/avatar/skins/
+# 3D-аватар: skin-текстуры скопированы из MakeHuman pak'ов skins01/02_cc0
+# (исходные PNG 4096×4096 = ~150 МБ суммарно). После `sharp resize 2048 →
+# webp q=80` сжаты до ~5 МБ — лежат в репо. GLB-файлы (male ~5 МБ, female
+# ~10 МБ) после `gltf-transform resize 1024 → webp q=80` тоже в репо.
 
 # PWA generated files (created at build time)
 apps/web/public/sw.js
