@@ -108,10 +108,10 @@ const SKIN_PRESETS: {
 // gender 'both' = унисекс (есть в обоих GLB).
 type HairGender = AvatarGender | 'both'
 const HAIR_STYLES: { key: string | null; label: string; gender: HairGender }[] = [
-  // «Без причёски» — только для женщин: у мужчин hair-mhclo через
-  // delete-groups вырезает вершины макушки под hair, и без причёски остаётся
-  // дыра в черепе. Для мужчин выбор всегда из непустого списка.
-  { key: null,                label: 'Без причёски',     gender: 'female' },
+  // «Без причёски» — для обоих полов. У мужчин раньше hair-mhclo через
+  // delete-groups вырезала макушку, теперь Blender pipeline снимает Mask-
+  // модификаторы перед export (strip_hair_mask_modifiers), и макушка цела.
+  { key: null,                label: 'Без причёски',     gender: 'both'   },
   // Женские — 11 пресетов (7 «классических» женских + 4 формально-унисекс
   // ассета, но визуально женственные: длинные, аниме, повязка, маугли).
   { key: 'blunt_bob',         label: 'Каре прямое',       gender: 'female' },
@@ -158,25 +158,45 @@ function ModelMesh({
   hairKey: string | null
   eyeSrc: string
 }) {
-  const { scene } = useGLTF(url)
+  const { scene } = useGLTF(url, true, true)
   const root = useRef<THREE.Group>(null)
   const currentRef = useRef<Record<string, number>>({})
 
+  // DIAG: одноразовый дамп morph-структуры по mesh-объектам сцены.
+  useEffect(() => {
+    const rows: Array<{ name: string; dict: string[]; infl: number }> = []
+    scene.traverse((obj) => {
+      const mesh = obj as THREE.Mesh
+      if (!mesh.isMesh) return
+      const dict = mesh.morphTargetDictionary
+        ? Object.keys(mesh.morphTargetDictionary)
+        : []
+      const infl = mesh.morphTargetInfluences?.length ?? 0
+      rows.push({ name: mesh.name || '(no name)', dict, infl })
+    })
+    // eslint-disable-next-line no-console
+    console.log('[AVATAR DIAG]', url)
+    for (const r of rows) {
+      // eslint-disable-next-line no-console
+      console.log(`  ${r.name}  infl=${r.infl}  morphs=[${r.dict.join(',')}]`)
+    }
+  }, [scene, url])
+
   // Skin diffuse: подгружаем PNG из skins01/02 CC0 как texture и применяем
-  // как map у body mesh (max-vertex — это body, остальное — eyes/teeth/clothes).
-  // У GLB body нет своего материала, three.js создаёт default MeshStandardMaterial.
+  // как map у body mesh. Body — это нода 'Human' (root MakeHuman + mesh
+  // 'base'); three.js при загрузке glTF берёт имя из node, поэтому
+  // mesh.name === 'Human'. Fallback на max-vertex отключён: у женского
+  // GLB hair_anime (91k верт) больше body (14k), max-vertex эвристика
+  // на нём ломалась — скин применялся на причёску.
   useEffect(() => {
     let cancelled = false
     let bodyMesh: THREE.Mesh | null = null
-    let maxVerts = 0
     scene.traverse((obj) => {
       const mesh = obj as THREE.Mesh
+      if (bodyMesh) return
       if (!mesh.isMesh || !mesh.geometry) return
-      const verts = mesh.geometry.attributes.position?.count ?? 0
-      if (verts > maxVerts) {
-        maxVerts = verts
-        bodyMesh = mesh
-      }
+      const n = mesh.name?.toLowerCase()
+      if (n === 'human' || n === 'base') bodyMesh = mesh
     })
     if (!bodyMesh) return
 
@@ -219,6 +239,58 @@ function ModelMesh({
       mesh.visible = hairKey !== null && key === hairKey
     })
   }, [scene, hairKey])
+
+  // MakeHuman экспортирует hair-материалы с alphaMode=BLEND. У BLEND нет
+  // depth write → при вращении пряди рисуются «сквозь себя», получается
+  // каша. Переключаем на alpha-test: depthWrite=true + transparent=false +
+  // alphaTest>0. DoubleSide — чтобы пряди читались с обеих сторон.
+  useEffect(() => {
+    scene.traverse((obj) => {
+      const mesh = obj as THREE.Mesh
+      if (!mesh.isMesh || !mesh.name) return
+      if (!mesh.name.toLowerCase().startsWith('hair_')) return
+      const mats = Array.isArray(mesh.material)
+        ? (mesh.material as THREE.Material[])
+        : [mesh.material as THREE.Material]
+      for (const m of mats) {
+        const mat = m as THREE.MeshStandardMaterial
+        if (!mat) continue
+        mat.transparent = false
+        mat.depthWrite = true
+        mat.alphaTest = 0.5
+        mat.side = THREE.DoubleSide
+        mat.needsUpdate = true
+      }
+    })
+  }, [scene])
+
+  // Одежда (clothes_*) и body лежат практически на одной плоскости — без
+  // глубинного зазора depth-buffer выбирает то одно, то другое и кожа
+  // мерцает сквозь трусы/бра. Сдвигаем clothes на сегмент вперёд через
+  // polygonOffset (рендер-уровень, без модификации геометрии). renderOrder=1
+  // подстраховывает порядок прохода — clothes идут после body.
+  useEffect(() => {
+    scene.traverse((obj) => {
+      const mesh = obj as THREE.Mesh
+      if (!mesh.isMesh || !mesh.name) return
+      if (!mesh.name.toLowerCase().startsWith('clothes_')) return
+      mesh.renderOrder = 1
+      const mats = Array.isArray(mesh.material)
+        ? (mesh.material as THREE.Material[])
+        : [mesh.material as THREE.Material]
+      for (const m of mats) {
+        const mat = m as THREE.MeshStandardMaterial
+        if (!mat) continue
+        mat.polygonOffset = true
+        mat.polygonOffsetFactor = -2
+        mat.polygonOffsetUnits = -2
+        mat.depthWrite = true
+        mat.transparent = false
+        mat.alphaTest = 0
+        mat.needsUpdate = true
+      }
+    })
+  }, [scene])
 
   // Цвет глаз — просто подменяем eye-map целиком на готовую текстуру
   // MakeHuman из `/avatar/eyes/<key>.png`. Никакой обработки на лету.
@@ -590,7 +662,10 @@ export default function AvatarViewer({
   const [focus, setFocus] = useState<'face' | 'body'>('body')
   const zoomRef = useRef<ZoomFn | null>(null)
 
-  const url = `/avatar/${gender}.glb`
+  // Версия в query string — cache buster. Поднимать при перегенерации GLB,
+  // иначе браузер / SW отдают старый файл и новые morph-таргеты на одежде
+  // не подхватываются.
+  const url = `/avatar/${gender}.glb?v=7`
   const visibleMorphs = useMemo(() => getMorphsForGender(gender), [gender])
 
   const byGroup = useMemo(() => {
@@ -1203,5 +1278,5 @@ export default function AvatarViewer({
   )
 }
 
-useGLTF.preload('/avatar/male.glb')
-useGLTF.preload('/avatar/female.glb')
+useGLTF.preload('/avatar/male.glb?v=7', true, true)
+useGLTF.preload('/avatar/female.glb?v=7', true, true)

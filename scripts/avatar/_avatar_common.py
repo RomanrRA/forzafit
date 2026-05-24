@@ -470,6 +470,9 @@ def load_clothes_variants(body, slot, variants):
             obj.data.name = canon
         obj["clothes_slot"] = slot
         obj["clothes_key"] = key
+        # Сохраняем путь к MHCLO — нужен потом для transfer_body_shapekeys_to_clothes
+        # (barycentric проекция вершин одежды по треугольникам тела).
+        obj["mhclo_path"] = fp
         loaded.append(canon)
         log(f"  loaded clothes {slot}/{key} ← {os.path.basename(fp)} → {canon}")
     return loaded
@@ -533,7 +536,278 @@ def load_hair_variants(body, variants):
     return loaded
 
 
+def _import_mhclo_class():
+    """Lazy импорт Mhclo (MPFB extension namespace в Blender 5.x / legacy mpfb)."""
+    last_exc = None
+    for modname in ("bl_ext.user_default.mpfb.entities.clothes.mhclo",
+                    "mpfb.entities.clothes.mhclo"):
+        try:
+            mod = __import__(modname, fromlist=["Mhclo"])
+            cls = getattr(mod, "Mhclo", None)
+            if cls is not None:
+                return cls
+        except Exception as e:
+            last_exc = e
+    log(f"  [transfer] FAIL import Mhclo: {type(last_exc).__name__}: {last_exc}")
+    return None
+
+
+def _snapshot_max_delta_from_basis(clothes, active_idx):
+    """Максимальный |Δ| между активным shape key и Basis. Диагностический."""
+    if not clothes.data.shape_keys:
+        return 0.0
+    sks = clothes.data.shape_keys.key_blocks
+    if active_idx <= 0 or active_idx >= len(sks):
+        return 0.0
+    basis = sks[0].data
+    active = sks[active_idx].data
+    m = 0.0
+    n = min(len(basis), len(active))
+    for i in range(n):
+        dx = active[i].co[0] - basis[i].co[0]
+        dy = active[i].co[1] - basis[i].co[1]
+        dz = active[i].co[2] - basis[i].co[2]
+        d2 = dx*dx + dy*dy + dz*dz
+        if d2 > m:
+            m = d2
+    return m ** 0.5
+
+
+def _build_clothes_to_body_nearest(body, clothes):
+    """KD-tree по body Basis-вершинам → для каждой clothes Basis-вершины
+    найти ближайшую body-вершину. Возвращает list[int] длиной по числу
+    clothes-вершин (или None если что-то пошло не так).
+
+    Нужен для fallback в _fit_clothes_into_active_shapekey, когда MHCLO
+    ссылается на helper-вершины (индексы > len(body.vertices) после
+    delete_helpers). Случается с MHCLO от wolgade (panties, bra) —
+    они индексированы по helper-юбкам MakeHuman.
+    """
+    from mathutils.kdtree import KDTree
+
+    body_sks = body.data.shape_keys
+    if body_sks and "Basis" in body_sks.key_blocks:
+        body_basis = body_sks.key_blocks["Basis"].data
+    else:
+        body_basis = body.data.vertices
+
+    clothes_sks = clothes.data.shape_keys
+    if clothes_sks and "Basis" in clothes_sks.key_blocks:
+        clothes_basis = clothes_sks.key_blocks["Basis"].data
+    else:
+        clothes_basis = clothes.data.vertices
+
+    kd = KDTree(len(body_basis))
+    for i, v in enumerate(body_basis):
+        kd.insert(v.co, i)
+    kd.balance()
+
+    nearest = [0] * len(clothes_basis)
+    for i, v in enumerate(clothes_basis):
+        _co, idx, _dist = kd.find(v.co)
+        nearest[i] = idx
+    return nearest
+
+
+def _fit_clothes_into_active_shapekey(body, clothes, mhclo, body_sk_name,
+                                      nearest_map=None):
+    """Записать в активный shape key clothes позиции, спроецированные на body
+    в состоянии «только body_sk_name поднят на 1.0».
+
+    Читаем абсолютные позиции вершин body напрямую из
+    `body.data.shape_keys.key_blocks[body_sk_name].data[i].co` — это
+    стабильные значения, не зависящие от depsgraph/evaluated_get
+    (headless Blender в `--background` режиме evaluated_get для shape keys
+    обновляет ненадёжно, поэтому идём через сырые данные).
+
+    Если MHCLO ссылается на helper-индексы (>= human_count) — fallback на
+    nearest-vertex: сдвигаем clothes-вершину на дельту ближайшей body-вершины
+    от её Basis-позиции. Менее точно (одежда двигается «жёстко» без локального
+    вращения), но работает для wolgade-MHCLO (panties, bra).
+    """
+    from mathutils import Vector
+
+    body_sks = body.data.shape_keys
+    if not body_sks or body_sk_name not in body_sks.key_blocks:
+        return False
+    human_vertices = body_sks.key_blocks[body_sk_name].data
+    human_count = len(human_vertices)
+    body_basis = body_sks.key_blocks["Basis"].data if "Basis" in body_sks.key_blocks else None
+
+    x_size = y_size = z_size = 1.0
+    if mhclo.x_scale and mhclo.y_scale and mhclo.z_scale:
+        if (mhclo.x_scale[0] < human_count and mhclo.x_scale[1] < human_count and
+                mhclo.y_scale[0] < human_count and mhclo.y_scale[1] < human_count and
+                mhclo.z_scale[0] < human_count and mhclo.z_scale[1] < human_count):
+            x_size = abs(human_vertices[mhclo.x_scale[0]].co[0]
+                         - human_vertices[mhclo.x_scale[1]].co[0]) / mhclo.x_scale[2]
+            y_size = abs(human_vertices[mhclo.y_scale[0]].co[2]
+                         - human_vertices[mhclo.y_scale[1]].co[2]) / mhclo.y_scale[2]
+            z_size = abs(human_vertices[mhclo.z_scale[0]].co[1]
+                         - human_vertices[mhclo.z_scale[1]].co[1]) / mhclo.z_scale[2]
+
+    if not clothes.data.shape_keys:
+        return False
+    active_idx = clothes.active_shape_key_index
+    sks = clothes.data.shape_keys.key_blocks
+    if active_idx <= 0 or active_idx >= len(sks):
+        return False
+    clothes_verts = sks[active_idx].data
+    clothes_basis = sks["Basis"].data if "Basis" in sks else None
+
+    bary_ok = 0
+    fallback_ok = 0
+    skipped = 0
+    for i, info in mhclo.verts.items():
+        if i >= len(clothes_verts):
+            skipped += 1
+            continue
+        v0, v1, v2 = info["verts"]
+        if v0 >= human_count or v1 >= human_count or v2 >= human_count:
+            # MHCLO ссылается на удалённые helper-вершины. Fallback на nearest.
+            if nearest_map is None or body_basis is None or clothes_basis is None:
+                skipped += 1
+                continue
+            nearest_idx = nearest_map[i]
+            if nearest_idx >= human_count:
+                skipped += 1
+                continue
+            delta = human_vertices[nearest_idx].co - body_basis[nearest_idx].co
+            clothes_verts[i].co = clothes_basis[i].co + delta
+            fallback_ok += 1
+            continue
+        w = info["weights"]
+        o = info["offsets"]
+        offset = Vector((o[0] * x_size, o[1] * z_size, o[2] * y_size))
+        pos = (w[0] * human_vertices[v0].co
+               + w[1] * human_vertices[v1].co
+               + w[2] * human_vertices[v2].co
+               + offset)
+        clothes_verts[i].co = pos
+        bary_ok += 1
+
+    # Если ВСЁ через fallback — заодно покрыть clothes-вершины которых нет в
+    # mhclo.verts (бывает, если в mhclo не каждая cloth-вершина mapped).
+    if bary_ok == 0 and fallback_ok > 0 and clothes_basis is not None:
+        mapped = set(mhclo.verts.keys())
+        for i in range(len(clothes_verts)):
+            if i in mapped:
+                continue
+            nearest_idx = nearest_map[i]
+            if nearest_idx >= human_count:
+                continue
+            delta = human_vertices[nearest_idx].co - body_basis[nearest_idx].co
+            clothes_verts[i].co = clothes_basis[i].co + delta
+            fallback_ok += 1
+
+    log(f"    fit {clothes.name}/{body_sk_name}: bary={bary_ok} fallback={fallback_ok} skip={skipped}")
+    return (bary_ok + fallback_ok) > 0
+
+
+def transfer_body_shapekeys_to_clothes(body, slot_to_shape_keys):
+    """Перенести деформации body shape keys на shape keys одежды.
+
+    Для каждого clothes-объекта в сцене (с custom prop 'clothes_slot' и
+    'mhclo_path') добавляем shape keys из slot_to_shape_keys[slot] и
+    заполняем их через barycentric projection (Mhclo.verts).
+
+    Three.js на runtime поднимает morph influence по имени shape key — тело
+    и одежда поднимут одинаковый morph синхронно.
+
+    slot_to_shape_keys пример: {'bottom': ['waist','hips','thigh',
+    'muscle','bodyFat'], 'top': ['chest','breastSize','muscle','bodyFat']}.
+    """
+    Mhclo = _import_mhclo_class()
+    if Mhclo is None:
+        log("  transfer: SKIP — Mhclo не импортирован")
+        return
+
+    clothes_objs = []
+    for o in bpy.context.scene.objects:
+        if o.type != "MESH":
+            continue
+        slot = o.get("clothes_slot")
+        path = o.get("mhclo_path")
+        if not slot or not path:
+            continue
+        if not slot_to_shape_keys.get(slot):
+            continue
+        clothes_objs.append((o, slot, path))
+
+    if not clothes_objs:
+        log("  transfer: clothes-объектов с подходящим slot нет")
+        return
+    if not body.data.shape_keys:
+        log("  transfer: на body нет shape keys")
+        return
+
+    body_sks = body.data.shape_keys.key_blocks
+
+    total_transferred = 0
+    for clothes, slot, mhclo_path in clothes_objs:
+        sk_names = slot_to_shape_keys.get(slot, [])
+        mhclo = Mhclo()
+        mhclo.load(mhclo_path)
+        mhclo.clothes = clothes
+
+        if not clothes.data.shape_keys:
+            clothes.shape_key_add(name="Basis", from_mix=False)
+
+        nearest_map = _build_clothes_to_body_nearest(body, clothes)
+
+        ok_for_this = 0
+        for sk_name in sk_names:
+            if sk_name not in body_sks:
+                continue
+            sks_block = clothes.data.shape_keys.key_blocks
+            if sk_name not in sks_block:
+                clothes.shape_key_add(name=sk_name, from_mix=False)
+            sks_block = clothes.data.shape_keys.key_blocks
+            idx = sks_block.find(sk_name)
+            if idx <= 0:
+                continue
+            clothes.active_shape_key_index = idx
+
+            if _fit_clothes_into_active_shapekey(body, clothes, mhclo, sk_name,
+                                                 nearest_map=nearest_map):
+                ok_for_this += 1
+                dmax = _snapshot_max_delta_from_basis(clothes, idx)
+                log(f"    {clothes.name}/{sk_name}: max delta = {dmax:.4f}")
+
+        total_transferred += ok_for_this
+        log(f"  transferred {ok_for_this}/{len(sk_names)} shape keys → {clothes.name}")
+
+    log(f"  transfer: total {total_transferred} clothes shape keys")
+
+
+def strip_hair_mask_modifiers(body):
+    """Снять Mask-модификаторы у body, которые добавляют hair-mhclo через
+    delete-groups. Без этого export_apply=True вырезает вершины макушки и
+    при показе «Без причёски» получается дыра. Hair всё равно лежит сверху;
+    возможен лёгкий z-fight на коротких причёсках — это меньшее зло.
+
+    Не трогает Mask-модификаторы с другими именами/группами (на случай
+    если когда-нибудь появятся осознанные cutout-маски).
+    """
+    if not body or body.type != "MESH":
+        return
+    removed = []
+    for mod in list(body.modifiers):
+        if mod.type != "MASK":
+            continue
+        vgname = (mod.vertex_group or "").lower()
+        if "delete" in vgname or "hair" in vgname:
+            removed.append(f"{mod.name}({mod.vertex_group})")
+            body.modifiers.remove(mod)
+    if removed:
+        log(f"  stripped hair Mask modifiers: {removed}")
+
+
 def export_glb(body, out_path: str):
+    # Перед export_apply снимаем Mask-модификаторы от hair-mhclo: иначе
+    # макушка вырезается и «Без причёски» показывает дыру.
+    strip_hair_mask_modifiers(body)
+
     # Выбираем body + глаза/ресницы/зубы (все остальные mesh-объекты сцены),
     # чтобы в GLB попали глаза. MPFB создаёт их отдельными meshes; без них
     # глазницы пустые.

@@ -148,6 +148,14 @@ def main():
         if load_paired_targets_as_shapekey(body, name, rel_paths, weight):
             built += 1
 
+    # 6.5. Transfer body shape keys → clothes. Точная barycentric для MHCLO,
+    # ссылающейся на body-вершины (boxer_briefs, simple_shorts), и nearest-vertex
+    # fallback для wolgade-стилей (panties, bra), индексированных по удалённым
+    # helper-вершинам.
+    transfer_body_shapekeys_to_clothes(body, {
+        "bottom": ["waist", "hips", "thigh", "muscle", "bodyFat"],
+    })
+
     # 7. Export.
     out_path = os.path.join(OUT_DIR, "male.glb")
     os.makedirs(OUT_DIR, exist_ok=True)
