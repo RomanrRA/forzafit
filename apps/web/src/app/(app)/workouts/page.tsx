@@ -53,7 +53,12 @@ export default function WorkoutsPage() {
   const workouts = data?.items ?? []
   const total = data?.total ?? 0
   const totalPages = Math.ceil(total / pageSize)
-  const allSelected = workouts.length > 0 && workouts.every((w) => selected.has(w.id))
+  // На вкладке «Выполненные» — completed-тренировки разрешено выделять и удалять.
+  // На всех остальных вкладках выполненные защищены: только просмотр.
+  const isCompletedTab = tab === 'completed'
+  const selectableWorkouts = isCompletedTab ? workouts : workouts.filter((w) => !w.finishedAt)
+  const allSelected =
+    selectableWorkouts.length > 0 && selectableWorkouts.every((w) => selected.has(w.id))
 
   function handleTabChange(t: Tab) {
     setTab(t)
@@ -75,7 +80,7 @@ export default function WorkoutsPage() {
     if (allSelected) {
       setSelected(new Set())
     } else {
-      setSelected(new Set(workouts.map((w) => w.id)))
+      setSelected(new Set(selectableWorkouts.map((w) => w.id)))
     }
   }
 
@@ -268,13 +273,18 @@ export default function WorkoutsPage() {
             ? 'text-red-500/70 dark:text-red-500/60'
             : 'text-muted-foreground'
 
+          const canDelete = isCompletedTab || !isCompleted
+          const lockTitle = 'Выполненные тренировки можно удалить только во вкладке «Выполненные»'
+
           return (
             <div key={w.id} className="flex items-start gap-2 group">
               <input
                 type="checkbox"
-                className="h-4 w-4 rounded border-border accent-primary cursor-pointer shrink-0 mt-4"
+                className="h-4 w-4 rounded border-border accent-primary shrink-0 mt-4 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
                 checked={selected.has(w.id)}
                 onChange={() => toggleSelect(w.id)}
+                disabled={!canDelete}
+                title={canDelete ? undefined : lockTitle}
               />
               <Link href={`/workouts/${w.id}`} className="flex-1 min-w-0">
                 <Card className={`transition-colors cursor-pointer ${cardClass}`}>
@@ -298,18 +308,20 @@ export default function WorkoutsPage() {
                           </span>
                         </div>
                       </div>
-                      {/* Delete button */}
-                      <button
-                        className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors opacity-0 group-hover:opacity-100 shrink-0 sm:mt-0.5"
-                        onClick={(e) => {
-                          e.preventDefault()
-                          if (confirm(`Удалить «${w.title}»?`)) {
-                            deleteMutation.mutate(w.id)
-                          }
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      {/* Delete button — спрятана для выполненных тренировок вне вкладки «Выполненные» */}
+                      {canDelete && (
+                        <button
+                          className="p-1.5 rounded-md text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors opacity-0 group-hover:opacity-100 shrink-0 sm:mt-0.5"
+                          onClick={(e) => {
+                            e.preventDefault()
+                            if (confirm(`Удалить «${w.title}»?`)) {
+                              deleteMutation.mutate(w.id)
+                            }
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
