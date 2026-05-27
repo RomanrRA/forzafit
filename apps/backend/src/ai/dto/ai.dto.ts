@@ -7,6 +7,8 @@ import {
   IsArray,
   IsInt,
   Min,
+  Max,
+  IsIn,
   ArrayMaxSize,
 } from 'class-validator';
 
@@ -27,6 +29,29 @@ export class StartConversationDto {
   @IsString()
   @MaxLength(8000)
   initialMessage?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Намерения по форме/тренингу. Если массив непустой — AI сначала подберёт целевые показатели через suggest_body_goal, потом план под них. Можно комбинировать (например, lose+strength = рекомпозиция).',
+    enum: ['lose', 'gain', 'maintain', 'strength'],
+    isArray: true,
+  })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(4)
+  @IsIn(['lose', 'gain', 'maintain', 'strength'], { each: true })
+  intent?: ('lose' | 'gain' | 'maintain' | 'strength')[];
+
+  @ApiPropertyOptional({
+    description: 'Желаемый срок достижения цели в месяцах (2..12).',
+    minimum: 2,
+    maximum: 12,
+  })
+  @IsOptional()
+  @IsInt()
+  @Min(2)
+  @Max(12)
+  targetMonths?: number;
 }
 
 // SSE event shapes (for documentation only — not used as class-validator DTOs)
@@ -62,9 +87,28 @@ export type SseEvent =
   | SseDoneEvent
   | SseErrorEvent;
 
+export class FinalizeBodyGoalDto {
+  @ApiPropertyOptional() weightKg?: number | null;
+  @ApiPropertyOptional() bodyFatPct?: number | null;
+  @ApiPropertyOptional() chestCm?: number | null;
+  @ApiPropertyOptional() waistCm?: number | null;
+  @ApiPropertyOptional() hipsCm?: number | null;
+  @ApiPropertyOptional() armCm?: number | null;
+  @ApiPropertyOptional() thighCm?: number | null;
+  @ApiPropertyOptional() targetDate?: string | null;
+  @ApiPropertyOptional() rationale?: string;
+}
+
 export class FinalizeResponseDto {
   @ApiProperty({ description: 'ID созданного шаблона плана тренировок' })
   planTemplateId: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Целевые показатели тела, если AI подобрал их в этой беседе. null если intent не передавали.',
+    type: () => FinalizeBodyGoalDto,
+  })
+  bodyGoal?: FinalizeBodyGoalDto | null;
 }
 
 export class StartConversationResponseDto {

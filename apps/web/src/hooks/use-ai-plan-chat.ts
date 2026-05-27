@@ -13,13 +13,39 @@ export interface ChatMessage {
   toolCall?: { name: string; args: Record<string, unknown> }
 }
 
+export type CoachIntent = 'lose' | 'gain' | 'maintain' | 'strength'
+
+export interface StartOptions {
+  initialMessage?: string
+  intent?: CoachIntent[]
+  targetMonths?: number
+}
+
+export interface BodyGoalSuggestion {
+  weightKg?: number | null
+  bodyFatPct?: number | null
+  chestCm?: number | null
+  waistCm?: number | null
+  hipsCm?: number | null
+  armCm?: number | null
+  thighCm?: number | null
+  targetDate?: string | null
+  rationale?: string
+}
+
+export interface FinalizeResult {
+  planTemplateId: string
+  bodyGoal?: BodyGoalSuggestion | null
+}
+
 interface UseAiPlanChatResult {
   messages: ChatMessage[]
   isStreaming: boolean
   toolCallReady: boolean
-  start: (initialMessage?: string) => Promise<void>
+  goalSuggestion: BodyGoalSuggestion | null
+  start: (opts?: StartOptions) => Promise<void>
   sendMessage: (content: string) => Promise<void>
-  finalize: () => Promise<string>
+  finalize: () => Promise<FinalizeResult>
   reset: () => void
   error: string | null
 }
@@ -50,6 +76,8 @@ export function useAiPlanChat(): UseAiPlanChatResult {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isStreaming, setIsStreaming] = useState(false)
   const [toolCallReady, setToolCallReady] = useState(false)
+  const [goalSuggestion, setGoalSuggestion] =
+    useState<BodyGoalSuggestion | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   // conversationId received from the meta event
@@ -140,6 +168,11 @@ export function useAiPlanChat(): UseAiPlanChatResult {
             if (payload.name === 'generate_plan') {
               setToolCallReady(true)
             }
+            if (payload.name === 'suggest_body_goal') {
+              setGoalSuggestion(
+                (payload.args ?? {}) as BodyGoalSuggestion,
+              )
+            }
           } else if (payload.type === 'error') {
             setError((payload.message as string) ?? 'Ошибка сервера')
           } else if (payload.type === 'done') {
@@ -160,9 +193,11 @@ export function useAiPlanChat(): UseAiPlanChatResult {
     }
   }
 
-  const start = useCallback(async (initialMessage?: string) => {
+  const start = useCallback(async (opts: StartOptions = {}) => {
     if (startedRef.current) return
     startedRef.current = true
+
+    const { initialMessage, intent, targetMonths } = opts
 
     setIsStreaming(true)
     setError(null)
@@ -177,13 +212,18 @@ export function useAiPlanChat(): UseAiPlanChatResult {
 
     try {
       const token = getToken()
+      const body: Record<string, unknown> = {}
+      if (initialMessage) body.initialMessage = initialMessage
+      if (intent && intent.length > 0) body.intent = intent
+      if (targetMonths != null) body.targetMonths = targetMonths
+
       const response = await fetch(`${API_BASE}/ai/plans/start`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify(initialMessage ? { initialMessage } : {}),
+        body: JSON.stringify(body),
       })
 
       if (response.status === 401) {
@@ -250,7 +290,7 @@ export function useAiPlanChat(): UseAiPlanChatResult {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const finalize = useCallback(async (): Promise<string> => {
+  const finalize = useCallback(async (): Promise<FinalizeResult> => {
     const id = conversationIdRef.current
     if (!id) throw new Error('Сессия не инициализирована')
 
@@ -275,8 +315,9 @@ export function useAiPlanChat(): UseAiPlanChatResult {
       )
     }
 
-    const data = await response.json() as { planTemplateId: string }
-    return data.planTemplateId
+    const data = (await response.json()) as FinalizeResult
+    if (data.bodyGoal) setGoalSuggestion(data.bodyGoal)
+    return data
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -286,8 +327,19 @@ export function useAiPlanChat(): UseAiPlanChatResult {
     setMessages([])
     setIsStreaming(false)
     setToolCallReady(false)
+    setGoalSuggestion(null)
     setError(null)
   }, [])
 
-  return { messages, isStreaming, toolCallReady, start, sendMessage, finalize, reset, error }
+  return {
+    messages,
+    isStreaming,
+    toolCallReady,
+    goalSuggestion,
+    start,
+    sendMessage,
+    finalize,
+    reset,
+    error,
+  }
 }

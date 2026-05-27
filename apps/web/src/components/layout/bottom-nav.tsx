@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, ListChecks, ClipboardList, Scale, Trophy, User,
-  MoreHorizontal, TrendingUp, Newspaper, Users, Medal, X, Sparkles,
+  MoreHorizontal, TrendingUp, Users, X,
 } from 'lucide-react'
 import { useFriends } from '@/hooks/use-social'
 
@@ -19,16 +19,13 @@ const primaryItems: NavItem[] = [
   { href: '/dashboard', label: 'Дашборд', icon: LayoutDashboard },
   { href: '/workouts', label: 'Тренировки', icon: ListChecks },
   { href: '/plans', label: 'Планы', icon: ClipboardList },
-  { href: '/body', label: 'Замеры', icon: Scale },
-  { href: '/achievements', label: 'Достижения', icon: Trophy },
+  { href: '/body', label: 'Тело', icon: Scale },
+  { href: '/achievements', label: 'Цели', icon: Trophy },
 ]
 
 const moreItems: NavItem[] = [
-  { href: '/avatar', label: 'Аватар', icon: Sparkles },
   { href: '/progress', label: 'Прогресс', icon: TrendingUp },
-  { href: '/feed', label: 'Лента', icon: Newspaper },
-  { href: '/friends', label: 'Друзья', icon: Users },
-  { href: '/leaderboard', label: 'Топ', icon: Medal },
+  { href: '/social', label: 'Соцсеть', icon: Users },
   { href: '/profile', label: 'Профиль', icon: User },
 ]
 
@@ -222,7 +219,7 @@ export function BottomNav() {
             <div className="grid grid-cols-3 gap-2">
               {moreItems.map(({ href, label, icon: Icon }) => {
                 const active = pathname === href || pathname.startsWith(href + '/')
-                const showBadge = href === '/friends' && incomingCount > 0
+                const showBadge = href === '/social' && incomingCount > 0
                 return (
                   <Link
                     key={href}

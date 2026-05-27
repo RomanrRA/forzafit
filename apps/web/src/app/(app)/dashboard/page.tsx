@@ -2,24 +2,24 @@
 
 import { useState, useMemo } from 'react'
 import Link from 'next/link'
-import { format, startOfDay } from 'date-fns'
+import { format, startOfDay, differenceInCalendarDays } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import { useAuthStore } from '@/store/auth.store'
 import { useWorkouts } from '@/hooks/use-workouts'
 import { usePlanTemplates } from '@/hooks/use-plan-templates'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { AlertTriangle, ChevronDown, ChevronUp, Sparkles, Play } from 'lucide-react'
+import { AlertTriangle, Sparkles, Play } from 'lucide-react'
 import { PlanAdjustDialog } from '@/components/plans/plan-adjust-dialog'
 import { RecentPrCard } from '@/components/gamification/recent-pr-card'
 import { RecentAchievementCard } from '@/components/gamification/recent-achievement-card'
+import { ActiveQuestCard } from '@/components/gamification/active-quest-card'
 import { StreakHeatmapCard } from '@/components/dashboard/streak-heatmap-card'
 import { BodyWeightCard } from '@/components/dashboard/body-weight-card'
 import { plural } from '@/lib/utils'
 
 export default function DashboardPage() {
   const user = useAuthStore((s) => s.user)
-  const [missedExpanded, setMissedExpanded] = useState(true)
   const [adjustOpen, setAdjustOpen] = useState(false)
 
   // Запланированные тренировки (finishedAt === null), сортировка по дате
@@ -43,22 +43,30 @@ export default function DashboardPage() {
   const isFirstTime =
     !latestPlan && (completedData?.items?.length ?? 0) === 0
 
-  // Разделяем на ближайшую и пропущенные
-  const { nextWorkout, missedWorkouts } = useMemo(() => {
+  // Пропущенные не накапливаются: показываем ОДНУ самую раннюю,
+  // пока юзер её не закроет — следующая не отмечается.
+  // И только после первой завершённой тренировки, чтобы не пугать новичков.
+  const hasAnyCompleted = (completedData?.items?.length ?? 0) > 0
+
+  const { nextWorkout, missedWorkout } = useMemo(() => {
     const today = startOfDay(new Date())
     let next = null as typeof plannedWorkouts[0] | null
-    const missed: typeof plannedWorkouts = []
+    let earliestMissed = null as typeof plannedWorkouts[0] | null
 
+    // plannedWorkouts отсортирован asc → первый просроченный = самый ранний
     for (const w of plannedWorkouts) {
       const wDate = startOfDay(new Date(w.startedAt))
       if (wDate < today) {
-        missed.push(w)
+        if (!earliestMissed) earliestMissed = w
       } else if (!next) {
         next = w
       }
     }
-    return { nextWorkout: next, missedWorkouts: missed }
-  }, [plannedWorkouts])
+    return {
+      nextWorkout: next,
+      missedWorkout: hasAnyCompleted ? earliestMissed : null,
+    }
+  }, [plannedWorkouts, hasAnyCompleted])
 
   const todayLabel = format(new Date(), 'EEEE, d MMMM', { locale: ru })
 
@@ -172,7 +180,7 @@ export default function DashboardPage() {
               </div>
               <div className="flex flex-wrap gap-2 mt-2">
                 <Link
-                  href="/plans/new?ai=1"
+                  href="/plans/new?ai=1&from=/dashboard"
                   className="glass-btn-primary inline-flex items-center gap-2"
                   style={{ padding: '13px 20px', minHeight: 48, fontSize: 14, fontWeight: 800 }}
                 >
@@ -180,7 +188,7 @@ export default function DashboardPage() {
                   Собрать план с ИИ
                 </Link>
                 <Link
-                  href="/plans/new?mode=manual"
+                  href="/plans/new?mode=manual&from=/dashboard"
                   className="glass-btn inline-flex items-center gap-2"
                   style={{ padding: '13px 18px', minHeight: 48, fontSize: 14 }}
                 >
@@ -231,6 +239,7 @@ export default function DashboardPage() {
       {/* ── PR/Achievement (left) + Body weight (right) ───── */}
       <div className="grid gap-4 sm:gap-5 grid-cols-1 lg:[grid-template-columns:1fr_1.4fr] items-stretch">
         <div className="flex h-full flex-col gap-4 sm:gap-5 [&>*]:flex-1">
+          <ActiveQuestCard />
           <RecentPrCard />
           <RecentAchievementCard />
         </div>
@@ -267,45 +276,33 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* ── Пропущенные тренировки ──────────────────────── */}
-      {missedWorkouts.length > 0 && (
-        <div>
-          <button
-            onClick={() => setMissedExpanded((v) => !v)}
-            className="w-full flex items-center justify-between mb-3 text-red-500 hover:text-red-600 transition-colors"
-          >
-            <h2 className="font-semibold flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4" />
-              Пропущенные тренировки
-              <span className="text-xs font-normal bg-red-100 text-red-600 dark:bg-red-950 dark:text-red-400 px-1.5 py-0.5 rounded-full">
-                {missedWorkouts.length}
-              </span>
-            </h2>
-            {missedExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          </button>
-          {missedExpanded && (
-            <div className="flex flex-col gap-2">
-              {missedWorkouts.map((w) => (
-                <Link key={w.id} href={`/workouts/${w.id}`}>
-                  <Card className="border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-950/30 hover:border-red-400 transition-colors cursor-pointer">
-                    <CardContent className="flex items-center justify-between py-3 px-4">
-                      <div className="min-w-0">
-                        <p className="font-medium text-sm truncate text-red-700 dark:text-red-400">{w.title}</p>
-                        <p className="text-xs text-red-500/70 dark:text-red-500/60">
-                          {format(new Date(w.startedAt), 'EEEE, d MMMM', { locale: ru })}
-                        </p>
-                      </div>
-                      <span className="text-xs text-red-500/70 shrink-0 ml-2">
-                        {w.exerciseCount ?? 0} упр.
-                      </span>
-                    </CardContent>
-                  </Card>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      {/* ── Одна пропущенная — не накапливается, пока не закроется ── */}
+      {missedWorkout && (() => {
+        const daysAgo = differenceInCalendarDays(new Date(), new Date(missedWorkout.startedAt))
+        const daysLabel = daysAgo === 1
+          ? 'Пропущена вчера'
+          : `Пропущена ${daysAgo} ${plural(daysAgo, ['день', 'дня', 'дней'])} назад`
+        return (
+          <Link href={`/workouts/${missedWorkout.id}`}>
+            <Card className="border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-950/30 hover:border-red-400 transition-colors cursor-pointer">
+              <CardContent className="flex items-center gap-3 py-3 px-4">
+                <AlertTriangle className="h-5 w-5 shrink-0 text-red-500" />
+                <div className="min-w-0 flex-1">
+                  <p className="font-medium text-sm truncate text-red-700 dark:text-red-400">
+                    {missedWorkout.title}
+                  </p>
+                  <p className="text-xs text-red-500/70 dark:text-red-500/60">
+                    {daysLabel} · догоните, когда сможете
+                  </p>
+                </div>
+                <span className="text-xs text-red-500/70 shrink-0">
+                  {missedWorkout.exerciseCount ?? 0} упр.
+                </span>
+              </CardContent>
+            </Card>
+          </Link>
+        )
+      })()}
     </div>
   )
 }

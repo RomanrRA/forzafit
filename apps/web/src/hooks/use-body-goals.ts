@@ -61,3 +61,23 @@ export function useDeleteBodyGoals() {
     },
   })
 }
+
+export type BodyGoalIntent = 'lose' | 'gain' | 'maintain' | 'strength'
+
+export interface AiGoalResponse {
+  goal: BodyGoals
+  rationale: string
+}
+
+export function useAiSuggestBodyGoals() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (dto: { intent: BodyGoalIntent[]; targetMonths?: number }) => {
+      const { data } = await api.post('/body-goals/ai-suggest', dto)
+      return data as AiGoalResponse
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['body-goals'] })
+    },
+  })
+}

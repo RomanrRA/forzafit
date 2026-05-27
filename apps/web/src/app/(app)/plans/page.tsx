@@ -39,7 +39,7 @@ export default function PlansPage() {
       <div className="grid gap-3 sm:gap-4 sm:grid-cols-2">
         {/* AI — акцентная */}
         <Link
-          href="/plans/new?ai=1"
+          href="/plans/new?ai=1&from=/plans"
           className="glass-card strong p-5 sm:p-6 flex flex-col gap-3 hover:scale-[1.01] transition-transform cursor-pointer fz-rise"
           style={{
             background: 'color-mix(in oklab, var(--c-accent) 10%, transparent)',
@@ -74,12 +74,12 @@ export default function PlansPage() {
                   color: 'var(--txt-1)',
                 }}
               >
-                Собрать план с ИИ
+                Цель тела + программа
               </div>
             </div>
           </div>
           <p className="text-sm txt-muted leading-snug">
-            Расскажите про цели и опыт — AI составит программу под вас
+            AI подберёт целевые показатели по фигуре и тренировочный план под них
           </p>
           <span
             className="mt-auto inline-flex items-center gap-1 text-sm font-semibold"
@@ -91,7 +91,7 @@ export default function PlansPage() {
 
         {/* Manual */}
         <Link
-          href="/plans/new?mode=manual"
+          href="/plans/new?mode=manual&from=/plans"
           className="glass-card p-5 sm:p-6 flex flex-col gap-3 hover:scale-[1.01] transition-transform cursor-pointer fz-rise"
         >
           <div className="flex items-center gap-3">
@@ -146,7 +146,7 @@ export default function PlansPage() {
             <p className="font-medium">У вас пока нет своих планов</p>
             <p className="text-sm text-muted-foreground mt-1 mb-4">Создайте первый план тренировок под свои цели</p>
             <Button asChild variant="outline">
-              <Link href="/plans/new">
+              <Link href="/plans/new?from=/plans">
                 <Plus className="h-4 w-4 mr-1" />
                 Создать первый план
               </Link>

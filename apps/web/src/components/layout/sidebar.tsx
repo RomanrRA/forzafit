@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   Flame, LayoutDashboard, ListChecks, ClipboardList, TrendingUp, Scale, Trophy, User,
-  ChevronsLeft, ChevronsRight, Newspaper, Users, Medal, Sparkles,
+  ChevronsLeft, ChevronsRight, Users,
 } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
@@ -24,13 +24,10 @@ const navItems: NavItem[] = [
   { href: '/dashboard', label: 'Дашборд', icon: LayoutDashboard },
   { href: '/workouts', label: 'Тренировки', icon: ListChecks },
   { href: '/plans', label: 'Планы', icon: ClipboardList },
+  { href: '/body', label: 'Тело', icon: Scale },
   { href: '/progress', label: 'Прогресс', icon: TrendingUp },
-  { href: '/body', label: 'Замеры', icon: Scale },
-  { href: '/avatar', label: 'Аватар', icon: Sparkles },
-  { href: '/achievements', label: 'Достижения', icon: Trophy },
-  { href: '/feed', label: 'Лента', icon: Newspaper },
-  { href: '/friends', label: 'Друзья', icon: Users },
-  { href: '/leaderboard', label: 'Топ', icon: Medal },
+  { href: '/achievements', label: 'Цели', icon: Trophy },
+  { href: '/social', label: 'Соцсеть', icon: Users },
   { href: '/profile', label: 'Профиль', icon: User },
 ]
 
@@ -139,7 +136,7 @@ export function Sidebar() {
               {!collapsed && (
                 <>
                   <span className="flex-1 truncate text-left">{label}</span>
-                  {href === '/friends' && incomingCount > 0 && (
+                  {href === '/social' && incomingCount > 0 && (
                     <span
                       className="tnum shrink-0"
                       style={{
@@ -161,7 +158,7 @@ export function Sidebar() {
                   )}
                 </>
               )}
-              {collapsed && href === '/friends' && incomingCount > 0 && (
+              {collapsed && href === '/social' && incomingCount > 0 && (
                 <span
                   className="tnum"
                   style={{

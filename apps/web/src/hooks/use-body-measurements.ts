@@ -10,6 +10,10 @@ export interface BodyMeasurement {
   waistCm: number | null
   hipsCm: number | null
   armCm: number | null
+  thighCm: number | null
+  forearmCm: number | null
+  calfCm: number | null
+  neckCm: number | null
   custom: { fieldId: string; name: string; value: number; unit: string }[] | null
   createdAt: string
   updatedAt: string
@@ -23,6 +27,10 @@ export interface CreateBodyMeasurementDto {
   waistCm?: number
   hipsCm?: number
   armCm?: number
+  thighCm?: number
+  forearmCm?: number
+  calfCm?: number
+  neckCm?: number
   custom?: { fieldId: string; name: string; value: number; unit: string }[]
 }
 
@@ -34,6 +42,10 @@ export interface UpdateBodyMeasurementDto {
   waistCm?: number
   hipsCm?: number
   armCm?: number
+  thighCm?: number
+  forearmCm?: number
+  calfCm?: number
+  neckCm?: number
   custom?: { fieldId: string; name: string; value: number; unit: string }[]
 }
 

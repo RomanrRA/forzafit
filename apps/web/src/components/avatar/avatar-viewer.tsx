@@ -12,6 +12,10 @@ import {
   type MorphSpec,
 } from '@/lib/avatar-morphs'
 import { applyBodyToMorphs } from '@/lib/avatar-morphs-from-body'
+import {
+  applyProfileToMorphs,
+  type UserBodyProfile,
+} from '@/lib/avatar-measurements-mapping'
 import type { BodyMeasurement } from '@/hooks/use-body-measurements'
 import type { BodyGoals } from '@/hooks/use-body-goals'
 
@@ -363,41 +367,67 @@ function ModelMesh({
  * Анимирует только пока не достигла цели — потом отпускает контролы,
  * чтобы юзер мог свободно крутить/зумить без drift.
  */
-function CameraFocus({ mode }: { mode: 'face' | 'body' }) {
+function CameraFocus({
+  mode,
+  nonce,
+}: {
+  mode: 'face' | 'body'
+  nonce: number
+}) {
   const { camera, scene } = useThree()
   const animatingRef = useRef(false)
-  const prevModeRef = useRef<'face' | 'body'>(mode)
   const desiredRef = useRef<{ target: THREE.Vector3; distance: number } | null>(null)
 
-  // Запускаем анимацию только при изменении mode.
+  // Срабатывает при каждом изменении mode или nonce (включая первый mount).
+  // Модель грузится асинхронно через Suspense — bbox может быть пустым,
+  // поэтому ретраим пока сцена не появится. Это даёт корректный
+  // initial-фокус на body после загрузки GLB.
   useEffect(() => {
-    if (prevModeRef.current === mode) return
-    prevModeRef.current = mode
+    let cancelled = false
+    let timer: ReturnType<typeof setTimeout> | null = null
 
-    const bbox = new THREE.Box3().setFromObject(scene)
-    if (!isFinite(bbox.min.y)) return
-    const size = new THREE.Vector3()
-    bbox.getSize(size)
-    const center = new THREE.Vector3()
-    bbox.getCenter(center)
+    function tryFit() {
+      if (cancelled) return
+      const bbox = new THREE.Box3().setFromObject(scene)
+      const size = new THREE.Vector3()
+      const sizeOk =
+        isFinite(bbox.min.y) &&
+        isFinite(bbox.max.y) &&
+        !bbox.isEmpty() &&
+        bbox.getSize(size).length() > 0.1
 
-    if (mode === 'face') {
-      desiredRef.current = {
-        target: new THREE.Vector3(
-          center.x,
-          bbox.max.y - size.y * 0.05,
-          center.z,
-        ),
-        distance: size.y * 0.4,
+      if (!sizeOk) {
+        timer = setTimeout(tryFit, 80)
+        return
       }
-    } else {
-      desiredRef.current = {
-        target: center.clone(),
-        distance: size.y * 1.4,
+
+      const center = new THREE.Vector3()
+      bbox.getCenter(center)
+
+      if (mode === 'face') {
+        desiredRef.current = {
+          target: new THREE.Vector3(
+            center.x,
+            bbox.max.y - size.y * 0.05,
+            center.z,
+          ),
+          distance: size.y * 0.4,
+        }
+      } else {
+        desiredRef.current = {
+          target: center.clone(),
+          distance: size.y * 1.4,
+        }
       }
+      animatingRef.current = true
     }
-    animatingRef.current = true
-  }, [mode, scene])
+
+    tryFit()
+    return () => {
+      cancelled = true
+      if (timer) clearTimeout(timer)
+    }
+  }, [mode, nonce, scene])
 
   useFrame((state) => {
     if (!animatingRef.current || !desiredRef.current) return
@@ -477,6 +507,7 @@ function Stage({
   url,
   morphs,
   focus,
+  focusNonce,
   skinSrc,
   hairKey,
   eyeSrc,
@@ -485,6 +516,7 @@ function Stage({
   url: string
   morphs: Record<string, number>
   focus: 'face' | 'body'
+  focusNonce: number
   skinSrc: string
   hairKey: string | null
   eyeSrc: string
@@ -534,7 +566,7 @@ function Stage({
         minDistance={minDistance}
         maxDistance={maxDistance}
       />
-      <CameraFocus mode={focus} />
+      <CameraFocus mode={focus} nonce={focusNonce} />
       <ZoomBridge apiRef={zoomRef} />
     </>
   )
@@ -585,6 +617,11 @@ interface AvatarViewerProps {
   startMeasurement?: BodyMeasurement | null
   currentMeasurement?: BodyMeasurement | null
   goals?: BodyGoals | null
+  /** Базовые параметры из профиля юзера. Управляют scale модели и
+   *  начальным «телосложением» (BMI-бакеты) для вкладки now. */
+  profile?: UserBodyProfile | null
+  /** Открыть диалог AI-цели (передаётся из AvatarBlock). */
+  onOpenAiGoal?: () => void
 }
 
 export default function AvatarViewer({
@@ -592,15 +629,13 @@ export default function AvatarViewer({
   startMeasurement,
   currentMeasurement,
   goals,
+  profile,
+  onOpenAiGoal,
 }: AvatarViewerProps) {
   const [tab, setTab] = useState<TabKey>('now')
   const [subTab, setSubTab] = useState<SubTab>('params')
-  // Dev-переключатель пола (м/ж) для тестирования. По умолчанию = пол из
-  // профиля; кнопки над canvas позволяют менять на лету.
-  const [gender, setGender] = useState<AvatarGender>(propGender)
-  useEffect(() => {
-    setGender(propGender)
-  }, [propGender])
+  // Пол строго из профиля — переключатель убран.
+  const gender = propGender
   const defaultSkin = gender === 'male' ? 'light_m' : 'light_f'
   const [skinKey, setSkinKey] = useState<string>(defaultSkin)
   // Доступны только пресеты текущего пола — иначе UV не совпадает и кожа
@@ -637,15 +672,25 @@ export default function AvatarViewer({
   )
 
   // Базовые морфы для каждой вкладки — из замеров поверх athletic preset.
-  // Ручные правки пользователя поверх — в state, привязаны к вкладке.
+  // Для вкладки «Сейчас» сначала применяем профиль (рост/вес/возраст из
+  // users) — даёт BMI-бакет, затем детальные замеры обхватов поверх.
+  // Ручные правки пользователя — в state, привязаны к вкладке.
+  const profileResult = useMemo(() => {
+    if (!profile) return null
+    const baseline = athleticPreset(gender)
+    return applyProfileToMorphs(baseline, { ...profile, gender })
+  }, [profile, gender])
+
   const tabBaseMorphs = useMemo(() => {
     const baseline = athleticPreset(gender)
+    const nowBaseline = profileResult ? profileResult.morphs : baseline
     return {
       start: applyBodyToMorphs(baseline, startMeasurement, gender),
-      now: applyBodyToMorphs(baseline, currentMeasurement, gender),
+      now: applyBodyToMorphs(nowBaseline, currentMeasurement, gender),
       goal: applyBodyToMorphs(baseline, goals, gender),
     } as Record<TabKey, Record<string, number>>
-  }, [gender, startMeasurement, currentMeasurement, goals])
+  }, [gender, startMeasurement, currentMeasurement, goals, profileResult])
+
 
   const [overrides, setOverrides] = useState<Record<TabKey, Record<string, number>>>({
     start: {},
@@ -666,6 +711,14 @@ export default function AvatarViewer({
   }, [tabBaseMorphs, overrides, tab])
 
   const [focus, setFocus] = useState<'face' | 'body'>('body')
+  // Бампается на каждый клик кнопки фокуса — даже если mode не меняется,
+  // CameraFocus всё равно перенацеливается. Также инкрементится при mount,
+  // чтобы initial fit на тело отрабатывал после загрузки модели.
+  const [focusNonce, setFocusNonce] = useState(0)
+  const recenter = (m: 'face' | 'body') => {
+    setFocus(m)
+    setFocusNonce((n) => n + 1)
+  }
   const zoomRef = useRef<ZoomFn | null>(null)
 
   // Версия в query string — cache buster. Поднимать при перегенерации GLB,
@@ -723,7 +776,7 @@ export default function AvatarViewer({
         gap: 10,
       }}
     >
-      {/* Над canvas: табы Начало/Сейчас/Цель + dev-переключатель пола М/Ж. */}
+      {/* Над canvas: табы Начало/Сейчас/Цель. Пол берётся из профиля. */}
       <div
         style={{
           display: 'flex',
@@ -732,48 +785,6 @@ export default function AvatarViewer({
           gap: 8,
         }}
       >
-        {/* Dev-переключатель пола (для теста — какой GLB рендерить) */}
-        <div
-          style={{
-            display: 'inline-flex',
-            gap: 4,
-            padding: 4,
-            borderRadius: 10,
-            background: 'var(--gl-bg)',
-            border: '1px solid var(--gl-border)',
-            backdropFilter: 'blur(8px)',
-          }}
-        >
-          {(['male', 'female'] as AvatarGender[]).map((g) => {
-            const label = g === 'male' ? 'М' : 'Ж'
-            const active = gender === g
-            return (
-              <button
-                key={g}
-                type="button"
-                onClick={() => setGender(g)}
-                className="glass-btn"
-                style={{
-                  padding: '6px 12px',
-                  fontSize: 12,
-                  fontWeight: 700,
-                  borderRadius: 8,
-                  background: active ? 'var(--gl-bg-strong)' : 'transparent',
-                  border:
-                    '1px solid ' +
-                    (active ? 'var(--gl-border-strong)' : 'transparent'),
-                  color: active ? 'var(--txt-1)' : 'var(--txt-2)',
-                  cursor: 'pointer',
-                  minWidth: 36,
-                }}
-                title={g === 'male' ? 'Мужчина' : 'Женщина'}
-              >
-                {label}
-              </button>
-            )
-          })}
-        </div>
-
       <div
         style={{
           display: 'inline-flex',
@@ -838,6 +849,7 @@ export default function AvatarViewer({
               url={url}
               morphs={morphs}
               focus={focus}
+              focusNonce={focusNonce}
               skinSrc={skinSrc}
               hairKey={hairKey}
               eyeSrc={eyeSrc}
@@ -878,7 +890,7 @@ export default function AvatarViewer({
           </button>
           <button
             type="button"
-            onClick={() => setFocus('body')}
+            onClick={() => recenter('body')}
             className="glass-btn"
             title="Общий вид"
             aria-label="Общий вид"
@@ -888,7 +900,7 @@ export default function AvatarViewer({
           </button>
           <button
             type="button"
-            onClick={() => setFocus('face')}
+            onClick={() => recenter('face')}
             className="glass-btn"
             title="К лицу"
             aria-label="К лицу"
@@ -1006,20 +1018,24 @@ export default function AvatarViewer({
                   Цель ещё не задана. Подвигайте ползунки, чтобы прикинуть, к чему
                   хочется прийти.
                 </span>
-                <a
-                  href="/avatar/goals"
-                  className="glass-btn"
-                  style={{
-                    padding: '6px 12px',
-                    fontSize: 12,
-                    fontWeight: 700,
-                    borderRadius: 8,
-                    color: 'var(--txt-1)',
-                    textAlign: 'center',
-                  }}
-                >
-                  Задать цель в цифрах
-                </a>
+                {onOpenAiGoal && (
+                  <button
+                    type="button"
+                    onClick={onOpenAiGoal}
+                    className="glass-btn"
+                    style={{
+                      padding: '6px 12px',
+                      fontSize: 12,
+                      fontWeight: 700,
+                      borderRadius: 8,
+                      color: 'var(--txt-1)',
+                      textAlign: 'center',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    Задать AI-цель
+                  </button>
+                )}
               </>
             ))}
         </div>

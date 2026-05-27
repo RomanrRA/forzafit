@@ -1,12 +1,13 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useRef, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '@/lib/api'
-import { useAiPlanChat } from '@/hooks/use-ai-plan-chat'
+import { useAiPlanChat, type CoachIntent } from '@/hooks/use-ai-plan-chat'
+import { useBodyMeasurements } from '@/hooks/use-body-measurements'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Check } from 'lucide-react'
+import { ArrowLeft, Check, Sparkles, TrendingDown, TrendingUp, Minus, Dumbbell } from 'lucide-react'
 
 interface UserProfile {
   id: string
@@ -27,6 +28,27 @@ const GENDER_LABEL: Record<string, string> = {
   other: 'другой',
 }
 
+const INTENT_OPTIONS: Array<{
+  key: CoachIntent
+  label: string
+  description: string
+  icon: typeof TrendingDown
+}> = [
+  { key: 'lose', label: 'Сбросить вес', description: 'Меньше жира, талия уже', icon: TrendingDown },
+  { key: 'gain', label: 'Набрать массу', description: 'Больше мышц, шире плечи', icon: TrendingUp },
+  { key: 'strength', label: 'Набрать силу', description: 'Больше рабочие веса, тяжёлая база', icon: Dumbbell },
+  { key: 'maintain', label: 'Поддерживать форму', description: 'Тот же вес, лучше композиция', icon: Minus },
+]
+
+const INTENT_LABEL: Record<CoachIntent, string> = {
+  lose: 'сбросить вес/жир',
+  gain: 'набрать мышечную массу',
+  strength: 'нарастить силовые показатели',
+  maintain: 'поддерживать форму',
+}
+
+const MONTH_OPTIONS = [2, 3, 6, 9, 12]
+
 const WISH_EXAMPLES = [
   'Бассейн 2 раза в неделю',
   'Кроссфит-комплексы по пятницам',
@@ -37,35 +59,29 @@ const WISH_EXAMPLES = [
   'Утром только разминка',
 ]
 
+// Замеры тела — поля, которые показываем на шаге 1
+const MEASUREMENT_FIELDS: Array<{
+  key: 'chestCm' | 'waistCm' | 'hipsCm' | 'armCm' | 'thighCm' | 'forearmCm' | 'calfCm' | 'neckCm' | 'bodyFatPct'
+  label: string
+  unit: string
+  placeholder: string
+}> = [
+  { key: 'chestCm', label: 'Грудь', unit: 'см', placeholder: '100' },
+  { key: 'waistCm', label: 'Талия', unit: 'см', placeholder: '80' },
+  { key: 'hipsCm', label: 'Бёдра', unit: 'см', placeholder: '95' },
+  { key: 'armCm', label: 'Рука', unit: 'см', placeholder: '35' },
+  { key: 'thighCm', label: 'Бедро', unit: 'см', placeholder: '58' },
+  { key: 'forearmCm', label: 'Предплечье', unit: 'см', placeholder: '30' },
+  { key: 'calfCm', label: 'Икра', unit: 'см', placeholder: '38' },
+  { key: 'neckCm', label: 'Шея', unit: 'см', placeholder: '38' },
+  { key: 'bodyFatPct', label: '% жира', unit: '%', placeholder: '15' },
+]
+
 function calcAge(dob: string | null): number | null {
   if (!dob) return null
   const d = new Date(dob)
   if (Number.isNaN(d.getTime())) return null
   return Math.floor((Date.now() - d.getTime()) / (365.25 * 24 * 3600 * 1000))
-}
-
-// Returns a short string describing profile data for Q1 (or null if empty)
-function profileSummary(p: UserProfile | undefined): string | null {
-  if (!p) return null
-  const parts: string[] = []
-  if (p.gender) parts.push(GENDER_LABEL[p.gender] ?? p.gender)
-  const age = calcAge(p.dob)
-  if (age) parts.push(`${age} лет`)
-  if (p.heightCm) parts.push(`${p.heightCm} см`)
-  if (p.weightKg) parts.push(`${p.weightKg} кг`)
-  return parts.length ? parts.join(', ') : null
-}
-
-// Detailed profile rows for Q1 — each field on its own line
-function profileRows(p: UserProfile | undefined): Array<[string, string]> {
-  if (!p) return []
-  const rows: Array<[string, string]> = []
-  if (p.gender) rows.push(['Пол', GENDER_LABEL[p.gender] ?? p.gender])
-  const age = calcAge(p.dob)
-  if (age) rows.push(['Возраст', `${age} лет`])
-  if (p.heightCm) rows.push(['Рост', `${p.heightCm} см`])
-  if (p.weightKg) rows.push(['Вес', `${p.weightKg} кг`])
-  return rows
 }
 
 // ─── UI: option chip ──────────────────────────────────────────────────────────
@@ -101,20 +117,38 @@ function Chip({
 
 // ─── Wizard state ─────────────────────────────────────────────────────────────
 
+type MeasurementsValues = {
+  chestCm: string
+  waistCm: string
+  hipsCm: string
+  armCm: string
+  thighCm: string
+  forearmCm: string
+  calfCm: string
+  neckCm: string
+  bodyFatPct: string
+}
+
 type WizardState = {
-  profileOk: 'yes' | 'custom' | null
-  profileCustom: string
-  weightKg: string // numeric input as string (empty = unknown)
+  // Step 0: намерения (AI-coach, мульти)
+  intents: CoachIntent[]
+  // Step 1: срок в месяцах
+  targetMonths: number
+  // Step 2: основные параметры (редактируем возраст/рост/вес)
+  ageYears: string
+  weightKg: string
   heightCm: string
-  goals: string[] // multi
-  goalCustom: string
-  daysPerWeek: string // '2'|'3'|'4'|'5'|'custom'
+  // Step 3: замеры тела
+  measurementsMode: 'skip' | 'fill' | null
+  measurements: MeasurementsValues
+  // Остальное — как было
+  daysPerWeek: string
   daysCustom: string
   experience: string
   experienceCustom: string
   place: 'gym' | 'home' | 'custom' | null
   placeCustom: string
-  equipment: string[] // only if place === 'home'
+  equipment: string[]
   equipmentCustom: string
   injuries: 'no' | 'yes' | null
   injuriesText: string
@@ -126,13 +160,26 @@ type WizardState = {
   programTypeCustom: string
 }
 
+const EMPTY_MEASUREMENTS: MeasurementsValues = {
+  chestCm: '',
+  waistCm: '',
+  hipsCm: '',
+  armCm: '',
+  thighCm: '',
+  forearmCm: '',
+  calfCm: '',
+  neckCm: '',
+  bodyFatPct: '',
+}
+
 const INITIAL: WizardState = {
-  profileOk: null,
-  profileCustom: '',
+  intents: [],
+  targetMonths: 3,
+  ageYears: '',
   weightKg: '',
   heightCm: '',
-  goals: [],
-  goalCustom: '',
+  measurementsMode: null,
+  measurements: { ...EMPTY_MEASUREMENTS },
   daysPerWeek: '',
   daysCustom: '',
   experience: '',
@@ -156,41 +203,52 @@ const INITIAL: WizardState = {
 function compile(state: WizardState, profile: UserProfile | undefined): string {
   const lines: string[] = ['Ответы из анкеты:']
 
-  // 1. Profile
-  if (state.profileOk === 'yes' && profile) {
-    const s = profileSummary(profile)
-    if (s) lines.push(`- Профиль подтверждён: ${s}`)
-  } else if (state.profileOk === 'custom' && state.profileCustom.trim()) {
-    lines.push(`- Поправки по профилю: ${state.profileCustom.trim()}`)
+  // 0. Намерения и срок (AI-coach режим)
+  if (state.intents.length > 0) {
+    const labels = state.intents.map((i) => INTENT_LABEL[i]).join('; ')
+    lines.push(`- Намерения: ${labels}`)
+    lines.push(`- Срок до цели: ${state.targetMonths} мес.`)
   }
 
-  // 1a. Weight & height (always explicit — override profile if entered)
-  if (state.weightKg.trim()) lines.push(`- Вес: ${state.weightKg.trim()} кг`)
-  if (state.heightCm.trim()) lines.push(`- Рост: ${state.heightCm.trim()} см`)
+  // 1. Профиль: пол — из профиля, возраст/рост/вес — из формы (с фолбеком на профиль)
+  const profileParts: string[] = []
+  if (profile?.gender) profileParts.push(GENDER_LABEL[profile.gender] ?? profile.gender)
+  if (profileParts.length) lines.push(`- Пол: ${profileParts.join(', ')}`)
 
-  // 2. Goals (multi)
-  const goals = [...state.goals]
-  if (state.goalCustom.trim()) goals.push(state.goalCustom.trim())
-  if (goals.length) lines.push(`- Цели: ${goals.join(', ')}`)
+  const ageRaw = state.ageYears.trim() || (calcAge(profile?.dob ?? null) ?? '')
+  if (ageRaw) lines.push(`- Возраст: ${ageRaw} лет`)
+  if (state.heightCm.trim()) lines.push(`- Рост: ${state.heightCm.trim()} см`)
+  if (state.weightKg.trim()) lines.push(`- Вес: ${state.weightKg.trim()} кг`)
+
+  // 2. Замеры тела
+  if (state.measurementsMode === 'fill') {
+    const m = state.measurements
+    const parts: string[] = []
+    for (const f of MEASUREMENT_FIELDS) {
+      const v = m[f.key].trim()
+      if (v) parts.push(`${f.label} ${v} ${f.unit}`)
+    }
+    if (parts.length) lines.push(`- Замеры тела: ${parts.join(', ')}`)
+  }
 
   // 3. Frequency
   const days =
     state.daysPerWeek === 'custom' ? state.daysCustom.trim() : state.daysPerWeek
   if (days) lines.push(`- Тренировок в неделю: ${days}`)
 
-  // 4. Experience
+  // 5. Experience
   const exp =
     state.experience === 'custom' ? state.experienceCustom.trim() : state.experience
   if (exp) lines.push(`- Стаж: ${exp}`)
 
-  // 5. Place
+  // 6. Place
   let placeText = ''
   if (state.place === 'gym') placeText = 'зал'
   else if (state.place === 'home') placeText = 'дом'
   else if (state.place === 'custom') placeText = state.placeCustom.trim()
   if (placeText) lines.push(`- Место тренировок: ${placeText}`)
 
-  // 6. Equipment (home only)
+  // 7. Equipment (home only)
   if (state.place === 'home') {
     const eq = [...state.equipment]
     if (state.equipmentCustom.trim()) eq.push(state.equipmentCustom.trim())
@@ -200,14 +258,14 @@ function compile(state: WizardState, profile: UserProfile | undefined): string {
     lines.push('- Оборудование: полный набор зала (штанги, гантели, тренажёры)')
   }
 
-  // 7. Injuries
+  // 8. Injuries
   if (state.injuries === 'no') {
     lines.push('- Травм и ограничений нет')
   } else if (state.injuries === 'yes' && state.injuriesText.trim()) {
     lines.push(`- Травмы/ограничения: ${state.injuriesText.trim()}`)
   }
 
-  // 8. Working weights
+  // 9. Working weights
   if (state.workingWeights === 'no') {
     lines.push(
       '- Рабочие веса неизвестны — оцени консервативные стартовые веса под мой пол, вес, стаж (не ставь 0)',
@@ -223,7 +281,7 @@ function compile(state: WizardState, profile: UserProfile | undefined): string {
       : state.programType
   if (prog) lines.push(`- Тип программы: ${prog}`)
 
-  // 9. Wishes — отдельным акцентным блоком, чтобы AI не игнорировал
+  // 11. Wishes — отдельным акцентным блоком, чтобы AI не игнорировал
   const wishesText = state.wishesText.trim()
   if (wishesText) {
     lines.push(
@@ -239,23 +297,19 @@ function compile(state: WizardState, profile: UserProfile | undefined): string {
 
 // ─── Validation ───────────────────────────────────────────────────────────────
 
-function isStepComplete(step: number, s: WizardState, hasProfile: boolean): boolean {
+function isStepComplete(step: number, s: WizardState): boolean {
   switch (step) {
-    case 0: // profile
-      if (!hasProfile) return true // skipped
-      if (s.profileOk === 'yes') return true
-      if (s.profileOk === 'custom') return s.profileCustom.trim().length > 0
-      return false
-    case 1: { // weight
-      const n = Number(s.weightKg)
-      return Number.isFinite(n) && n > 0
+    case 0: // intents — хотя бы один
+      return s.intents.length > 0
+    case 1: // targetMonths — default есть, всегда валидно
+      return MONTH_OPTIONS.includes(s.targetMonths)
+    case 2: { // основные параметры — рост и вес обязательны
+      const w = Number(s.weightKg)
+      const h = Number(s.heightCm)
+      return Number.isFinite(w) && w > 0 && Number.isFinite(h) && h > 0
     }
-    case 2: { // height
-      const n = Number(s.heightCm)
-      return Number.isFinite(n) && n > 0
-    }
-    case 3: // goals
-      return s.goals.length > 0 || s.goalCustom.trim().length > 0
+    case 3: // замеры — не давим, нужно лишь выбрать «Заполню/Пропустить»
+      return s.measurementsMode !== null
     case 4: // days
       if (s.daysPerWeek === 'custom') return s.daysCustom.trim().length > 0
       return s.daysPerWeek !== ''
@@ -286,8 +340,11 @@ function isStepComplete(step: number, s: WizardState, hasProfile: boolean): bool
 
 // ─── Main component ───────────────────────────────────────────────────────────
 
+const VALID_INTENTS: CoachIntent[] = ['lose', 'gain', 'maintain', 'strength']
+
 export function AiPlanWizard() {
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   const { data: profile } = useQuery<UserProfile>({
     queryKey: ['users', 'me'],
@@ -297,8 +354,9 @@ export function AiPlanWizard() {
     },
   })
 
-  const profileSummaryStr = useMemo(() => profileSummary(profile), [profile])
-  const hasProfile = profileSummaryStr !== null
+  // Последний замер тела — для предзаполнения шага 1
+  const { data: measurementsData } = useBodyMeasurements({ limit: 1, page: 1 })
+  const lastMeasurement = measurementsData?.items?.[0] ?? null
 
   const [state, setState] = useState<WizardState>(INITIAL)
   const [step, setStep] = useState(0)
@@ -306,29 +364,64 @@ export function AiPlanWizard() {
   const [finalizing, setFinalizing] = useState(false)
   const [localError, setLocalError] = useState<string | null>(null)
 
-  const { messages, isStreaming, toolCallReady, start, finalize, reset, error } =
+  const { messages, isStreaming, toolCallReady, goalSuggestion, start, finalize, reset, error } =
     useAiPlanChat()
 
-  // Total steps = 12, but step 7 (equipment) auto-skips when place !== 'home'
-  // and step 0 auto-skips when profile is empty.
   const TOTAL = 12
 
-  // Skip step 0 if profile is empty (jump to step 1 on mount)
+  // Prefill intents/months из query (?intent=lose,strength&months=3) — приходит из AiGoalDialog
+  const prefilledFromQueryRef = useRef(false)
   useEffect(() => {
-    if (!hasProfile && step === 0 && profile) setStep(1)
-  }, [hasProfile, step, profile])
+    if (prefilledFromQueryRef.current) return
+    const intentParam = searchParams.get('intent')
+    const monthsParam = searchParams.get('months')
+    if (!intentParam && !monthsParam) return
+    prefilledFromQueryRef.current = true
 
-  // Prefill weight/height from profile once profile loads
-  const prefilledRef = useRef(false)
-  useEffect(() => {
-    if (!profile || prefilledRef.current) return
-    prefilledRef.current = true
+    const parsedIntents = (intentParam ?? '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter((s): s is CoachIntent => (VALID_INTENTS as string[]).includes(s))
+    const parsedMonths = monthsParam ? Number(monthsParam) : null
+
     setState((s) => ({
       ...s,
+      intents: parsedIntents.length > 0 ? parsedIntents : s.intents,
+      targetMonths:
+        parsedMonths != null && MONTH_OPTIONS.includes(parsedMonths)
+          ? parsedMonths
+          : s.targetMonths,
+    }))
+  }, [searchParams])
+
+  // Prefill height/weight from profile once profile loads
+  const prefilledProfileRef = useRef(false)
+  useEffect(() => {
+    if (!profile || prefilledProfileRef.current) return
+    prefilledProfileRef.current = true
+    const profileAgeVal = calcAge(profile.dob ?? null)
+    setState((s) => ({
+      ...s,
+      ageYears: s.ageYears || (profileAgeVal != null ? String(profileAgeVal) : ''),
       weightKg: s.weightKg || (profile.weightKg != null ? String(profile.weightKg) : ''),
       heightCm: s.heightCm || (profile.heightCm != null ? String(profile.heightCm) : ''),
     }))
   }, [profile])
+
+  // Prefill measurements from last record once available (и только если пользователь ещё не редактировал)
+  const prefilledMeasurementsRef = useRef(false)
+  useEffect(() => {
+    if (!lastMeasurement || prefilledMeasurementsRef.current) return
+    prefilledMeasurementsRef.current = true
+    setState((s) => {
+      const next: MeasurementsValues = { ...s.measurements }
+      for (const f of MEASUREMENT_FIELDS) {
+        const v = lastMeasurement[f.key]
+        if (next[f.key] === '' && v != null) next[f.key] = String(v)
+      }
+      return { ...s, measurements: next }
+    })
+  }, [lastMeasurement])
 
   // Skip step 7 (equipment) forward/back when place != 'home'
   function goNext() {
@@ -343,31 +436,38 @@ export function AiPlanWizard() {
       setStep(6)
       return
     }
-    if (step === 1 && !hasProfile) {
-      return // can't go back below 1 when profile step is skipped
-    }
     setStep((s) => Math.max(s - 1, 0))
   }
 
-  const canProceed = isStepComplete(step, state, hasProfile)
+  const canProceed = isStepComplete(step, state)
   const isLastStep = step === TOTAL - 1
 
   async function handleSubmit() {
     const compiled = compile(state, profile)
     setSubmitted(true)
-    await start(compiled)
+    await start({
+      initialMessage: compiled,
+      intent: state.intents.length > 0 ? state.intents : undefined,
+      targetMonths: state.intents.length > 0 ? state.targetMonths : undefined,
+    })
   }
 
   // Auto-finalize as soon as the model emits the generate_plan tool_call
-  // and the stream finishes. Guarded so it runs only once.
   useEffect(() => {
     if (!submitted || !toolCallReady || isStreaming || finalizing) return
     setFinalizing(true)
     setLocalError(null)
     void (async () => {
       try {
-        const planTemplateId = await finalize()
-        router.push(`/plans/${planTemplateId}`)
+        const result = await finalize()
+        // Если цель подобрана — даём показать карточку пару секунд, потом редирект
+        if (result.bodyGoal && result.bodyGoal.rationale) {
+          setTimeout(() => {
+            router.push(`/plans/${result.planTemplateId}`)
+          }, 2500)
+        } else {
+          router.push(`/plans/${result.planTemplateId}`)
+        }
       } catch (err) {
         setLocalError(err instanceof Error ? err.message : 'Не удалось создать план')
         setFinalizing(false)
@@ -402,20 +502,67 @@ export function AiPlanWizard() {
             AI
           </div>
           <div>
-            <p className="font-semibold">AI-тренер работает над планом</p>
+            <p className="font-semibold">
+              {state.intents.length > 0 ? 'AI-тренер: подбираем цель и план' : 'AI-тренер работает над планом'}
+            </p>
             <p className="text-xs text-muted-foreground">
               {isStreaming
                 ? 'Анализируем ответы и подбираем упражнения...'
                 : finalizing
-                  ? 'Сохраняем план...'
+                  ? 'Сохраняем цель и план...'
                   : toolCallReady
-                    ? 'План готов, открываем редактор...'
+                    ? 'Готово, открываем план...'
                     : combinedError
-                      ? 'Не удалось сгенерировать план'
+                      ? 'Не удалось сгенерировать'
                       : 'Ожидание...'}
             </p>
           </div>
         </div>
+
+        {goalSuggestion && (
+          <div
+            className="rounded-2xl border p-4 space-y-2"
+            style={{
+              background: 'color-mix(in oklab, var(--c-accent) 8%, transparent)',
+              borderColor: 'color-mix(in oklab, var(--c-accent) 35%, var(--gl-border))',
+            }}
+          >
+            <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--c-accent)' }}>
+              <Sparkles className="h-3.5 w-3.5" />
+              Целевые показатели
+            </div>
+            <div className="text-sm leading-snug">
+              {goalSuggestion.rationale}
+            </div>
+            <div className="flex flex-wrap gap-2 pt-1">
+              {goalSuggestion.weightKg != null && (
+                <span className="text-xs px-2 py-1 rounded-full bg-background/60 border border-border">
+                  Вес: {goalSuggestion.weightKg} кг
+                </span>
+              )}
+              {goalSuggestion.bodyFatPct != null && (
+                <span className="text-xs px-2 py-1 rounded-full bg-background/60 border border-border">
+                  Жир: {goalSuggestion.bodyFatPct}%
+                </span>
+              )}
+              {goalSuggestion.waistCm != null && (
+                <span className="text-xs px-2 py-1 rounded-full bg-background/60 border border-border">
+                  Талия: {goalSuggestion.waistCm} см
+                </span>
+              )}
+              {goalSuggestion.chestCm != null && (
+                <span className="text-xs px-2 py-1 rounded-full bg-background/60 border border-border">
+                  Грудь: {goalSuggestion.chestCm} см
+                </span>
+              )}
+              {goalSuggestion.targetDate && (
+                <span className="text-xs px-2 py-1 rounded-full bg-background/60 border border-border">
+                  Срок: {new Date(goalSuggestion.targetDate).toLocaleDateString('ru-RU')}
+                </span>
+              )}
+            </div>
+          </div>
+        )}
 
         {aiText && (
           <div className="text-sm leading-relaxed whitespace-pre-wrap text-foreground/90 border-l-2 border-primary/30 pl-3">
@@ -456,6 +603,8 @@ export function AiPlanWizard() {
   const progressCurrent = step + 1
   const progressTotal = TOTAL
 
+  const profileGender = profile?.gender ? GENDER_LABEL[profile.gender] ?? profile.gender : null
+
   return (
     <div className="glass-card p-6 space-y-5">
       {/* Header */}
@@ -473,115 +622,208 @@ export function AiPlanWizard() {
         </div>
       </div>
 
-      {/* Step 0: Profile confirmation */}
-      {step === 0 && hasProfile && (
-        <StepContainer title="Ваши данные верны?">
-          <div className="rounded-xl bg-primary/5 border border-primary/20 px-4 py-3">
-            <p className="text-xs font-medium text-muted-foreground mb-2">
-              Из профиля
-            </p>
-            <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5">
-              {profileRows(profile).map(([label, value]) => (
-                <div key={label} className="contents">
-                  <dt className="text-sm font-medium text-foreground/70">{label}:</dt>
-                  <dd className="text-sm font-semibold text-foreground">{value}</dd>
-                </div>
-              ))}
-            </dl>
-          </div>
+      {/* Step 0: намерения (AI-coach, мульти) */}
+      {step === 0 && (
+        <StepContainer
+          title="Что хотите достичь?"
+          hint="Можно выбрать несколько — AI совместит цели в одной программе."
+        >
           <div className="grid grid-cols-1 gap-2">
-            <Chip
-              label="Да, всё верно"
-              selected={state.profileOk === 'yes'}
-              onClick={() => setState((s) => ({ ...s, profileOk: 'yes' }))}
-            />
-            <Chip
-              label="Поправить"
-              selected={state.profileOk === 'custom'}
-              onClick={() => setState((s) => ({ ...s, profileOk: 'custom' }))}
-            />
+            {INTENT_OPTIONS.map(({ key, label, description, icon: Icon }) => {
+              const selected = state.intents.includes(key)
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() =>
+                    setState((s) => ({
+                      ...s,
+                      intents: s.intents.includes(key)
+                        ? s.intents.filter((x) => x !== key)
+                        : [...s.intents, key],
+                    }))
+                  }
+                  className={`relative flex items-center gap-3 text-left rounded-2xl px-4 py-3 transition-all border ${
+                    selected
+                      ? 'bg-primary text-primary-foreground border-primary shadow-sm'
+                      : 'glass-card border-transparent hover:border-primary/40'
+                  }`}
+                >
+                  <div className={`grid place-items-center shrink-0 w-9 h-9 rounded-xl ${
+                    selected ? 'bg-primary-foreground/20' : 'bg-primary/10'
+                  }`}>
+                    <Icon className="h-4 w-4" strokeWidth={2.4} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="text-sm font-semibold">{label}</div>
+                    <div className={`text-xs mt-0.5 ${
+                      selected ? 'text-primary-foreground/80' : 'text-muted-foreground'
+                    }`}>
+                      {description}
+                    </div>
+                  </div>
+                  {selected && (
+                    <Check className="h-4 w-4 shrink-0" />
+                  )}
+                </button>
+              )
+            })}
           </div>
-          {state.profileOk === 'custom' && (
-            <textarea
-              value={state.profileCustom}
-              onChange={(e) =>
-                setState((s) => ({ ...s, profileCustom: e.target.value }))
-              }
-              placeholder="Например: мне 32, не 28, вес 82"
-              rows={2}
-              className="w-full resize-none rounded-xl border border-input bg-background/70 px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            />
-          )}
         </StepContainer>
       )}
 
-      {/* Step 1: Weight */}
+      {/* Step 1: срок до цели */}
       {step === 1 && (
-        <StepContainer title="Ваш вес" hint="В килограммах">
-          <input
-            type="number"
-            inputMode="decimal"
-            min={20}
-            max={300}
-            step={0.1}
-            value={state.weightKg}
-            onChange={(e) =>
-              setState((s) => ({ ...s, weightKg: e.target.value }))
-            }
-            placeholder="Например: 78"
-            className="w-full rounded-xl border border-input bg-background/70 px-4 py-3 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          />
-        </StepContainer>
-      )}
-
-      {/* Step 2: Height */}
-      {step === 2 && (
-        <StepContainer title="Ваш рост" hint="В сантиметрах">
-          <input
-            type="number"
-            inputMode="numeric"
-            min={100}
-            max={250}
-            step={1}
-            value={state.heightCm}
-            onChange={(e) =>
-              setState((s) => ({ ...s, heightCm: e.target.value }))
-            }
-            placeholder="Например: 180"
-            className="w-full rounded-xl border border-input bg-background/70 px-4 py-3 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          />
-        </StepContainer>
-      )}
-
-      {/* Step 3: Goals (multi) */}
-      {step === 3 && (
-        <StepContainer title="Главная цель" hint="Можно выбрать несколько">
+        <StepContainer
+          title="За какой срок хотите достичь цели?"
+          hint="Реалистичный темп — 0.5-0.7 кг/нед на сброс, 0.2-0.4 кг/нед на набор."
+        >
           <div className="grid grid-cols-1 gap-2">
-            {['Масса', 'Сила', 'Похудение', 'Тонус'].map((g) => (
+            {MONTH_OPTIONS.map((m) => (
               <Chip
-                key={g}
-                label={g}
-                selected={state.goals.includes(g)}
-                onClick={() =>
-                  setState((s) => ({
-                    ...s,
-                    goals: s.goals.includes(g)
-                      ? s.goals.filter((x) => x !== g)
-                      : [...s.goals, g],
-                  }))
-                }
+                key={m}
+                label={`${m} месяцев`}
+                selected={state.targetMonths === m}
+                onClick={() => setState((s) => ({ ...s, targetMonths: m }))}
               />
             ))}
           </div>
-          <textarea
-            value={state.goalCustom}
-            onChange={(e) =>
-              setState((s) => ({ ...s, goalCustom: e.target.value }))
-            }
-            placeholder="Другое (свой вариант)..."
-            rows={1}
-            className="w-full resize-none rounded-xl border border-input bg-background/70 px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-          />
+        </StepContainer>
+      )}
+
+      {/* Step 2: основные параметры */}
+      {step === 2 && (
+        <StepContainer
+          title="Ваши основные параметры"
+          hint="Все поля можно поправить — данные из профиля предзаполнены."
+        >
+          {profileGender && (
+            <div className="rounded-xl bg-primary/5 border border-primary/20 px-4 py-3">
+              <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5">
+                <div className="contents">
+                  <dt className="text-sm font-medium text-foreground/70">Пол:</dt>
+                  <dd className="text-sm font-semibold text-foreground">{profileGender}</dd>
+                </div>
+              </dl>
+            </div>
+          )}
+
+          <div className="grid grid-cols-3 gap-3">
+            <label className="space-y-1.5">
+              <span className="text-xs font-medium text-muted-foreground">Возраст</span>
+              <input
+                type="number"
+                inputMode="numeric"
+                min={10}
+                max={100}
+                step={1}
+                value={state.ageYears}
+                onChange={(e) =>
+                  setState((s) => ({ ...s, ageYears: e.target.value }))
+                }
+                placeholder="32"
+                className="w-full rounded-xl border border-input bg-background/70 px-4 py-3 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              />
+            </label>
+            <label className="space-y-1.5">
+              <span className="text-xs font-medium text-muted-foreground">Рост, см</span>
+              <input
+                type="number"
+                inputMode="numeric"
+                min={100}
+                max={250}
+                step={1}
+                value={state.heightCm}
+                onChange={(e) =>
+                  setState((s) => ({ ...s, heightCm: e.target.value }))
+                }
+                placeholder="180"
+                className="w-full rounded-xl border border-input bg-background/70 px-4 py-3 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              />
+            </label>
+            <label className="space-y-1.5">
+              <span className="text-xs font-medium text-muted-foreground">Вес, кг</span>
+              <input
+                type="number"
+                inputMode="decimal"
+                min={20}
+                max={300}
+                step={0.1}
+                value={state.weightKg}
+                onChange={(e) =>
+                  setState((s) => ({ ...s, weightKg: e.target.value }))
+                }
+                placeholder="78"
+                className="w-full rounded-xl border border-input bg-background/70 px-4 py-3 text-base focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+              />
+            </label>
+          </div>
+        </StepContainer>
+      )}
+
+      {/* Step 3: замеры тела */}
+      {step === 3 && (
+        <StepContainer
+          title="Замеры тела"
+          hint="Помогут точнее подобрать нагрузку и упражнения. Если не знаете — спокойно пропускайте."
+        >
+          <div className="grid grid-cols-1 gap-2">
+            <Chip
+              label="Заполню замеры"
+              selected={state.measurementsMode === 'fill'}
+              onClick={() =>
+                setState((s) => ({ ...s, measurementsMode: 'fill' }))
+              }
+            />
+            <Chip
+              label="Пропустить"
+              selected={state.measurementsMode === 'skip'}
+              onClick={() =>
+                setState((s) => ({
+                  ...s,
+                  measurementsMode: 'skip',
+                  measurements: { ...EMPTY_MEASUREMENTS },
+                }))
+              }
+            />
+          </div>
+
+          {state.measurementsMode === 'fill' && (
+            <div className="space-y-3">
+              {lastMeasurement && (
+                <p className="text-xs text-muted-foreground">
+                  Подтянули последний замер от {new Date(lastMeasurement.date).toLocaleDateString('ru-RU')}. Можно поправить.
+                </p>
+              )}
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {MEASUREMENT_FIELDS.map((f) => (
+                  <label key={f.key} className="space-y-1">
+                    <span className="text-xs font-medium text-muted-foreground">
+                      {f.label}, {f.unit}
+                    </span>
+                    <input
+                      type="number"
+                      inputMode="decimal"
+                      step={0.1}
+                      min={0}
+                      value={state.measurements[f.key]}
+                      onChange={(e) =>
+                        setState((s) => ({
+                          ...s,
+                          measurements: { ...s.measurements, [f.key]: e.target.value },
+                        }))
+                      }
+                      placeholder={f.placeholder}
+                      className="w-full rounded-xl border border-input bg-background/70 px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    />
+                  </label>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Любое поле можно оставить пустым — пришлём AI только заполненное.
+              </p>
+            </div>
+          )}
         </StepContainer>
       )}
 
@@ -800,49 +1042,6 @@ export function AiPlanWizard() {
         </StepContainer>
       )}
 
-      {/* Step 11: Wishes (свободный промпт — необязательный) */}
-      {step === 11 && (
-        <StepContainer
-          title="Свободные пожелания тренеру"
-          hint="Необязательно — но всё, что напишешь, AI учтёт строго. Можно пропустить."
-        >
-          <textarea
-            value={state.wishesText}
-            onChange={(e) =>
-              setState((s) => ({
-                ...s,
-                wishes: e.target.value.trim() ? 'yes' : 'no',
-                wishesText: e.target.value,
-              }))
-            }
-            placeholder="Например: бассейн 2 раза в неделю, упор на спину, беречь колено..."
-            rows={6}
-            className="w-full resize-y rounded-xl border border-input bg-background/70 px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring leading-relaxed"
-          />
-          <div>
-            <p className="text-xs text-muted-foreground mb-2">Можно нажать на пример — добавится в поле:</p>
-            <div className="flex flex-wrap gap-1.5">
-              {WISH_EXAMPLES.map((ex) => (
-                <button
-                  key={ex}
-                  type="button"
-                  onClick={() =>
-                    setState((s) => {
-                      const sep = s.wishesText.trim() ? '\n' : ''
-                      const next = `${s.wishesText}${sep}${ex}`
-                      return { ...s, wishes: 'yes', wishesText: next }
-                    })
-                  }
-                  className="text-xs rounded-full border border-border bg-background/60 px-2.5 py-1 hover:border-primary/60 hover:text-primary transition-colors"
-                >
-                  + {ex}
-                </button>
-              ))}
-            </div>
-          </div>
-        </StepContainer>
-      )}
-
       {/* Step 10: Program type */}
       {step === 10 && (
         <StepContainer title="Тип программы">
@@ -887,12 +1086,55 @@ export function AiPlanWizard() {
         </StepContainer>
       )}
 
+      {/* Step 11: Wishes (свободный промпт — необязательный) */}
+      {step === 11 && (
+        <StepContainer
+          title="Свободные пожелания тренеру"
+          hint="Необязательно — но всё, что напишешь, AI учтёт строго. Можно пропустить."
+        >
+          <textarea
+            value={state.wishesText}
+            onChange={(e) =>
+              setState((s) => ({
+                ...s,
+                wishes: e.target.value.trim() ? 'yes' : 'no',
+                wishesText: e.target.value,
+              }))
+            }
+            placeholder="Например: бассейн 2 раза в неделю, упор на спину, беречь колено..."
+            rows={6}
+            className="w-full resize-y rounded-xl border border-input bg-background/70 px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring leading-relaxed"
+          />
+          <div>
+            <p className="text-xs text-muted-foreground mb-2">Можно нажать на пример — добавится в поле:</p>
+            <div className="flex flex-wrap gap-1.5">
+              {WISH_EXAMPLES.map((ex) => (
+                <button
+                  key={ex}
+                  type="button"
+                  onClick={() =>
+                    setState((s) => {
+                      const sep = s.wishesText.trim() ? '\n' : ''
+                      const next = `${s.wishesText}${sep}${ex}`
+                      return { ...s, wishes: 'yes', wishesText: next }
+                    })
+                  }
+                  className="text-xs rounded-full border border-border bg-background/60 px-2.5 py-1 hover:border-primary/60 hover:text-primary transition-colors"
+                >
+                  + {ex}
+                </button>
+              ))}
+            </div>
+          </div>
+        </StepContainer>
+      )}
+
       {/* Nav */}
       <div className="flex items-center justify-between pt-2">
         <Button
           variant="ghost"
           onClick={goBack}
-          disabled={step === 0 || (step === 1 && !hasProfile)}
+          disabled={step === 0}
         >
           <ArrowLeft className="h-4 w-4 mr-1" />
           Назад

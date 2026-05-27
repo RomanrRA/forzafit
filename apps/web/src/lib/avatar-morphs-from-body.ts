@@ -27,7 +27,10 @@ interface RangesByGender {
   waistCm: Range
   hipsCm: Range
   armCm: Range
+  forearmCm: Range
   thighCm: Range
+  calfCm: Range
+  neckCm: Range
   bodyFatPct: Range
 }
 
@@ -36,7 +39,10 @@ const MALE_RANGES: RangesByGender = {
   waistCm:    [70,  85,  110],
   hipsCm:     [85,  95,  110],
   armCm:      [25,  32,  42],
+  forearmCm:  [22,  28,  35],
   thighCm:    [50,  58,  68],
+  calfCm:     [32,  38,  46],
+  neckCm:     [34,  40,  48],
   bodyFatPct: [8,   18,  30],
 }
 
@@ -45,7 +51,10 @@ const FEMALE_RANGES: RangesByGender = {
   waistCm:    [60,  72,  95],
   hipsCm:     [85,  98,  115],
   armCm:      [22,  28,  36],
+  forearmCm:  [18,  24,  30],
   thighCm:    [52,  60,  72],
+  calfCm:     [30,  36,  42],
+  neckCm:     [30,  34,  40],
   bodyFatPct: [15,  25,  38],
 }
 
@@ -56,7 +65,10 @@ export interface BodyGoalsForMorphs {
   waistCm?: number | null
   hipsCm?: number | null
   armCm?: number | null
+  forearmCm?: number | null
   thighCm?: number | null
+  calfCm?: number | null
+  neckCm?: number | null
 }
 
 /**
@@ -72,14 +84,14 @@ export function applyBodyToMorphs(
   const out = { ...morphs }
   const r = gender === 'male' ? MALE_RANGES : FEMALE_RANGES
 
-  if (source.chestCm != null) out.chest = lerpRange(source.chestCm, r.chestCm)
-  if (source.waistCm != null) out.waist = lerpRange(source.waistCm, r.waistCm)
-  if (source.hipsCm != null)  out.hips  = lerpRange(source.hipsCm,  r.hipsCm)
-  if (source.armCm != null)   out.arm   = lerpRange(source.armCm,   r.armCm)
-
-  // thighCm только в body_goals — в body_measurements нет.
-  const thigh = (source as BodyGoalsForMorphs).thighCm
-  if (thigh != null) out.thigh = lerpRange(thigh, r.thighCm)
+  if (source.chestCm != null)   out.chest    = lerpRange(source.chestCm,   r.chestCm)
+  if (source.waistCm != null)   out.waist    = lerpRange(source.waistCm,   r.waistCm)
+  if (source.hipsCm != null)    out.hips     = lerpRange(source.hipsCm,    r.hipsCm)
+  if (source.armCm != null)     out.arm      = lerpRange(source.armCm,     r.armCm)
+  if (source.forearmCm != null) out.forearm  = lerpRange(source.forearmCm, r.forearmCm)
+  if (source.thighCm != null)   out.thigh    = lerpRange(source.thighCm,   r.thighCm)
+  if (source.calfCm != null)    out.calf     = lerpRange(source.calfCm,    r.calfCm)
+  if (source.neckCm != null)    out.neck     = lerpRange(source.neckCm,    r.neckCm)
 
   if (source.bodyFatPct != null) out.bodyFat = lerpRange(source.bodyFatPct, r.bodyFatPct)
 

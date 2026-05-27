@@ -6,7 +6,6 @@ import {
   personalRecords,
   prHistory,
   workoutExercises,
-  workoutSessions,
   workoutSets,
 } from '../db/schema';
 

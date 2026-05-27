@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD } from '@nestjs/core';
 
 import { DbModule } from './db/db.module';
@@ -12,11 +13,14 @@ import { PlanTemplatesModule } from './plan-templates/plan-templates.module';
 import { BodyMeasurementsModule } from './body-measurements/body-measurements.module';
 import { BodyGoalsModule } from './body-goals/body-goals.module';
 import { AiModule } from './ai/ai.module';
+import { OpenRouterModule } from './ai/openrouter.module';
 import { GamificationModule } from './gamification/gamification.module';
 import { FriendsModule } from './friends/friends.module';
 import { FeedModule } from './feed/feed.module';
 import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import { CalendarModule } from './calendar/calendar.module';
+import { QuestsModule } from './quests/quests.module';
+import { WorkoutAdviceModule } from './workout-advice/workout-advice.module';
 
 @Module({
   imports: [
@@ -31,6 +35,8 @@ import { CalendarModule } from './calendar/calendar.module';
         limit: 100,
       },
     ]),
+    ScheduleModule.forRoot(),
+    OpenRouterModule,
     DbModule,
     AuthModule,
     UsersModule,
@@ -45,6 +51,8 @@ import { CalendarModule } from './calendar/calendar.module';
     FeedModule,
     LeaderboardModule,
     CalendarModule,
+    QuestsModule,
+    WorkoutAdviceModule,
   ],
   providers: [
     {

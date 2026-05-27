@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Put,
+  Post,
   Delete,
   Body,
   UseGuards,
@@ -10,7 +11,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { BodyGoalsService } from './body-goals.service';
-import { UpsertBodyGoalDto } from './dto/body-goal.dto';
+import { UpsertBodyGoalDto, AiSuggestGoalDto } from './dto/body-goal.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 
@@ -34,6 +35,21 @@ export class BodyGoalsController {
     @Body() dto: UpsertBodyGoalDto,
   ) {
     return this.service.upsert(userId, dto);
+  }
+
+  @Post('ai-suggest')
+  @ApiOperation({
+    summary: 'AI-тренер подбирает цель по профилю/замерам и сохраняет её',
+  })
+  aiSuggest(
+    @CurrentUser('userId') userId: string,
+    @Body() dto: AiSuggestGoalDto,
+  ) {
+    return this.service.aiSuggestAndSave(
+      userId,
+      dto.intent,
+      dto.targetMonths ?? null,
+    );
   }
 
   @Delete()

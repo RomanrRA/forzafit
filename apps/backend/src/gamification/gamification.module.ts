@@ -5,9 +5,10 @@ import { StreakService } from './streak.service';
 import { PrDetectorService } from './pr-detector.service';
 import { AchievementsService } from './achievements.service';
 import { FeedModule } from '../feed/feed.module';
+import { QuestsModule } from '../quests/quests.module';
 
 @Module({
-  imports: [FeedModule],
+  imports: [FeedModule, QuestsModule],
   controllers: [GamificationController],
   providers: [
     GamificationService,

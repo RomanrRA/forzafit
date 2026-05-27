@@ -9,11 +9,13 @@ import {
   UnlockedAchievement,
 } from './achievements.service';
 import { FeedService } from '../feed/feed.service';
+import { QuestTrackerService, CompletedQuestNotification } from '../quests/quest-tracker.service';
 
 export interface WorkoutCompletedResult {
   streak: { current: number; longest: number; isNewLongest: boolean };
   newPrs: DetectedPr[];
   newAchievements: UnlockedAchievement[];
+  completedQuests: CompletedQuestNotification[];
 }
 
 @Injectable()
@@ -26,6 +28,7 @@ export class GamificationService {
     private prs: PrDetectorService,
     private achievements: AchievementsService,
     private feed: FeedService,
+    private questTracker: QuestTrackerService,
   ) {}
 
   /** Точка входа — вызывается из WorkoutsService после установки finishedAt. */
@@ -67,6 +70,15 @@ export class GamificationService {
       daysSincePreviousActivity: streakUpdate.daysSincePrevious,
     });
 
+    const completedQuests = await this.questTracker.onWorkoutCompleted({
+      userId,
+      sessionId,
+      sessionStartedAt: session.startedAt ?? null,
+      sessionVolume,
+      newPrs,
+      currentStreak: streakUpdate.currentCount,
+    });
+
     if (options.writeFeed) {
       try {
         await this.feed.writeEvent(userId, 'workout_completed', {
@@ -91,6 +103,14 @@ export class GamificationService {
             achievementEmoji: ach.emoji,
           });
         }
+        for (const q of completedQuests) {
+          await this.feed.writeEvent(userId, 'quest_completed', {
+            questId: q.questId,
+            questTitle: q.title,
+            questType: q.type,
+            rewardPoints: q.rewardPoints,
+          });
+        }
       } catch (e) {
         this.logger.warn(
           `Не удалось записать события в feed: ${(e as Error).message}`,
@@ -106,6 +126,7 @@ export class GamificationService {
       },
       newPrs,
       newAchievements,
+      completedQuests,
     };
   }
 
@@ -174,9 +195,10 @@ export class GamificationService {
     const prs = await this.prs.getAllForUser(userId);
     const achievements = await this.achievements.getMineWithProgress(userId);
     const unlockedCount = achievements.filter((a) => a.unlocked).length;
-    const totalPoints = achievements
+    const achievementPoints = achievements
       .filter((a) => a.unlocked)
       .reduce((sum, a) => sum + a.points, 0);
+    const questPoints = await this.questTracker.getTotalRewardPoints(userId);
 
     return {
       streak: {
@@ -188,7 +210,8 @@ export class GamificationService {
       recentPrs: prs.slice(0, 3),
       achievementsUnlocked: unlockedCount,
       achievementsTotal: achievements.length,
-      points: totalPoints,
+      points: achievementPoints + questPoints,
+      questPoints,
       recentAchievements: achievements
         .filter((a) => a.unlocked)
         .sort(

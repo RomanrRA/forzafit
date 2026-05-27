@@ -45,7 +45,11 @@ export class AiController {
   ): Promise<void> {
     this.initSse(res);
     try {
-      for await (const event of this.aiService.startConversationStream(userId, dto?.initialMessage)) {
+      for await (const event of this.aiService.startConversationStream(userId, {
+        initialMessage: dto?.initialMessage,
+        intent: dto?.intent,
+        targetMonths: dto?.targetMonths,
+      })) {
         this.writeEvent(res, event);
       }
     } catch (err: any) {

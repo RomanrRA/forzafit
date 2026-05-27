@@ -179,7 +179,7 @@ export const ACHIEVEMENT_SEEDS: AchievementSeed[] = [
   },
   {
     code: 'pr_5',
-    title: 'Пятёрка PR',
+    title: 'Пять рекордов',
     description: '5 личных рекордов',
     emoji: '⭐',
     category: 'strength',
@@ -190,7 +190,7 @@ export const ACHIEVEMENT_SEEDS: AchievementSeed[] = [
   },
   {
     code: 'pr_10',
-    title: 'Десятка PR',
+    title: 'Десять рекордов',
     description: '10 личных рекордов',
     emoji: '📈',
     category: 'strength',
@@ -202,7 +202,7 @@ export const ACHIEVEMENT_SEEDS: AchievementSeed[] = [
   {
     code: 'triple_pr',
     title: 'Тройной прорыв',
-    description: 'Установи 3 PR за одну тренировку',
+    description: 'Установи 3 рекорда за одну тренировку',
     emoji: '🚀',
     category: 'strength',
     points: 50,

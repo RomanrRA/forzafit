@@ -4,21 +4,40 @@ import {
   ForbiddenException,
   ConflictException,
 } from '@nestjs/common';
-import { eq, and, sql } from 'drizzle-orm';
+import { eq, and, desc, sql } from 'drizzle-orm';
 import * as fs from 'fs';
 import * as path from 'path';
 import { DrizzleService } from '../db/db.service';
-import { aiConversations, planTemplates, users } from '../db/schema';
+import {
+  aiConversations,
+  planTemplates,
+  users,
+  bodyMeasurements,
+} from '../db/schema';
 import { PlanTemplatesService } from '../plan-templates/plan-templates.service';
 import { ExercisesService } from '../workouts/exercises/exercises.service';
+import { BodyGoalsService } from '../body-goals/body-goals.service';
 import { OpenRouterService, ChatMessage, ToolCall } from './openrouter.service';
 import { GENERATE_PLAN_TOOL, GeneratePlanArgs } from './tools/generate-plan.tool';
+import {
+  SUGGEST_BODY_GOAL_TOOL,
+  SuggestBodyGoalArgs,
+} from './tools/suggest-body-goal.tool';
 import {
   ADJUST_PLAN_TOOL,
   AdjustPlanArgs,
   PlanAdjustment,
 } from './tools/adjust-plan.tool';
-import { SseEvent } from './dto/ai.dto';
+import { SseEvent, FinalizeBodyGoalDto } from './dto/ai.dto';
+
+type CoachIntent = 'lose' | 'gain' | 'maintain' | 'strength';
+
+const INTENT_LABEL: Record<CoachIntent, string> = {
+  lose: 'сбросить вес/жир',
+  gain: 'набрать мышечную массу',
+  maintain: 'поддерживать форму, улучшить композицию',
+  strength: 'нарастить силовые показатели',
+};
 
 const GENDER_LABEL: Record<string, string> = {
   male: 'мужской',
@@ -58,6 +77,77 @@ function buildProfileContext(user: {
   return `## Что уже известно о пользователе (из профиля)\n${lines.join('\n')}\n\nЭти данные не переспрашивай.`;
 }
 
+function buildCoachContext(
+  intents: CoachIntent[],
+  targetMonths: number | undefined,
+  measurement: {
+    date: Date | string;
+    weightKg: number | null;
+    bodyFatPct: number | null;
+    chestCm: number | null;
+    waistCm: number | null;
+    hipsCm: number | null;
+    armCm: number | null;
+    thighCm: number | null;
+    calfCm: number | null;
+    forearmCm: number | null;
+    neckCm: number | null;
+  } | null,
+): string {
+  const today = new Date().toISOString().slice(0, 10);
+  const intentList = intents.map((i) => `- ${INTENT_LABEL[i]}`).join('\n');
+  const lines: string[] = [
+    '## Режим AI-coach: цель + программа',
+    '',
+    `Сегодня: ${today}`,
+    intents.length > 1
+      ? `Намерения пользователя (комбинировать):\n${intentList}`
+      : `Намерение пользователя: ${INTENT_LABEL[intents[0]]}`,
+  ];
+  if (targetMonths != null) {
+    lines.push(`Желаемый срок: ${targetMonths} мес.`);
+  }
+  lines.push('');
+
+  if (measurement) {
+    lines.push('Последний замер тела:');
+    const fmt = (v: number | null) => (v == null ? '—' : String(v));
+    lines.push(`- вес: ${fmt(measurement.weightKg)} кг`);
+    lines.push(`- % жира: ${fmt(measurement.bodyFatPct)}`);
+    lines.push(`- грудь: ${fmt(measurement.chestCm)} см`);
+    lines.push(`- талия: ${fmt(measurement.waistCm)} см`);
+    lines.push(`- бёдра: ${fmt(measurement.hipsCm)} см`);
+    lines.push(`- плечо: ${fmt(measurement.armCm)} см`);
+    lines.push(`- бедро: ${fmt(measurement.thighCm)} см`);
+    lines.push(`- икра: ${fmt(measurement.calfCm)} см`);
+    lines.push(`- предплечье: ${fmt(measurement.forearmCm)} см`);
+    lines.push(`- шея: ${fmt(measurement.neckCm)} см`);
+    lines.push('');
+  } else {
+    lines.push(
+      'Текущих замеров тела в БД нет — опирайся на профиль (рост, вес, пол).',
+      '',
+    );
+  }
+
+  lines.push(
+    '## ОБЯЗАТЕЛЬНО: два tool_call в одном ответе',
+    '',
+    'В этом режиме ты должен вызвать **оба** tool в одном ответе:',
+    '1. `suggest_body_goal` — целевые показатели тела (вес/% жира/обхваты, targetDate, rationale).',
+    '   Правила: BMI 18.5-25, % жира М 10-20% / Ж 18-28%, темп 0.5-0.7 кг/нед сброс, 0.2-0.4 кг/нед набор.',
+    '   targetDate в будущем минимум 2 месяца, максимум 12. Если каких-то текущих замеров нет — оставь соответствующие цели null.',
+    '2. `generate_plan` — программа тренировок, **подогнанная под эту цель**.',
+    '   При сбросе: больше кардио/circuit, дефицит. При наборе: гипертрофия 8-12 повторов, прогрессия. При силе: 3-6 повторов в базовых движениях (присед/тяга/жим), длинный отдых 2-4 мин, RPE 7-9. При maintain: смешанный.',
+    '   Если намерений несколько — совмести (lose+strength = рекомпозиция: силовая база + дефицит; gain+strength = периодизация: тяжёлые сеты 3-6 + объёмные 8-12).',
+    '   В description плана упомяни связь с целью («Программа на 3 мес под сброс 5 кг»).',
+    '',
+    'Не задавай вопросов — все ответы анкеты уже в первом сообщении пользователя.',
+  );
+
+  return lines.join('\n');
+}
+
 @Injectable()
 export class AiService {
   private readonly systemPrompt: string;
@@ -68,6 +158,7 @@ export class AiService {
     private openRouter: OpenRouterService,
     private planTemplatesService: PlanTemplatesService,
     private exercisesService: ExercisesService,
+    private bodyGoalsService: BodyGoalsService,
   ) {
     const promptPath = path.join(__dirname, 'prompts', 'plan-wizard.md');
     this.systemPrompt = fs.readFileSync(promptPath, 'utf-8').trim();
@@ -108,8 +199,15 @@ export class AiService {
 
   async *startConversationStream(
     userId: string,
-    initialMessage?: string,
+    opts: {
+      initialMessage?: string;
+      intent?: CoachIntent[];
+      targetMonths?: number;
+    } = {},
   ): AsyncIterable<SseEvent> {
+    const { initialMessage, intent, targetMonths } = opts;
+    const intents: CoachIntent[] = Array.isArray(intent) ? intent : [];
+
     const [user] = await this.drizzle.db
       .select({
         gender: users.gender,
@@ -123,38 +221,60 @@ export class AiService {
       .limit(1);
 
     const profileContext = user ? buildProfileContext(user) : null;
-    const systemContent = profileContext
-      ? `${this.systemPrompt}\n\n${profileContext}`
-      : this.systemPrompt;
+
+    // Доп. блоки промпта — только если хотя бы одно намерение задано (режим AI-coach)
+    let coachContext: string | null = null;
+    if (intents.length > 0) {
+      const measurement = await this.getLatestMeasurement(userId);
+      coachContext = buildCoachContext(intents, targetMonths, measurement);
+    }
+
+    const systemPieces = [this.systemPrompt];
+    if (profileContext) systemPieces.push(profileContext);
+    if (coachContext) systemPieces.push(coachContext);
+    const systemContent = systemPieces.join('\n\n');
+
     const systemMessage: ChatMessage = { role: 'system', content: systemContent };
 
     const seedMessages: ChatMessage[] = initialMessage
       ? [systemMessage, { role: 'user', content: initialMessage }]
       : [systemMessage];
 
+    const tools = intents.length > 0
+      ? [SUGGEST_BODY_GOAL_TOOL as any, GENERATE_PLAN_TOOL as any]
+      : [GENERATE_PLAN_TOOL as any];
+
     const [conversation] = await this.drizzle.db
       .insert(aiConversations)
       .values({
         userId,
         messages: seedMessages,
+        context:
+          intents.length > 0
+            ? { kind: 'coach', intent: intents, targetMonths }
+            : undefined,
       })
       .returning();
 
     yield { type: 'meta', conversationId: conversation.id };
 
     let assistantContent = '';
-    let toolCallResult: ToolCall | null = null;
+    const toolCalls: ToolCall[] = [];
 
     for await (const event of this.openRouter.streamCompletion({
       messages: seedMessages,
-      tools: [GENERATE_PLAN_TOOL as any],
+      tools,
     })) {
       if (event.type === 'token') {
         assistantContent += event.content;
         yield { type: 'token', content: event.content };
       } else if (event.type === 'tool_call') {
-        toolCallResult = event.toolCall;
-        yield { type: 'tool_call', name: event.toolCall.function.name, args: JSON.parse(event.toolCall.function.arguments || '{}') };
+        toolCalls.push(event.toolCall);
+        yield {
+          type: 'tool_call',
+          name: event.toolCall.function.name,
+          args: JSON.parse(event.toolCall.function.arguments || '{}'),
+        };
       } else if (event.type === 'done') {
         break;
       }
@@ -163,7 +283,7 @@ export class AiService {
     const assistantMessage: ChatMessage = {
       role: 'assistant',
       content: assistantContent || null,
-      ...(toolCallResult ? { tool_calls: [toolCallResult] } : {}),
+      ...(toolCalls.length ? { tool_calls: toolCalls } : {}),
     };
 
     const updatedMessages: ChatMessage[] = [...seedMessages, assistantMessage];
@@ -179,22 +299,33 @@ export class AiService {
     const conversation = await this.getOwnedActiveConversation(conversationId, userId);
     const messages = (conversation.messages as ChatMessage[]) ?? [];
 
+    // Если беседа в режиме AI-coach — даём оба tool в follow-up тоже
+    const ctx = conversation.context as { kind?: string } | null;
+    const tools =
+      ctx?.kind === 'coach'
+        ? [SUGGEST_BODY_GOAL_TOOL as any, GENERATE_PLAN_TOOL as any]
+        : [GENERATE_PLAN_TOOL as any];
+
     const userMessage: ChatMessage = { role: 'user', content };
     const messagesWithUser = [...messages, userMessage];
 
     let assistantContent = '';
-    let toolCallResult: ToolCall | null = null;
+    const toolCalls: ToolCall[] = [];
 
     for await (const event of this.openRouter.streamCompletion({
       messages: messagesWithUser,
-      tools: [GENERATE_PLAN_TOOL as any],
+      tools,
     })) {
       if (event.type === 'token') {
         assistantContent += event.content;
         yield { type: 'token', content: event.content };
       } else if (event.type === 'tool_call') {
-        toolCallResult = event.toolCall;
-        yield { type: 'tool_call', name: event.toolCall.function.name, args: JSON.parse(event.toolCall.function.arguments || '{}') };
+        toolCalls.push(event.toolCall);
+        yield {
+          type: 'tool_call',
+          name: event.toolCall.function.name,
+          args: JSON.parse(event.toolCall.function.arguments || '{}'),
+        };
       } else if (event.type === 'done') {
         break;
       }
@@ -203,7 +334,7 @@ export class AiService {
     const assistantMessage: ChatMessage = {
       role: 'assistant',
       content: assistantContent || null,
-      ...(toolCallResult ? { tool_calls: [toolCallResult] } : {}),
+      ...(toolCalls.length ? { tool_calls: toolCalls } : {}),
     };
 
     const updatedMessages = [...messagesWithUser, assistantMessage];
@@ -215,29 +346,71 @@ export class AiService {
     yield { type: 'done' };
   }
 
-  async finalizeConversation(conversationId: string, userId: string): Promise<{ planTemplateId: string }> {
+  async finalizeConversation(
+    conversationId: string,
+    userId: string,
+  ): Promise<{ planTemplateId: string; bodyGoal?: FinalizeBodyGoalDto | null }> {
     const conversation = await this.getOwnedActiveConversation(conversationId, userId);
     const messages = (conversation.messages as ChatMessage[]) ?? [];
 
-    // Find last assistant message with a generate_plan tool call
-    const lastAssistant = [...messages].reverse().find(
-      (m) => m.role === 'assistant' && m.tool_calls?.some((tc) => tc.function.name === 'generate_plan'),
-    );
+    // Собираем все tool_calls со всех assistant-сообщений беседы
+    const allToolCalls = messages
+      .filter((m) => m.role === 'assistant' && m.tool_calls?.length)
+      .flatMap((m) => m.tool_calls!);
 
-    if (!lastAssistant || !lastAssistant.tool_calls) {
-      throw new ConflictException('Агент ещё не сгенерировал план');
-    }
+    const planToolCall = [...allToolCalls]
+      .reverse()
+      .find((tc) => tc.function.name === 'generate_plan');
 
-    const toolCall = lastAssistant.tool_calls.find((tc) => tc.function.name === 'generate_plan');
-    if (!toolCall) {
+    if (!planToolCall) {
       throw new ConflictException('Агент ещё не сгенерировал план');
     }
 
     let args: GeneratePlanArgs;
     try {
-      args = JSON.parse(toolCall.function.arguments);
+      args = JSON.parse(planToolCall.function.arguments);
     } catch {
       throw new ConflictException('Не удалось разобрать аргументы плана');
+    }
+
+    // Если в беседе был режим AI-coach — ищем suggest_body_goal
+    const goalToolCall = [...allToolCalls]
+      .reverse()
+      .find((tc) => tc.function.name === 'suggest_body_goal');
+
+    let savedBodyGoal: FinalizeBodyGoalDto | null = null;
+    if (goalToolCall) {
+      try {
+        const goalArgs = JSON.parse(
+          goalToolCall.function.arguments,
+        ) as SuggestBodyGoalArgs;
+        const upserted = await this.bodyGoalsService.upsert(userId, {
+          weightKg: goalArgs.weightKg ?? null,
+          bodyFatPct: goalArgs.bodyFatPct ?? null,
+          chestCm: goalArgs.chestCm ?? null,
+          waistCm: goalArgs.waistCm ?? null,
+          hipsCm: goalArgs.hipsCm ?? null,
+          armCm: goalArgs.armCm ?? null,
+          thighCm: goalArgs.thighCm ?? null,
+          targetDate: goalArgs.targetDate,
+        });
+        savedBodyGoal = {
+          weightKg: upserted.weightKg,
+          bodyFatPct: upserted.bodyFatPct,
+          chestCm: upserted.chestCm,
+          waistCm: upserted.waistCm,
+          hipsCm: upserted.hipsCm,
+          armCm: upserted.armCm,
+          thighCm: upserted.thighCm,
+          targetDate: upserted.targetDate
+            ? new Date(upserted.targetDate).toISOString().slice(0, 10)
+            : null,
+          rationale: goalArgs.rationale,
+        };
+      } catch {
+        // Не валим финализацию плана из-за goal — просто не сохраняем цель
+        savedBodyGoal = null;
+      }
     }
 
     // Map tool args → PlanBuilder/plan_templates.days shape (name/focus/note keys differ from tool schema)
@@ -292,7 +465,17 @@ export class AiService {
       })
       .where(eq(aiConversations.id, conversationId));
 
-    return { planTemplateId: plan.id };
+    return { planTemplateId: plan.id, bodyGoal: savedBodyGoal };
+  }
+
+  private async getLatestMeasurement(userId: string) {
+    const [m] = await this.drizzle.db
+      .select()
+      .from(bodyMeasurements)
+      .where(eq(bodyMeasurements.userId, userId))
+      .orderBy(desc(bodyMeasurements.date))
+      .limit(1);
+    return m ?? null;
   }
 
   // ─── Plan adjustment (step 2) ──────────────────────────────────────────────

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { format, startOfDay } from 'date-fns'
 import { ru } from 'date-fns/locale'
@@ -22,11 +23,16 @@ const TAB_OPTIONS: { value: Tab; label: string; shortLabel: string }[] = [
 ]
 
 export default function WorkoutsPage() {
+  const searchParams = useSearchParams()
+  const initialTab = (() => {
+    const t = searchParams.get('tab')
+    return t === 'missed' || t === 'completed' || t === 'all' || t === 'planned' ? (t as Tab) : 'planned'
+  })()
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
-  const [tab, setTab] = useState<Tab>('planned')
+  const [tab, setTab] = useState<Tab>(initialTab)
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
   const deleteMutation = useDeleteWorkout()

@@ -12,7 +12,8 @@ import { toast } from '@/hooks/use-toast'
 
 // ─── Chooser ──────────────────────────────────────────────────────────────────
 
-function ModeChooser() {
+function ModeChooser({ from }: { from: string | null }) {
+  const fromSuffix = from ? `&from=${encodeURIComponent(from)}` : ''
   return (
     <div className="space-y-6">
       <div>
@@ -23,7 +24,7 @@ function ModeChooser() {
       <div className="grid gap-4 sm:grid-cols-2">
         {/* Manual */}
         <Link
-          href="/plans/new?mode=manual"
+          href={`/plans/new?mode=manual${fromSuffix}`}
           className="glass-card p-6 flex flex-col gap-3 hover:scale-[1.02] transition-transform cursor-pointer"
         >
           <div className="w-11 h-11 rounded-2xl bg-primary/10 flex items-center justify-center">
@@ -40,7 +41,7 @@ function ModeChooser() {
 
         {/* AI */}
         <Link
-          href="/plans/new?ai=1"
+          href={`/plans/new?ai=1${fromSuffix}`}
           className="glass-card p-6 flex flex-col gap-3 hover:scale-[1.02] transition-transform cursor-pointer"
         >
           <div className="w-11 h-11 rounded-2xl bg-primary/10 flex items-center justify-center">
@@ -83,19 +84,29 @@ function ManualForm() {
 
 // ─── Page content (reads search params, must be inside Suspense) ──────────────
 
+// Только относительные пути на свой же сайт — защита от open redirect.
+function safeFrom(raw: string | null): string | null {
+  if (!raw) return null
+  if (!raw.startsWith('/') || raw.startsWith('//')) return null
+  return raw
+}
+
 function PageContent() {
   const params = useSearchParams()
   const isAi = params.get('ai') === '1'
   const isManual = params.get('mode') === 'manual'
+  const from = safeFrom(params.get('from'))
 
   let title = 'Новый план'
   let subtitle = 'Создайте свою программу тренировок'
   if (isAi) {
     title = 'AI-тренер'
-    subtitle = 'Составим план вместе'
+    subtitle = 'Подберём цель по фигуре и план под неё'
   } else if (isManual) {
     subtitle = 'Заполните детали вручную'
   }
+
+  const backHref = from ?? '/plans'
 
   // Show chooser when no mode is selected
   if (!isAi && !isManual) {
@@ -103,7 +114,7 @@ function PageContent() {
       <div className="max-w-2xl space-y-5">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" asChild>
-            <Link href="/plans">
+            <Link href={backHref}>
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
@@ -112,7 +123,7 @@ function PageContent() {
             <p className="text-sm text-muted-foreground">{subtitle}</p>
           </div>
         </div>
-        <ModeChooser />
+        <ModeChooser from={from} />
       </div>
     )
   }
@@ -121,8 +132,8 @@ function PageContent() {
     <div className={isAi ? 'max-w-2xl space-y-5' : 'max-w-2xl space-y-5'}>
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="icon" asChild>
-          {/* Back to chooser if in a sub-mode, back to plans list if nothing */}
-          <Link href={isAi || isManual ? '/plans/new' : '/plans'}>
+          {/* В sub-mode: на источник (from) или сразу на /plans, минуя chooser */}
+          <Link href={backHref}>
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>

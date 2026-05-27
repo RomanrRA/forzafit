@@ -1,18 +1,15 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { and, asc, eq, inArray, isNotNull, sql } from 'drizzle-orm';
+import { and, asc, eq, isNotNull, sql } from 'drizzle-orm';
 import { DrizzleService } from '../db/db.service';
 import {
   achievementsCatalog,
   userAchievements,
-  workoutExercises,
   workoutSessions,
-  workoutSets,
   personalRecords,
 } from '../db/schema';
 import {
   ACHIEVEMENT_SEEDS,
   AchievementCondition,
-  AchievementSeed,
 } from './achievements-seed';
 
 export interface AchievementCheckContext {

@@ -1,9 +1,20 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
+/**
+ * Текстовый блок с опциональным cache_control — формат Anthropic через OpenRouter.
+ * `ephemeral` = 5-минутный кэш. Маркируем последний блок системного промпта/тулзы,
+ * который должен кэшироваться (включает всё содержимое до маркера).
+ */
+export interface ContentBlock {
+  type: 'text';
+  text: string;
+  cache_control?: { type: 'ephemeral' };
+}
+
 export interface ChatMessage {
   role: 'system' | 'user' | 'assistant' | 'tool';
-  content: string | null;
+  content: string | ContentBlock[] | null;
   tool_calls?: ToolCall[];
   tool_call_id?: string;
 }
@@ -24,6 +35,8 @@ export interface OpenRouterTool {
     description?: string;
     parameters: Record<string, unknown>;
   };
+  /** Anthropic prompt cache marker — кэширует всё до этого тула включительно. */
+  cache_control?: { type: 'ephemeral' };
 }
 
 // Events yielded by streamCompletion
@@ -65,16 +78,22 @@ export class OpenRouterService {
   async *streamCompletion(params: {
     messages: ChatMessage[];
     tools?: OpenRouterTool[];
+    model?: string;
+    temperature?: number;
+    maxTokens?: number;
+    toolChoice?: 'auto' | 'required' | { type: 'function'; function: { name: string } };
   }): AsyncIterable<OpenRouterEvent> {
     const body: Record<string, unknown> = {
-      model: this.model,
+      model: params.model ?? this.model,
       messages: params.messages,
       stream: true,
     };
     if (params.tools?.length) {
       body.tools = params.tools;
-      body.tool_choice = 'auto';
+      body.tool_choice = params.toolChoice ?? 'auto';
     }
+    if (params.temperature !== undefined) body.temperature = params.temperature;
+    if (params.maxTokens !== undefined) body.max_tokens = params.maxTokens;
 
     const response = await fetch(`${this.baseUrl}/chat/completions`, {
       method: 'POST',
@@ -186,16 +205,22 @@ export class OpenRouterService {
   async completion(params: {
     messages: ChatMessage[];
     tools?: OpenRouterTool[];
+    model?: string;
+    temperature?: number;
+    maxTokens?: number;
+    toolChoice?: 'auto' | 'required' | { type: 'function'; function: { name: string } };
   }): Promise<OpenRouterResponse> {
     const body: Record<string, unknown> = {
-      model: this.model,
+      model: params.model ?? this.model,
       messages: params.messages,
       stream: false,
     };
     if (params.tools?.length) {
       body.tools = params.tools;
-      body.tool_choice = 'auto';
+      body.tool_choice = params.toolChoice ?? 'auto';
     }
+    if (params.temperature !== undefined) body.temperature = params.temperature;
+    if (params.maxTokens !== undefined) body.max_tokens = params.maxTokens;
 
     const response = await fetch(`${this.baseUrl}/chat/completions`, {
       method: 'POST',

@@ -10,6 +10,8 @@ import {
   MaxLength,
   MinLength,
   IsUrl,
+  Min,
+  Max,
 } from 'class-validator';
 
 export class UpdateUserDto {
@@ -28,14 +30,18 @@ export class UpdateUserDto {
   @IsDateString()
   dob?: string;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ minimum: 120, maximum: 220 })
   @IsOptional()
   @IsNumber()
+  @Min(120)
+  @Max(220)
   heightCm?: number;
 
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({ minimum: 30, maximum: 250 })
   @IsOptional()
   @IsNumber()
+  @Min(30)
+  @Max(250)
   weightKg?: number;
 
   @ApiPropertyOptional({

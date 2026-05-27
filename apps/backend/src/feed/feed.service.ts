@@ -7,7 +7,8 @@ import { FriendsService } from '../friends/friends.service';
 export type FeedEventType =
   | 'workout_completed'
   | 'pr_set'
-  | 'achievement_unlocked';
+  | 'achievement_unlocked'
+  | 'quest_completed';
 
 export interface FeedEventData {
   // workout_completed
@@ -27,6 +28,11 @@ export interface FeedEventData {
   achievementCode?: string;
   achievementTitle?: string;
   achievementEmoji?: string;
+  // quest_completed
+  questId?: string;
+  questTitle?: string;
+  questType?: string;
+  rewardPoints?: number;
 }
 
 @Injectable()

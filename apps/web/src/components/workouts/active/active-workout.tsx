@@ -547,7 +547,7 @@ function ExerciseStage({
 
         {/* Set dots */}
         <div className="mt-4 flex items-center gap-1.5">
-          {sets.map((s, i) => {
+          {sets.map((s) => {
             const done = s.completed
             const isNext = !done && nextPlanned?.id === s.id
             return (
@@ -592,10 +592,7 @@ function ExerciseStage({
         <div className="mt-5 flex flex-col sm:flex-row gap-3">
           <div className="flex-1">
             {bodyweight ? (
-              <BodyweightToggle
-                onClear={() => setBodyweight(false)}
-                weight={weight}
-              />
+              <BodyweightToggle onClear={() => setBodyweight(false)} />
             ) : (
               <BigStepper
                 label="Вес"
@@ -849,13 +846,7 @@ function Chip({ children }: { children: React.ReactNode }) {
   )
 }
 
-function BodyweightToggle({
-  weight,
-  onClear,
-}: {
-  weight: number
-  onClear: () => void
-}) {
+function BodyweightToggle({ onClear }: { onClear: () => void }) {
   return (
     <div className="flex flex-1 flex-col gap-2">
       <div className="flex items-baseline justify-between">

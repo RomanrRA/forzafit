@@ -10,6 +10,7 @@ import type { WorkoutCompletedGamification } from '@/hooks/use-gamification'
 import { AddExerciseDialog } from '@/components/workouts/add-exercise-dialog'
 import { ExerciseRow } from '@/components/workouts/exercise-row'
 import { SortableWorkoutExercises } from '@/components/workouts/sortable-workout-exercises'
+import { WorkoutAdvicePanel } from '@/components/workouts/workout-advice-panel'
 import { CelebrationDialog } from '@/components/gamification/celebration-dialog'
 import { Button } from '@/components/ui/button'
 import {
@@ -262,6 +263,10 @@ export default function WorkoutDetailPage({ params }: Props) {
 
       {workout.notes && (
         <p className="glass-card p-3 text-sm txt-muted">{workout.notes}</p>
+      )}
+
+      {isActive && exercises.length > 0 && (
+        <WorkoutAdvicePanel sessionId={workout.id} />
       )}
 
       {exercises.length === 0 ? (

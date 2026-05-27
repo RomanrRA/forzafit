@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { eq, sql } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { DrizzleService } from '../db/db.service';
 import { streaks } from '../db/schema';
 

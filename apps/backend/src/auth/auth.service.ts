@@ -342,7 +342,7 @@ export class AuthService {
   ): Promise<AuthResponseDto> {
     const accessToken = await this.jwtService.signAsync(
       { sub: userId, email, subscriptionTier },
-      { expiresIn: '15m' },
+      { expiresIn: '2h' },
     );
 
     const rawRefresh = await this.jwtService.signAsync(
@@ -365,7 +365,7 @@ export class AuthService {
     return {
       accessToken,
       refreshToken: rawRefresh,
-      expiresIn: 15 * 60,
+      expiresIn: 2 * 60 * 60,
     };
   }
 }

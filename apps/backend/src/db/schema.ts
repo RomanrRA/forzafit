@@ -254,6 +254,10 @@ export const bodyMeasurements = pgTable(
     waistCm: real('waist_cm'),
     hipsCm: real('hips_cm'),
     armCm: real('arm_cm'),
+    thighCm: real('thigh_cm'),
+    forearmCm: real('forearm_cm'),
+    calfCm: real('calf_cm'),
+    neckCm: real('neck_cm'),
     custom: jsonb('custom').$type<{ fieldId: string; name: string; value: number; unit: string }[]>(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
@@ -471,6 +475,7 @@ export const feedEventTypeEnum = pgEnum('feed_event_type', [
   'workout_completed',
   'pr_set',
   'achievement_unlocked',
+  'quest_completed',
 ]);
 
 export const activityFeed = pgTable(
@@ -488,6 +493,86 @@ export const activityFeed = pgTable(
     index('activity_feed_user_id_idx').on(t.userId),
     index('activity_feed_created_at_idx').on(t.createdAt),
     index('activity_feed_user_created_idx').on(t.userId, t.createdAt),
+  ],
+);
+
+// ─── Gamification: Quests (Этап 3) ────────────────────────────────────────────
+
+export const questStatusEnum = pgEnum('quest_status', [
+  'suggested',
+  'active',
+  'completed',
+  'failed',
+  'abandoned',
+]);
+
+export const questSourceEnum = pgEnum('quest_source', [
+  'ai',
+  'manual',
+  'template',
+]);
+
+export const questTypeEnum = pgEnum('quest_type', [
+  'workout_count',
+  'streak_keep',
+  'pr_in_exercise',
+  'total_volume',
+  'exercise_frequency',
+  'weekday_consistency',
+]);
+
+export const userQuests = pgTable(
+  'user_quests',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade' }),
+    title: text('title').notNull(),
+    description: text('description').notNull(),
+    type: questTypeEnum('type').notNull(),
+    target: jsonb('target').notNull(),
+    progress: jsonb('progress').notNull().default({}),
+    rewardPoints: integer('reward_points').notNull().default(20),
+    status: questStatusEnum('status').notNull().default('suggested'),
+    source: questSourceEnum('source').notNull().default('ai'),
+    durationDays: integer('duration_days').notNull(),
+    startedAt: timestamp('started_at'),
+    expiresAt: timestamp('expires_at'),
+    completedAt: timestamp('completed_at'),
+    aiReason: text('ai_reason'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (t) => [
+    index('user_quests_user_id_idx').on(t.userId),
+    index('user_quests_user_status_idx').on(t.userId, t.status),
+    index('user_quests_expires_at_idx').on(t.expiresAt),
+  ],
+);
+
+// ─── Workout Advice ───────────────────────────────────────────────────────────
+// AI-кэш: на каждую (session, exercise) — одна рекомендация по весу/повторам.
+// Считается один раз при первом открытии превью тренировки и переиспользуется.
+
+export const workoutAdvice = pgTable(
+  'workout_advice',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    sessionId: uuid('session_id')
+      .notNull()
+      .references(() => workoutSessions.id, { onDelete: 'cascade' }),
+    exerciseId: uuid('exercise_id')
+      .notNull()
+      .references(() => exercises.id, { onDelete: 'cascade' }),
+    suggestedWeightKg: real('suggested_weight_kg'),
+    suggestedReps: integer('suggested_reps'),
+    suggestedSets: integer('suggested_sets'),
+    reason: text('reason').notNull(),
+    generatedAt: timestamp('generated_at').defaultNow().notNull(),
+  },
+  (t) => [
+    uniqueIndex('workout_advice_session_exercise_idx').on(t.sessionId, t.exerciseId),
   ],
 );
 
@@ -542,6 +627,7 @@ export const usersRelations = relations(users, ({ many, one }) => ({
   achievements: many(userAchievements),
   personalRecords: many(personalRecords),
   activityFeed: many(activityFeed),
+  quests: many(userQuests),
 }));
 
 export const friendshipsRelations = relations(friendships, ({ one }) => ({
@@ -694,6 +780,13 @@ export const bodyMeasurementsRelations = relations(bodyMeasurements, ({ one }) =
 export const bodyGoalsRelations = relations(bodyGoals, ({ one }) => ({
   user: one(users, {
     fields: [bodyGoals.userId],
+    references: [users.id],
+  }),
+}));
+
+export const userQuestsRelations = relations(userQuests, ({ one }) => ({
+  user: one(users, {
+    fields: [userQuests.userId],
     references: [users.id],
   }),
 }));

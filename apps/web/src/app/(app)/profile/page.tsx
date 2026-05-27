@@ -59,6 +59,8 @@ export default function ProfilePage() {
   const [name, setName] = useState('')
   const [gender, setGender] = useState('')
   const [dob, setDob] = useState('')
+  const [heightCm, setHeightCm] = useState('')
+  const [weightKg, setWeightKg] = useState('')
 
   // --- Соц. профиль ---
   const [username, setUsername] = useState('')
@@ -71,6 +73,8 @@ export default function ProfilePage() {
       setName(profile.name ?? '')
       setGender(profile.gender ?? '')
       setDob(profile.dob ? profile.dob.split('T')[0] : '')
+      setHeightCm(profile.heightCm?.toString() ?? '')
+      setWeightKg(profile.weightKg?.toString() ?? '')
       setUsername(profile.username ?? '')
       setBio(profile.bio ?? '')
       setAvatarUrl(profile.avatarUrl ?? '')
@@ -88,6 +92,8 @@ export default function ProfilePage() {
       setName(data.name ?? '')
       setGender(data.gender ?? '')
       setDob(data.dob ? data.dob.split('T')[0] : '')
+      setHeightCm(data.heightCm?.toString() ?? '')
+      setWeightKg(data.weightKg?.toString() ?? '')
       toast({ title: 'Профиль обновлён' })
     },
     onError: () => {
@@ -101,6 +107,22 @@ export default function ProfilePage() {
     if (name.trim()) patch.name = name.trim()
     if (gender) patch.gender = gender
     if (dob) patch.dob = new Date(dob).toISOString()
+    if (heightCm.trim()) {
+      const h = Number(heightCm)
+      if (h < 120 || h > 220) {
+        toast({ variant: 'destructive', title: 'Рост должен быть 120-220 см' })
+        return
+      }
+      patch.heightCm = h
+    }
+    if (weightKg.trim()) {
+      const w = Number(weightKg)
+      if (w < 30 || w > 250) {
+        toast({ variant: 'destructive', title: 'Вес должен быть 30-250 кг' })
+        return
+      }
+      patch.weightKg = w
+    }
     updateProfile.mutate(patch)
   }
 
@@ -378,6 +400,38 @@ export default function ProfilePage() {
                   max={new Date().toISOString().split('T')[0]}
                   onChange={(e) => setDob(e.target.value)}
                 />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label htmlFor="height">Рост, см</Label>
+                <Input
+                  id="height"
+                  type="number"
+                  inputMode="decimal"
+                  placeholder="175"
+                  min={120}
+                  max={220}
+                  value={heightCm}
+                  onChange={(e) => setHeightCm(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="weight">Вес, кг</Label>
+                <Input
+                  id="weight"
+                  type="number"
+                  inputMode="decimal"
+                  step="0.1"
+                  placeholder="75"
+                  min={30}
+                  max={250}
+                  value={weightKg}
+                  onChange={(e) => setWeightKg(e.target.value)}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Если ведёте замеры на странице «Тело» — берётся последний оттуда.
+                </p>
               </div>
             </div>
             <Button type="submit" className="w-full" disabled={updateProfile.isPending}>

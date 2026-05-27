@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { format } from 'date-fns'
 import { ru } from 'date-fns/locale'
 import {
@@ -21,6 +21,7 @@ import {
   useDeleteBodyMeasurement,
   type BodyMeasurement,
 } from '@/hooks/use-body-measurements'
+import { AvatarBlock } from '@/components/avatar/avatar-block'
 
 // Custom field definition (persists across sessions)
 interface CustomFieldDef {
@@ -64,7 +65,11 @@ const STANDARD_METRICS = [
   { key: 'chestCm', label: 'Грудь', unit: 'см' },
   { key: 'waistCm', label: 'Талия', unit: 'см' },
   { key: 'hipsCm', label: 'Бёдра', unit: 'см' },
-  { key: 'armCm', label: 'Рука', unit: 'см' },
+  { key: 'armCm', label: 'Плечо', unit: 'см' },
+  { key: 'forearmCm', label: 'Предплечье', unit: 'см' },
+  { key: 'thighCm', label: 'Бедро', unit: 'см' },
+  { key: 'calfCm', label: 'Икра', unit: 'см' },
+  { key: 'neckCm', label: 'Шея', unit: 'см' },
 ]
 
 const STORAGE_KEY = 'forzafit_body_measurements'
@@ -82,6 +87,10 @@ const DEFAULT_WIDGET_SETTINGS: BodyWidgetSettings = {
   waistCm: { visible: true, goal: 'lose' },
   hipsCm: { visible: false, goal: 'lose' },
   armCm: { visible: false, goal: 'gain' },
+  forearmCm: { visible: false, goal: 'gain' },
+  thighCm: { visible: false, goal: 'gain' },
+  calfCm: { visible: false, goal: 'gain' },
+  neckCm: { visible: false, goal: 'gain' },
 }
 
 const REMINDER_OPTIONS = [
@@ -94,6 +103,7 @@ const REMINDER_OPTIONS = [
 const EMPTY_STANDARD = {
   date: new Date().toISOString().split('T')[0],
   weightKg: '', bodyFatPct: '', chestCm: '', waistCm: '', hipsCm: '', armCm: '',
+  forearmCm: '', thighCm: '', calfCm: '', neckCm: '',
 }
 
 export default function BodyPage() {
@@ -139,6 +149,7 @@ export default function BodyPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editForm, setEditForm] = useState<{
     date: string; weightKg: string; bodyFatPct: string; chestCm: string; waistCm: string; hipsCm: string; armCm: string
+    forearmCm: string; thighCm: string; calfCm: string; neckCm: string
     custom: Record<string, string>
   } | null>(null)
 
@@ -260,7 +271,8 @@ export default function BodyPage() {
 
   function handleAdd() {
     const hasStandard = form.weightKg || form.bodyFatPct || form.chestCm ||
-      form.waistCm || form.hipsCm || form.armCm
+      form.waistCm || form.hipsCm || form.armCm ||
+      form.forearmCm || form.thighCm || form.calfCm || form.neckCm
     const hasCustom = Object.values(customValues).some(Boolean)
     if (!hasStandard && !hasCustom) {
       toast({ variant: 'destructive', title: 'Введите хотя бы одно значение' })
@@ -279,6 +291,10 @@ export default function BodyPage() {
       waistCm: form.waistCm ? Number(form.waistCm) : undefined,
       hipsCm: form.hipsCm ? Number(form.hipsCm) : undefined,
       armCm: form.armCm ? Number(form.armCm) : undefined,
+      forearmCm: form.forearmCm ? Number(form.forearmCm) : undefined,
+      thighCm: form.thighCm ? Number(form.thighCm) : undefined,
+      calfCm: form.calfCm ? Number(form.calfCm) : undefined,
+      neckCm: form.neckCm ? Number(form.neckCm) : undefined,
       custom: custom.length ? custom : undefined,
     }, {
       onSuccess: () => {
@@ -308,6 +324,10 @@ export default function BodyPage() {
       waistCm: entry.waistCm?.toString() ?? '',
       hipsCm: entry.hipsCm?.toString() ?? '',
       armCm: entry.armCm?.toString() ?? '',
+      forearmCm: entry.forearmCm?.toString() ?? '',
+      thighCm: entry.thighCm?.toString() ?? '',
+      calfCm: entry.calfCm?.toString() ?? '',
+      neckCm: entry.neckCm?.toString() ?? '',
       custom,
     })
   }
@@ -327,6 +347,10 @@ export default function BodyPage() {
       waistCm: editForm.waistCm ? Number(editForm.waistCm) : undefined,
       hipsCm: editForm.hipsCm ? Number(editForm.hipsCm) : undefined,
       armCm: editForm.armCm ? Number(editForm.armCm) : undefined,
+      forearmCm: editForm.forearmCm ? Number(editForm.forearmCm) : undefined,
+      thighCm: editForm.thighCm ? Number(editForm.thighCm) : undefined,
+      calfCm: editForm.calfCm ? Number(editForm.calfCm) : undefined,
+      neckCm: editForm.neckCm ? Number(editForm.neckCm) : undefined,
       custom: custom.length ? custom : undefined,
     }, {
       onSuccess: () => {
@@ -336,8 +360,6 @@ export default function BodyPage() {
       },
     })
   }
-
-  const latest = entries[entries.length - 1]
 
   // Получить значение метрики из записи (стандартной или кастомной)
   function getMetricValue(entry: BodyMeasurement, key: string): number | null {
@@ -385,8 +407,8 @@ export default function BodyPage() {
     <div className="space-y-4 sm:space-y-6">
       <div className="flex items-center justify-between gap-2">
         <div className="min-w-0">
-          <h1 className="text-2xl sm:text-3xl font-bold">Замеры тела</h1>
-          <p className="text-sm text-muted-foreground hidden sm:block">Отслеживайте вес и обхваты</p>
+          <h1 className="text-2xl sm:text-3xl font-bold">Тело</h1>
+          <p className="text-sm text-muted-foreground hidden sm:block">Аватар и замеры</p>
         </div>
         <div className="flex gap-1.5 shrink-0">
           <Button
@@ -408,6 +430,9 @@ export default function BodyPage() {
           </Button>
         </div>
       </div>
+
+      {/* 3D-аватар — строится по замерам и профилю */}
+      <AvatarBlock />
 
       {/* Migration banner */}
       {hasLocalData && (
@@ -496,8 +521,24 @@ export default function BodyPage() {
                 <Input type="number" inputMode="decimal" placeholder="90" value={form.hipsCm} onChange={(e) => setForm({ ...form, hipsCm: e.target.value })} />
               </div>
               <div>
-                <Label className="text-xs">Рука, см</Label>
+                <Label className="text-xs">Плечо, см</Label>
                 <Input type="number" inputMode="decimal" placeholder="35" value={form.armCm} onChange={(e) => setForm({ ...form, armCm: e.target.value })} />
+              </div>
+              <div>
+                <Label className="text-xs">Предплечье, см</Label>
+                <Input type="number" inputMode="decimal" placeholder="28" value={form.forearmCm} onChange={(e) => setForm({ ...form, forearmCm: e.target.value })} />
+              </div>
+              <div>
+                <Label className="text-xs">Бедро, см</Label>
+                <Input type="number" inputMode="decimal" placeholder="58" value={form.thighCm} onChange={(e) => setForm({ ...form, thighCm: e.target.value })} />
+              </div>
+              <div>
+                <Label className="text-xs">Икра, см</Label>
+                <Input type="number" inputMode="decimal" placeholder="38" value={form.calfCm} onChange={(e) => setForm({ ...form, calfCm: e.target.value })} />
+              </div>
+              <div>
+                <Label className="text-xs">Шея, см</Label>
+                <Input type="number" inputMode="decimal" placeholder="38" value={form.neckCm} onChange={(e) => setForm({ ...form, neckCm: e.target.value })} />
               </div>
 
               {/* Custom fields */}
@@ -567,55 +608,6 @@ export default function BodyPage() {
             </div>
           </CardContent>
         </Card>
-      )}
-
-      {/* Current stats */}
-      {latest && (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
-          {latest.weightKg && (
-            <Card>
-              <CardContent className="p-3 sm:pt-4 sm:pb-3 sm:px-6">
-                <div className="flex items-center gap-1.5 mb-0.5">
-                  <Scale className="h-3.5 w-3.5 text-primary" />
-                  <span className="text-xs text-muted-foreground">Вес</span>
-                </div>
-                <div className="text-xl sm:text-2xl font-bold">{latest.weightKg} <span className="text-xs sm:text-sm font-normal text-muted-foreground">кг</span></div>
-              </CardContent>
-            </Card>
-          )}
-          {latest.bodyFatPct && (
-            <Card>
-              <CardContent className="p-3 sm:pt-4 sm:pb-3 sm:px-6">
-                <div className="text-xs text-muted-foreground mb-0.5">% жира</div>
-                <div className="text-xl sm:text-2xl font-bold">{latest.bodyFatPct}<span className="text-xs sm:text-sm font-normal text-muted-foreground">%</span></div>
-              </CardContent>
-            </Card>
-          )}
-          {latest.waistCm && (
-            <Card>
-              <CardContent className="p-3 sm:pt-4 sm:pb-3 sm:px-6">
-                <div className="text-xs text-muted-foreground mb-0.5">Талия</div>
-                <div className="text-xl sm:text-2xl font-bold">{latest.waistCm} <span className="text-xs sm:text-sm font-normal text-muted-foreground">см</span></div>
-              </CardContent>
-            </Card>
-          )}
-          {latest.chestCm && (
-            <Card>
-              <CardContent className="p-3 sm:pt-4 sm:pb-3 sm:px-6">
-                <div className="text-xs text-muted-foreground mb-0.5">Грудь</div>
-                <div className="text-xl sm:text-2xl font-bold">{latest.chestCm} <span className="text-xs sm:text-sm font-normal text-muted-foreground">см</span></div>
-              </CardContent>
-            </Card>
-          )}
-          {latest.custom?.map((c) => (
-            <Card key={c.fieldId}>
-              <CardContent className="p-3 sm:pt-4 sm:pb-3 sm:px-6">
-                <div className="text-xs text-muted-foreground mb-0.5">{c.name}</div>
-                <div className="text-xl sm:text-2xl font-bold">{c.value} <span className="text-xs sm:text-sm font-normal text-muted-foreground">{c.unit}</span></div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
       )}
 
       {/* Chart with metric picker + goal settings */}
@@ -776,8 +768,24 @@ export default function BodyPage() {
                           <Input type="number" inputMode="decimal" value={editForm.hipsCm} onChange={(e) => setEditForm({ ...editForm, hipsCm: e.target.value })} />
                         </div>
                         <div>
-                          <Label className="text-xs">Рука, см</Label>
+                          <Label className="text-xs">Плечо, см</Label>
                           <Input type="number" inputMode="decimal" value={editForm.armCm} onChange={(e) => setEditForm({ ...editForm, armCm: e.target.value })} />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Предплечье, см</Label>
+                          <Input type="number" inputMode="decimal" value={editForm.forearmCm} onChange={(e) => setEditForm({ ...editForm, forearmCm: e.target.value })} />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Бедро, см</Label>
+                          <Input type="number" inputMode="decimal" value={editForm.thighCm} onChange={(e) => setEditForm({ ...editForm, thighCm: e.target.value })} />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Икра, см</Label>
+                          <Input type="number" inputMode="decimal" value={editForm.calfCm} onChange={(e) => setEditForm({ ...editForm, calfCm: e.target.value })} />
+                        </div>
+                        <div>
+                          <Label className="text-xs">Шея, см</Label>
+                          <Input type="number" inputMode="decimal" value={editForm.neckCm} onChange={(e) => setEditForm({ ...editForm, neckCm: e.target.value })} />
                         </div>
                         {customFields.map((field) => (
                           <div key={field.id}>
@@ -815,7 +823,11 @@ export default function BodyPage() {
                           {entry.chestCm    && <span className="text-[11px] sm:text-xs text-muted-foreground">Грудь: {entry.chestCm}</span>}
                           {entry.waistCm    && <span className="text-[11px] sm:text-xs text-muted-foreground">Талия: {entry.waistCm}</span>}
                           {entry.hipsCm     && <span className="text-[11px] sm:text-xs text-muted-foreground">Бёдра: {entry.hipsCm}</span>}
-                          {entry.armCm      && <span className="text-[11px] sm:text-xs text-muted-foreground">Рука: {entry.armCm}</span>}
+                          {entry.armCm      && <span className="text-[11px] sm:text-xs text-muted-foreground">Плечо: {entry.armCm}</span>}
+                          {entry.forearmCm  && <span className="text-[11px] sm:text-xs text-muted-foreground">Предплечье: {entry.forearmCm}</span>}
+                          {entry.thighCm    && <span className="text-[11px] sm:text-xs text-muted-foreground">Бедро: {entry.thighCm}</span>}
+                          {entry.calfCm     && <span className="text-[11px] sm:text-xs text-muted-foreground">Икра: {entry.calfCm}</span>}
+                          {entry.neckCm     && <span className="text-[11px] sm:text-xs text-muted-foreground">Шея: {entry.neckCm}</span>}
                           {entry.custom?.map((c) => (
                             <span key={c.fieldId} className="text-[11px] sm:text-xs text-muted-foreground">{c.name}: {c.value}</span>
                           ))}

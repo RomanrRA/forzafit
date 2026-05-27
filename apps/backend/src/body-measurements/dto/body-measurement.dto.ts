@@ -64,6 +64,26 @@ export class CreateBodyMeasurementDto {
   @IsNumber()
   armCm?: number;
 
+  @ApiPropertyOptional({ example: 58 })
+  @IsOptional()
+  @IsNumber()
+  thighCm?: number;
+
+  @ApiPropertyOptional({ example: 30 })
+  @IsOptional()
+  @IsNumber()
+  forearmCm?: number;
+
+  @ApiPropertyOptional({ example: 38 })
+  @IsOptional()
+  @IsNumber()
+  calfCm?: number;
+
+  @ApiPropertyOptional({ example: 38 })
+  @IsOptional()
+  @IsNumber()
+  neckCm?: number;
+
   @ApiPropertyOptional({ type: [CustomFieldDto] })
   @IsOptional()
   @IsArray()
@@ -107,6 +127,26 @@ export class UpdateBodyMeasurementDto {
   @IsOptional()
   @IsNumber()
   armCm?: number;
+
+  @ApiPropertyOptional({ example: 58 })
+  @IsOptional()
+  @IsNumber()
+  thighCm?: number;
+
+  @ApiPropertyOptional({ example: 30 })
+  @IsOptional()
+  @IsNumber()
+  forearmCm?: number;
+
+  @ApiPropertyOptional({ example: 38 })
+  @IsOptional()
+  @IsNumber()
+  calfCm?: number;
+
+  @ApiPropertyOptional({ example: 38 })
+  @IsOptional()
+  @IsNumber()
+  neckCm?: number;
 
   @ApiPropertyOptional({ type: [CustomFieldDto] })
   @IsOptional()

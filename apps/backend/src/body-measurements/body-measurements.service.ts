@@ -3,9 +3,9 @@ import {
   NotFoundException,
   ForbiddenException,
 } from '@nestjs/common';
-import { eq, and, gte, lte, desc, count } from 'drizzle-orm';
+import { eq, and, gte, lte, desc, count, isNotNull } from 'drizzle-orm';
 import { DrizzleService } from '../db/db.service';
-import { bodyMeasurements } from '../db/schema';
+import { bodyMeasurements, users } from '../db/schema';
 import {
   CreateBodyMeasurementDto,
   UpdateBodyMeasurementDto,
@@ -70,10 +70,15 @@ export class BodyMeasurementsService {
         waistCm: dto.waistCm ?? null,
         hipsCm: dto.hipsCm ?? null,
         armCm: dto.armCm ?? null,
+        thighCm: dto.thighCm ?? null,
+        forearmCm: dto.forearmCm ?? null,
+        calfCm: dto.calfCm ?? null,
+        neckCm: dto.neckCm ?? null,
         custom: dto.custom ?? null,
       })
       .returning();
 
+    await this.syncLatestWeight(userId);
     return entry;
   }
 
@@ -90,12 +95,17 @@ export class BodyMeasurementsService {
         ...(dto.waistCm !== undefined ? { waistCm: dto.waistCm } : {}),
         ...(dto.hipsCm !== undefined ? { hipsCm: dto.hipsCm } : {}),
         ...(dto.armCm !== undefined ? { armCm: dto.armCm } : {}),
+        ...(dto.thighCm !== undefined ? { thighCm: dto.thighCm } : {}),
+        ...(dto.forearmCm !== undefined ? { forearmCm: dto.forearmCm } : {}),
+        ...(dto.calfCm !== undefined ? { calfCm: dto.calfCm } : {}),
+        ...(dto.neckCm !== undefined ? { neckCm: dto.neckCm } : {}),
         ...(dto.custom !== undefined ? { custom: dto.custom } : {}),
         updatedAt: new Date(),
       })
       .where(eq(bodyMeasurements.id, id))
       .returning();
 
+    await this.syncLatestWeight(userId);
     return entry;
   }
 
@@ -104,6 +114,33 @@ export class BodyMeasurementsService {
     await this.drizzle.db
       .delete(bodyMeasurements)
       .where(eq(bodyMeasurements.id, id));
+    await this.syncLatestWeight(userId);
+  }
+
+  /**
+   * Синхронизирует users.weight_kg = вес из самого свежего замера (по date).
+   * Так избегаем дрейфа между body_measurements и users — потребители
+   * (AI-квесты, аватар-маппинг, дашборд) могут читать любой источник.
+   * Если у юзера нет ни одного замера с весом — поле обнуляется.
+   */
+  private async syncLatestWeight(userId: string): Promise<void> {
+    const db = this.drizzle.db;
+    const [latest] = await db
+      .select({ weightKg: bodyMeasurements.weightKg })
+      .from(bodyMeasurements)
+      .where(
+        and(
+          eq(bodyMeasurements.userId, userId),
+          isNotNull(bodyMeasurements.weightKg),
+        ),
+      )
+      .orderBy(desc(bodyMeasurements.date))
+      .limit(1);
+
+    await db
+      .update(users)
+      .set({ weightKg: latest?.weightKg ?? null, updatedAt: new Date() })
+      .where(eq(users.id, userId));
   }
 
   private async assertOwner(id: string, userId: string) {
