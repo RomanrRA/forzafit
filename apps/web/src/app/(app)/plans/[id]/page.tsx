@@ -13,10 +13,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { toast } from '@/hooks/use-toast'
-import { ArrowLeft, Play, Dumbbell, Coffee, ChevronDown, ChevronUp, Pencil, Trash2, CalendarPlus, Sparkles, CalendarDays } from 'lucide-react'
+import { ArrowLeft, Play, Dumbbell, Coffee, ChevronDown, ChevronUp, Pencil, Trash2, CalendarPlus, Sparkles, CalendarDays, Info } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { PlanAdjustDialog } from '@/components/plans/plan-adjust-dialog'
 import { CalendarSubscribeDialog } from '@/components/plans/calendar-subscribe-dialog'
+import { ExerciseHowToDialog } from '@/components/exercises/exercise-how-to-dialog'
 
 const DIFFICULTY_LABEL = { beginner: 'Начинающий', intermediate: 'Средний', advanced: 'Продвинутый' }
 
@@ -55,6 +56,7 @@ function PlanDays({ plan, exercises, onWorkoutCreated }: {
 }) {
   const [expandedDay, setExpandedDay] = useState<number | null>(1)
   const [startingDay, setStartingDay] = useState<number | null>(null)
+  const [howToId, setHowToId] = useState<string | null>(null)
 
   async function handleStartDay(dayNumber: number) {
     const day = plan.days.find((d) => d.dayNumber === dayNumber)
@@ -174,7 +176,20 @@ function PlanDays({ plan, exercises, onWorkoutCreated }: {
                   </div>
                   {(day.exercises ?? []).map((ex, i) => (
                     <div key={i} className="grid grid-cols-4 text-sm py-1 border-b last:border-0">
-                      <span className="col-span-2 font-medium">{ex.name}</span>
+                      <span className="col-span-2 font-medium flex items-center gap-1.5">
+                        {ex.name}
+                        {ex.exerciseId && (
+                          <button
+                            type="button"
+                            onClick={() => setHowToId(ex.exerciseId!)}
+                            className="text-muted-foreground hover:text-primary"
+                            aria-label="Как делать"
+                            title="Как делать"
+                          >
+                            <Info className="h-3.5 w-3.5" strokeWidth={2.4} />
+                          </button>
+                        )}
+                      </span>
                       <span className="text-muted-foreground">{ex.sets} × {ex.reps}</span>
                       <span className="text-muted-foreground">{ex.rest}</span>
                       {ex.note && (
@@ -188,6 +203,11 @@ function PlanDays({ plan, exercises, onWorkoutCreated }: {
           </Card>
         )
       })}
+      <ExerciseHowToDialog
+        exerciseId={howToId}
+        open={!!howToId}
+        onOpenChange={(o) => !o && setHowToId(null)}
+      />
     </div>
   )
 }

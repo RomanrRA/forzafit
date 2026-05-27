@@ -27,6 +27,7 @@ tar czf - \
   --exclude='packages/types/node_modules' \
   --exclude='apps/web/.next' \
   --exclude='apps/backend/dist' \
+  --exclude='tmp' \
   --exclude='.env' \
   --exclude='.env.prod' \
   --exclude='.env.local' \

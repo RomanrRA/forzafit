@@ -143,6 +143,15 @@ export const exercises = pgTable(
     difficulty: difficultyEnum('difficulty'),
     description: text('description'),
     animationUrl: text('animation_url'),
+    // Поля из free-exercise-db. Идемпотентный импорт по sourceId.
+    sourceId: text('source_id'),
+    primaryMuscles: text('primary_muscles').array().notNull().default([]),
+    secondaryMuscles: text('secondary_muscles').array().notNull().default([]),
+    instructions: text('instructions').array().notNull().default([]),
+    imageUrls: text('image_urls').array().notNull().default([]),
+    category: text('category'),
+    force: text('force'),
+    mechanic: text('mechanic'),
     isCustom: boolean('is_custom').default(false).notNull(),
     userId: uuid('user_id').references(() => users.id, {
       onDelete: 'set null',

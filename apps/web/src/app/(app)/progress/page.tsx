@@ -8,6 +8,7 @@ import {
 } from 'recharts'
 import { useExercises } from '@/hooks/use-exercises'
 import { useProgress, usePersonalRecords } from '@/hooks/use-workouts'
+import { muscleRu } from '@/lib/exercise-labels'
 import { Search } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { PeriodTabs, type ProgressPeriod } from '@/components/progress/period-tabs'
@@ -164,7 +165,7 @@ export default function ProgressPage() {
               >
                 <span className="font-medium">{e.name}</span>
                 {e.muscleGroups[0] && (
-                  <span className="ml-2 text-xs text-muted-foreground">{e.muscleGroups[0]}</span>
+                  <span className="ml-2 text-xs text-muted-foreground">{muscleRu(e.muscleGroups[0])}</span>
                 )}
               </button>
             ))}

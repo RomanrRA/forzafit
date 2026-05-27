@@ -11,6 +11,7 @@ import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
 import { Search, Trash2, BookOpen, Dumbbell, ZoomIn } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
+import { muscleRu, equipmentRu, DIFFICULTY_LABEL } from '@/lib/exercise-labels'
 
 const MUSCLE_HEX: Record<string, string> = {
   грудь: '#f43f5e',      chest: '#f43f5e',
@@ -134,14 +135,14 @@ export default function ExercisesPage() {
                   <p className="font-medium truncate">{ex.name}</p>
                   <div className="flex flex-wrap gap-1 mt-1">
                     {ex.muscleGroups?.slice(0, 2).map((mg) => (
-                      <Badge key={mg} variant="secondary" className="text-xs">{mg}</Badge>
+                      <Badge key={mg} variant="secondary" className="text-xs">{muscleRu(mg)}</Badge>
                     ))}
                     {ex.equipment && (
-                      <Badge variant="outline" className="text-xs">{ex.equipment}</Badge>
+                      <Badge variant="outline" className="text-xs">{equipmentRu(ex.equipment)}</Badge>
                     )}
                     {ex.difficulty && (
                       <Badge variant="outline" className="text-xs">
-                        {{ beginner: 'Начинающий', intermediate: 'Средний', advanced: 'Продвинутый' }[ex.difficulty]}
+                        {DIFFICULTY_LABEL[ex.difficulty] ?? ex.difficulty}
                       </Badge>
                     )}
                   </div>
@@ -179,14 +180,14 @@ export default function ExercisesPage() {
                 <DialogTitle className="font-semibold text-lg">{preview.name}</DialogTitle>
                 <div className="flex flex-wrap gap-1 mt-1">
                   {preview.muscleGroups?.map((mg) => (
-                    <Badge key={mg} variant="secondary" className="text-xs">{mg}</Badge>
+                    <Badge key={mg} variant="secondary" className="text-xs">{muscleRu(mg)}</Badge>
                   ))}
                   {preview.equipment && (
-                    <Badge variant="outline" className="text-xs">{preview.equipment}</Badge>
+                    <Badge variant="outline" className="text-xs">{equipmentRu(preview.equipment)}</Badge>
                   )}
                   {preview.difficulty && (
                     <Badge variant="outline" className="text-xs">
-                      {{ beginner: 'Начинающий', intermediate: 'Средний', advanced: 'Продвинутый' }[preview.difficulty]}
+                      {DIFFICULTY_LABEL[preview.difficulty] ?? preview.difficulty}
                     </Badge>
                   )}
                 </div>

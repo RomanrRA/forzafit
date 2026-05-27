@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useExercises } from '@/hooks/use-exercises'
 import { useAddExerciseToWorkout } from '@/hooks/use-workouts'
+import { muscleRu } from '@/lib/exercise-labels'
 import {
   Dialog,
   DialogContent,
@@ -76,7 +77,7 @@ export function AddExerciseDialog({ workoutId, currentCount }: Props) {
                 <div>
                   <p className="text-sm font-medium">{ex.name}</p>
                   {ex.muscleGroups?.[0] && (
-                    <p className="text-xs text-muted-foreground">{ex.muscleGroups[0]}</p>
+                    <p className="text-xs text-muted-foreground">{muscleRu(ex.muscleGroups[0])}</p>
                   )}
                 </div>
                 {ex.isCustom && <Badge variant="secondary">Своё</Badge>}

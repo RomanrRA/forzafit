@@ -83,3 +83,12 @@ backend-requirements.md
 frontend-requirements.md
 ios-requirements.md
 prototype.html
+
+# scratch / dev artifacts
+tmp/
+
+# Exercise media + DB (бинарники из free-exercise-db, тяжёлые для git)
+apps/web/public/exercises/
+!apps/backend/src/workouts/exercises/free-exercise-db.json
+!apps/backend/src/workouts/exercises/exercise-translations.json
+

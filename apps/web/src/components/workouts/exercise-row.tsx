@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Plus, ChevronDown, ChevronUp, Trash2, Timer } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
+import { muscleRu } from '@/lib/exercise-labels'
 
 const REST_OPTIONS = [
   { label: '30с', value: 30 },
@@ -96,7 +97,7 @@ export function ExerciseRow({ workoutId, workoutExercise }: Props) {
                     color: 'var(--txt-2)',
                   }}
                 >
-                  {workoutExercise.exercise.muscleGroups[0]}
+                  {muscleRu(workoutExercise.exercise.muscleGroups[0])}
                 </span>
               )}
               {allDone && (

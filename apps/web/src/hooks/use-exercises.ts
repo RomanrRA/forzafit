@@ -10,6 +10,26 @@ export interface Exercise {
   difficulty: 'beginner' | 'intermediate' | 'advanced' | null
   isCustom: boolean
   animationUrl: string | null
+  // Из free-exercise-db. Старые упражнения имеют null/пустые массивы.
+  sourceId?: string | null
+  primaryMuscles?: string[]
+  secondaryMuscles?: string[]
+  instructions?: string[]
+  imageUrls?: string[]
+  category?: string | null
+  force?: string | null
+  mechanic?: string | null
+}
+
+export function useExercise(id: string | null | undefined) {
+  return useQuery({
+    queryKey: ['exercises', id],
+    enabled: !!id,
+    queryFn: async () => {
+      const { data } = await api.get(`/exercises/${id}`)
+      return data as Exercise
+    },
+  })
 }
 
 export function useExercises(params?: {

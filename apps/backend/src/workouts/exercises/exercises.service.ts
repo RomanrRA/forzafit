@@ -4,6 +4,7 @@ import { DrizzleService } from '../../db/db.service';
 import { exercises } from '../../db/schema';
 import { CreateExerciseDto, ExerciseFilterDto } from './dto/exercise.dto';
 import { SEED_PUBLIC_EXERCISES } from './seed-data';
+import { loadFreeDbSeed } from './free-db-loader';
 
 @Injectable()
 export class ExercisesService implements OnModuleInit {
@@ -13,6 +14,7 @@ export class ExercisesService implements OnModuleInit {
 
   async onModuleInit() {
     await this.seedPublicExercises();
+    await this.seedFromFreeDb();
   }
 
   /**
@@ -48,6 +50,117 @@ export class ExercisesService implements OnModuleInit {
     }
     if (inserted > 0) {
       this.logger.log(`Посеяно ${inserted} публичных упражнений`);
+    }
+  }
+
+  /**
+   * Идемпотентный импорт free-exercise-db (873 упр., инструкции + 2 кадра).
+   * Ключ — sourceId; при втором запуске обновляет существующие записи
+   * (имя/инструкции/картинки), чтобы свежий перевод подхватывался без миграции.
+   */
+  private async seedFromFreeDb() {
+    const seeds = loadFreeDbSeed();
+    if (seeds.length === 0) {
+      this.logger.warn(
+        'free-exercise-db.json не найден или пуст — пропускаю импорт расширенной базы',
+      );
+      return;
+    }
+
+    let inserted = 0;
+    let updated = 0;
+
+    for (const s of seeds) {
+      const [existing] = await this.drizzle.db
+        .select({ id: exercises.id })
+        .from(exercises)
+        .where(eq(exercises.sourceId, s.sourceId))
+        .limit(1);
+
+      if (existing) {
+        await this.drizzle.db
+          .update(exercises)
+          .set({
+            name: s.name,
+            muscleGroups: s.muscleGroups,
+            primaryMuscles: s.primaryMuscles,
+            secondaryMuscles: s.secondaryMuscles,
+            equipment: s.equipment,
+            difficulty: s.difficulty as any,
+            category: s.category,
+            force: s.force,
+            mechanic: s.mechanic,
+            instructions: s.instructions,
+            imageUrls: s.imageUrls,
+          })
+          .where(eq(exercises.id, existing.id));
+        updated++;
+      } else {
+        await this.drizzle.db.insert(exercises).values({
+          sourceId: s.sourceId,
+          name: s.name,
+          muscleGroups: s.muscleGroups,
+          primaryMuscles: s.primaryMuscles,
+          secondaryMuscles: s.secondaryMuscles,
+          equipment: s.equipment,
+          difficulty: s.difficulty as any,
+          category: s.category,
+          force: s.force,
+          mechanic: s.mechanic,
+          instructions: s.instructions,
+          imageUrls: s.imageUrls,
+          isCustom: false,
+          userId: null,
+        });
+        inserted++;
+      }
+    }
+
+    if (inserted > 0 || updated > 0) {
+      this.logger.log(
+        `free-exercise-db: вставлено ${inserted}, обновлено ${updated} (всего ${seeds.length})`,
+      );
+    }
+
+    // Phase 2: «подцепляем» старые AI-сгенерированные упражнения без sourceId, имя
+    // которых совпадает с английским или русским эквивалентом из free-db. Заменяем
+    // имя на русское, дописываем инструкции/картинки. sourceId не трогаем (unique
+    // index), чтобы не конфликтовать с уже вставленными записями.
+    let attached = 0;
+    for (const s of seeds) {
+      const candidates = await this.drizzle.db
+        .select({ id: exercises.id, name: exercises.name })
+        .from(exercises)
+        .where(
+          and(
+            eq(exercises.isCustom, false),
+            sql`${exercises.sourceId} IS NULL`,
+            sql`lower(${exercises.name}) IN (${sql.raw(`'${s.name.toLowerCase().replace(/'/g, "''")}'`)}, ${sql.raw(`'${s.sourceName.toLowerCase().replace(/'/g, "''")}'`)})`,
+          ),
+        );
+
+      for (const c of candidates) {
+        await this.drizzle.db
+          .update(exercises)
+          .set({
+            name: s.name,
+            muscleGroups: s.muscleGroups,
+            primaryMuscles: s.primaryMuscles,
+            secondaryMuscles: s.secondaryMuscles,
+            equipment: s.equipment,
+            difficulty: s.difficulty as any,
+            category: s.category,
+            force: s.force,
+            mechanic: s.mechanic,
+            instructions: s.instructions,
+            imageUrls: s.imageUrls,
+          })
+          .where(eq(exercises.id, c.id));
+        attached++;
+      }
+    }
+    if (attached > 0) {
+      this.logger.log(`free-exercise-db: подцеплено ${attached} старых записей (RU имя + медиа)`);
     }
   }
 
@@ -87,7 +200,30 @@ export class ExercisesService implements OnModuleInit {
       .where(and(...conditions))
       .orderBy(exercises.name);
 
-    return { items: result, total: result.length };
+    // Дедупликация по lower(name): после phase-2 импорта free-db могут существовать
+    // обе записи (старая без sourceId, новая с sourceId+медиа). Приоритет — у той,
+    // у которой больше контента (есть imageUrls). Для кастомных — не сливаем.
+    const map = new Map<string, (typeof result)[number]>();
+    for (const ex of result) {
+      if (ex.isCustom) {
+        map.set(`__c__${ex.id}`, ex);
+        continue;
+      }
+      const key = ex.name.trim().toLowerCase();
+      const cur = map.get(key);
+      if (!cur) {
+        map.set(key, ex);
+        continue;
+      }
+      const curScore = (cur.imageUrls?.length ?? 0) + (cur.instructions?.length ?? 0);
+      const newScore = (ex.imageUrls?.length ?? 0) + (ex.instructions?.length ?? 0);
+      if (newScore > curScore) map.set(key, ex);
+    }
+    const deduped = Array.from(map.values()).sort((a, b) =>
+      a.name.localeCompare(b.name, 'ru'),
+    );
+
+    return { items: deduped, total: deduped.length };
   }
 
   async findById(id: string) {

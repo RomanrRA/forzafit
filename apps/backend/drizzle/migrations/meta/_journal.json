@@ -99,6 +99,13 @@
       "when": 1779580800000,
       "tag": "0013_workout_advice",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1779667200000,
+      "tag": "0014_exercises_media_metadata",
+      "breakpoints": true
     }
   ]
 }

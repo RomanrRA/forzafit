@@ -15,6 +15,7 @@ import {
   Edit3,
   User,
   Flag,
+  Info,
 } from 'lucide-react'
 import {
   WorkoutSession,
@@ -33,6 +34,8 @@ import type { WorkoutCompletedGamification } from '@/hooks/use-gamification'
 import { CelebrationDialog } from '@/components/gamification/celebration-dialog'
 import { AddExerciseDialog } from '@/components/workouts/add-exercise-dialog'
 import { SortableExerciseList } from '@/components/workouts/sortable-exercise-list'
+import { ExerciseHowToDialog } from '@/components/exercises/exercise-how-to-dialog'
+import { muscleRu } from '@/lib/exercise-labels'
 import { toast } from '@/hooks/use-toast'
 import { BigStepper } from './big-stepper'
 import { RestTimer } from './rest-timer'
@@ -301,7 +304,9 @@ export function ActiveWorkout({ workout }: Props) {
             items={exercises.map((e, i) => ({
               id: e.id,
               name: e.exercise.name,
-              muscleGroup: e.exercise.muscleGroups?.[0] ?? null,
+              muscleGroup: e.exercise.muscleGroups?.[0]
+                ? muscleRu(e.exercise.muscleGroups[0])
+                : null,
               totalSets: e.sets.length,
               doneSets: e.sets.filter((s) => s.completed).length,
               isActive: i === exIdx,
@@ -408,6 +413,7 @@ function ExerciseStage({
   const [rpe, setRpe] = useState<number | null>(null)
   const [restAt, setRestAt] = useState<number | null>(null)
   const [justDoneId, setJustDoneId] = useState<string | null>(null)
+  const [showHowTo, setShowHowTo] = useState(false)
 
   // Reset on exercise change
   useEffect(() => {
@@ -500,19 +506,38 @@ function ExerciseStage({
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="mb-2 flex flex-wrap items-center gap-1.5">
-              {ex.exercise.muscleGroups?.[0] && <Chip>{ex.exercise.muscleGroups[0]}</Chip>}
+              {ex.exercise.muscleGroups?.[0] && <Chip>{muscleRu(ex.exercise.muscleGroups[0])}</Chip>}
             </div>
-            <h2
-              className="leading-tight"
-              style={{
-                fontSize: 'clamp(22px, 4vw, 30px)',
-                fontWeight: 800,
-                letterSpacing: -0.5,
-                color: 'var(--txt-1)',
-              }}
-            >
-              {ex.exercise.name}
-            </h2>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2
+                className="leading-tight"
+                style={{
+                  fontSize: 'clamp(22px, 4vw, 30px)',
+                  fontWeight: 800,
+                  letterSpacing: -0.5,
+                  color: 'var(--txt-1)',
+                }}
+              >
+                {ex.exercise.name}
+              </h2>
+              <button
+                type="button"
+                onClick={() => setShowHowTo(true)}
+                className="glass-btn inline-flex items-center gap-1 shrink-0"
+                style={{
+                  padding: '5px 10px',
+                  fontSize: 12,
+                  fontWeight: 700,
+                  borderRadius: 10,
+                  color: 'var(--c-accent)',
+                  border: '1px solid color-mix(in oklab, var(--c-accent) 35%, var(--gl-border))',
+                }}
+                aria-label="Как делать упражнение"
+              >
+                <Info className="h-3.5 w-3.5" strokeWidth={2.4} />
+                Как делать
+              </button>
+            </div>
           </div>
           {lastTopSet && (
             <div className="text-right">
@@ -819,6 +844,11 @@ function ExerciseStage({
           <ChevronRight className="h-4 w-4" />
         </button>
       </div>
+      <ExerciseHowToDialog
+        exerciseId={ex.exerciseId}
+        open={showHowTo}
+        onOpenChange={setShowHowTo}
+      />
     </div>
   )
 }
