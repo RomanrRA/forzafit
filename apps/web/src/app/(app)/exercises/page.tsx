@@ -1,14 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { useExercises, useDeleteExercise, type Exercise } from '@/hooks/use-exercises'
+import { useExercises, useDeleteExercise } from '@/hooks/use-exercises'
 import { ExerciseFilters } from '@/components/exercises/exercise-filters'
 import { CreateExerciseDialog } from '@/components/exercises/create-exercise-dialog'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog'
+import { ExerciseHowToDialog } from '@/components/exercises/exercise-how-to-dialog'
 import { Search, Trash2, BookOpen, Dumbbell, ZoomIn } from 'lucide-react'
 import { toast } from '@/hooks/use-toast'
 import { muscleRu, equipmentRu, DIFFICULTY_LABEL } from '@/lib/exercise-labels'
@@ -46,7 +46,7 @@ export default function ExercisesPage() {
 
   const deleteExercise = useDeleteExercise()
   const exercises = data?.items ?? []
-  const [preview, setPreview] = useState<Exercise | null>(null)
+  const [howToId, setHowToId] = useState<string | null>(null)
 
   async function handleDelete(id: string, name: string) {
     if (!confirm(`Удалить упражнение "${name}"?`)) return
@@ -97,17 +97,18 @@ export default function ExercisesPage() {
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
         {exercises.map((ex) => (
           <Card key={ex.id} className="overflow-hidden">
-            {/* Image / placeholder */}
+            {/* Image / placeholder — клик открывает «Как делать» для любого упражнения */}
             <div
               className="relative w-full h-36 overflow-hidden cursor-pointer group"
-              onClick={() => ex.animationUrl && setPreview(ex)}
+              onClick={() => setHowToId(ex.id)}
             >
-              {ex.animationUrl ? (
+              {(ex.imageUrls?.[0] ?? ex.animationUrl) ? (
                 <>
                   <img
-                    src={ex.animationUrl}
+                    src={ex.imageUrls?.[0] ?? ex.animationUrl!}
                     alt={ex.name}
                     className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                    loading="lazy"
                   />
                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
                     <ZoomIn className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -167,35 +168,11 @@ export default function ExercisesPage() {
         <p className="text-sm text-muted-foreground">Найдено: {data.total}</p>
       )}
 
-      <Dialog open={!!preview} onOpenChange={(open) => !open && setPreview(null)}>
-        <DialogContent className="max-w-lg p-4">
-          {preview && (
-            <div className="space-y-3">
-              <img
-                src={preview.animationUrl!}
-                alt={preview.name}
-                className="w-full rounded-md"
-              />
-              <div>
-                <DialogTitle className="font-semibold text-lg">{preview.name}</DialogTitle>
-                <div className="flex flex-wrap gap-1 mt-1">
-                  {preview.muscleGroups?.map((mg) => (
-                    <Badge key={mg} variant="secondary" className="text-xs">{muscleRu(mg)}</Badge>
-                  ))}
-                  {preview.equipment && (
-                    <Badge variant="outline" className="text-xs">{equipmentRu(preview.equipment)}</Badge>
-                  )}
-                  {preview.difficulty && (
-                    <Badge variant="outline" className="text-xs">
-                      {DIFFICULTY_LABEL[preview.difficulty] ?? preview.difficulty}
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <ExerciseHowToDialog
+        exerciseId={howToId}
+        open={!!howToId}
+        onOpenChange={(open) => !open && setHowToId(null)}
+      />
     </div>
   )
 }

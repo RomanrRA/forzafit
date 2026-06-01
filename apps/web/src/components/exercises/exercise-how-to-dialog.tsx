@@ -9,7 +9,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog'
 import { useExercise } from '@/hooks/use-exercises'
-import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Loader2, ChevronLeft, ChevronRight, Dumbbell } from 'lucide-react'
 import {
   DIFFICULTY_LABEL,
   FORCE_LABEL,
@@ -30,7 +30,6 @@ export function ExerciseHowToDialog({ exerciseId, open, onOpenChange }: Props) {
 
   const images = ex?.imageUrls ?? []
   const instructions = ex?.instructions ?? []
-  const hasMedia = images.length > 0 || instructions.length > 0
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -57,10 +56,16 @@ export function ExerciseHowToDialog({ exerciseId, open, onOpenChange }: Props) {
           </div>
         )}
 
-        {!isLoading && ex && !hasMedia && (
-          <p className="text-sm text-muted-foreground py-4">
-            Для этого упражнения пока нет подробного описания. Попробуй найти похожее в каталоге или добавь свою заметку в плане.
-          </p>
+        {/* Нет фото — показываем аккуратный плейсхолдер вместо пустоты. */}
+        {!isLoading && ex && images.length === 0 && (
+          <div className="rounded-2xl bg-muted/40 border border-border/60 grid place-items-center py-10 text-muted-foreground">
+            <Dumbbell className="h-10 w-10 opacity-30" />
+            <p className="text-xs mt-2">
+              {instructions.length > 0
+                ? 'Фото пока нет — следуй инструкции ниже'
+                : 'Фото и описание для этого упражнения пока нет'}
+            </p>
+          </div>
         )}
 
         {!isLoading && images.length > 0 && (
