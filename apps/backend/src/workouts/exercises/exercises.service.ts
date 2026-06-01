@@ -5,12 +5,43 @@ import { exercises } from '../../db/schema';
 import { CreateExerciseDto, ExerciseFilterDto } from './dto/exercise.dto';
 import { SEED_PUBLIC_EXERCISES } from './seed-data';
 import { loadFreeDbSeed } from './free-db-loader';
+import { bestMatch, type MatchCandidate } from './exercise-match';
 
 @Injectable()
 export class ExercisesService implements OnModuleInit {
   private readonly logger = new Logger(ExercisesService.name);
 
+  // Кэш публичных упражнений для fuzzy-резолва имён (resolveByName).
+  // Каталог меняется только при сидинге, поэтому короткого TTL достаточно.
+  private publicCache: { at: number; items: MatchCandidate[] } | null = null;
+  private static readonly PUBLIC_CACHE_TTL_MS = 5 * 60 * 1000;
+
   constructor(private drizzle: DrizzleService) {}
+
+  private async getPublicCandidates(): Promise<MatchCandidate[]> {
+    const now = Date.now();
+    if (this.publicCache && now - this.publicCache.at < ExercisesService.PUBLIC_CACHE_TTL_MS) {
+      return this.publicCache.items;
+    }
+    const rows = await this.drizzle.db
+      .select({
+        id: exercises.id,
+        name: exercises.name,
+        equipment: exercises.equipment,
+        imageUrls: exercises.imageUrls,
+      })
+      .from(exercises)
+      .where(eq(exercises.isCustom, false));
+
+    const items: MatchCandidate[] = rows.map((r) => ({
+      id: r.id,
+      name: r.name,
+      equipment: r.equipment,
+      hasImages: (r.imageUrls?.length ?? 0) > 0,
+    }));
+    this.publicCache = { at: now, items };
+    return items;
+  }
 
   async onModuleInit() {
     await this.seedPublicExercises();
@@ -252,27 +283,46 @@ export class ExercisesService implements OnModuleInit {
   }
 
   /**
-   * Найти упражнение по имени (case-insensitive) среди публичных + кастомных юзера.
-   * Если не найдено — создать custom от имени юзера, чтобы AI-сгенерированные имена
-   * не «терялись» при scheduling/Start Day. Возвращает id или null, если имя пустое.
+   * Найти упражнение по имени среди публичных + кастомных юзера.
+   * Сначала точное совпадение (case-insensitive), затем fuzzy-матч к публичным
+   * упражнениям с приоритетом тех, что с картинками — чтобы AI-сгенерированные
+   * названия цеплялись за упражнение из базы (с фото/инструкциями), а не плодили
+   * «голые» кастомы. Только если ничего похожего нет — создаём custom.
+   * Возвращает id или null, если имя пустое.
    */
   async resolveByName(userId: string, name: string): Promise<string | null> {
     const trimmed = (name ?? '').trim().replace(/\s+/g, ' ');
     if (!trimmed) return null;
 
-    const [found] = await this.drizzle.db
-      .select({ id: exercises.id })
+    // 1. Точное совпадение (публичные + кастомы юзера). Среди публичных приоритет
+    //    у записи с картинками — на случай дублей одного имени.
+    const exact = await this.drizzle.db
+      .select({ id: exercises.id, imageUrls: exercises.imageUrls })
       .from(exercises)
       .where(
         and(
           or(eq(exercises.isCustom, false), eq(exercises.userId, userId)),
           sql`lower(${exercises.name}) = lower(${trimmed})`,
         ),
-      )
-      .limit(1);
+      );
+    if (exact.length > 0) {
+      const withImg = exact.find((e) => (e.imageUrls?.length ?? 0) > 0);
+      return (withImg ?? exact[0]).id;
+    }
 
-    if (found) return found.id;
+    // 2. Fuzzy-матч к публичным упражнениям (порог 0.72, приоритет с картинками).
+    const match = bestMatch(trimmed, await this.getPublicCandidates(), {
+      minScore: 0.72,
+      preferImages: true,
+    });
+    if (match) {
+      this.logger.debug(
+        `resolveByName: «${trimmed}» → «${match.candidate.name}» (score ${match.score.toFixed(2)})`,
+      );
+      return match.candidate.id;
+    }
 
+    // 3. Ничего похожего — создаём custom.
     const [created] = await this.drizzle.db
       .insert(exercises)
       .values({
