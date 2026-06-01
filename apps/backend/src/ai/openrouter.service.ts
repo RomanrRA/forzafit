@@ -63,7 +63,7 @@ export class OpenRouterService {
   constructor(private config: ConfigService) {
     this.apiKey = this.config.get<string>('OPENROUTER_API_KEY') ?? '';
     this.baseUrl = this.config.get<string>('OPENROUTER_BASE_URL') ?? 'https://openrouter.ai/api/v1';
-    this.model = this.config.get<string>('AI_MODEL') ?? 'openai/gpt-5.4-nano';
+    this.model = this.config.get<string>('AI_MODEL') ?? 'anthropic/claude-sonnet-4.6';
   }
 
   private get headers(): Record<string, string> {

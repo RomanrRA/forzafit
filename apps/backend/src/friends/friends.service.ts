@@ -5,7 +5,7 @@ import {
   ConflictException,
   ForbiddenException,
 } from '@nestjs/common';
-import { eq, and, or, sql, desc } from 'drizzle-orm';
+import { eq, and, or, sql, desc, inArray } from 'drizzle-orm';
 import { DrizzleService } from '../db/db.service';
 import { friendships, users } from '../db/schema';
 
@@ -161,7 +161,7 @@ export class FriendsService {
         isProfilePublic: users.isProfilePublic,
       })
       .from(users)
-      .where(sql`${users.id} = ANY(${friendIds})`);
+      .where(inArray(users.id, friendIds));
 
     const friendMap = new Map(friendsData.map((u) => [u.id, u]));
 
