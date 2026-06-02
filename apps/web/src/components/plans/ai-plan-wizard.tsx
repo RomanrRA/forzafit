@@ -11,10 +11,6 @@ import {
   ArrowLeft,
   Check,
   Sparkles,
-  TrendingDown,
-  TrendingUp,
-  Minus,
-  Dumbbell,
   Upload,
   FileText,
   X,
@@ -22,95 +18,24 @@ import {
   ChevronDown,
   ChevronUp,
 } from 'lucide-react'
-
-interface UserProfile {
-  id: string
-  email: string
-  name: string | null
-  gender: 'male' | 'female' | 'other' | null
-  dob: string | null
-  heightCm: number | null
-  weightKg: number | null
-  goal: string | null
-}
-
-// ─── Question definitions ─────────────────────────────────────────────────────
-
-const GENDER_LABEL: Record<string, string> = {
-  male: 'мужской',
-  female: 'женский',
-  other: 'другой',
-}
-
-const INTENT_OPTIONS: Array<{
-  key: CoachIntent
-  label: string
-  description: string
-  icon: typeof TrendingDown
-}> = [
-  { key: 'lose', label: 'Сбросить вес', description: 'Меньше жира, талия уже', icon: TrendingDown },
-  { key: 'gain', label: 'Набрать массу', description: 'Больше мышц, шире плечи', icon: TrendingUp },
-  { key: 'strength', label: 'Набрать силу', description: 'Больше рабочие веса, тяжёлая база', icon: Dumbbell },
-  { key: 'maintain', label: 'Поддерживать форму', description: 'Тот же вес, лучше композиция', icon: Minus },
-]
-
-const INTENT_LABEL: Record<CoachIntent, string> = {
-  lose: 'сбросить вес/жир',
-  gain: 'набрать мышечную массу',
-  strength: 'нарастить силовые показатели',
-  maintain: 'поддерживать форму',
-}
-
-const MONTH_OPTIONS = [2, 3, 6, 9, 12]
-
-type PlaceKey = 'gym' | 'home' | 'street'
-
-const PLACE_OPTIONS: Array<{ key: PlaceKey; label: string }> = [
-  { key: 'gym', label: 'Зал' },
-  { key: 'home', label: 'Дом' },
-  { key: 'street', label: 'Улица / площадка' },
-]
-
-const PLACE_LABEL: Record<PlaceKey, string> = {
-  gym: 'зал',
-  home: 'дом',
-  street: 'улица/площадка',
-}
-
-const WISH_EXAMPLES = [
-  'Бассейн 2 раза в неделю',
-  'Кроссфит-комплексы по пятницам',
-  'Упор на спину',
-  'Беречь левое колено',
-  'Не люблю кардио на дорожке',
-  'Короткие тренировки (до 45 мин)',
-  'Утром только разминка',
-]
-
-// Замеры тела — поля, которые показываем на шаге замеров
-const MEASUREMENT_FIELDS: Array<{
-  key: 'chestCm' | 'waistCm' | 'hipsCm' | 'armCm' | 'thighCm' | 'forearmCm' | 'calfCm' | 'neckCm' | 'bodyFatPct'
-  label: string
-  unit: string
-  placeholder: string
-}> = [
-  { key: 'chestCm', label: 'Грудь', unit: 'см', placeholder: '100' },
-  { key: 'waistCm', label: 'Талия', unit: 'см', placeholder: '80' },
-  { key: 'hipsCm', label: 'Бёдра', unit: 'см', placeholder: '95' },
-  { key: 'armCm', label: 'Рука', unit: 'см', placeholder: '35' },
-  { key: 'thighCm', label: 'Бедро', unit: 'см', placeholder: '58' },
-  { key: 'forearmCm', label: 'Предплечье', unit: 'см', placeholder: '30' },
-  { key: 'calfCm', label: 'Икра', unit: 'см', placeholder: '38' },
-  { key: 'neckCm', label: 'Шея', unit: 'см', placeholder: '38' },
-  { key: 'bodyFatPct', label: '% жира', unit: '%', placeholder: '15' },
-]
-
-function calcAge(dob: string | null): number | null {
-  if (!dob) return null
-  const d = new Date(dob)
-  if (Number.isNaN(d.getTime())) return null
-  return Math.floor((Date.now() - d.getTime()) / (365.25 * 24 * 3600 * 1000))
-}
+import type {
+  UserProfile,
+  MeasurementsValues,
+  AnalysisFile,
+  WizardState,
+} from './ai-plan-wizard.types'
+import {
+  GENDER_LABEL,
+  INTENT_OPTIONS,
+  MONTH_OPTIONS,
+  PLACE_OPTIONS,
+  WISH_EXAMPLES,
+  MEASUREMENT_FIELDS,
+  EMPTY_MEASUREMENTS,
+  INITIAL,
+  VALID_INTENTS,
+} from './ai-plan-wizard.constants'
+import { calcAge, compile, isStepComplete } from './ai-plan-wizard.utils'
 
 // ─── UI: option chip ──────────────────────────────────────────────────────────
 
@@ -143,256 +68,7 @@ function Chip({
   )
 }
 
-// ─── Wizard state ─────────────────────────────────────────────────────────────
-
-type MeasurementsValues = {
-  chestCm: string
-  waistCm: string
-  hipsCm: string
-  armCm: string
-  thighCm: string
-  forearmCm: string
-  calfCm: string
-  neckCm: string
-  bodyFatPct: string
-}
-
-type AnalysisFile = { filename: string; text: string }
-
-type WizardState = {
-  // Step 0: намерения (AI-coach, мульти)
-  intents: CoachIntent[]
-  // Step 1: срок в месяцах
-  targetMonths: number
-  // Step 2: основные параметры (редактируем возраст/рост/вес)
-  ageYears: string
-  weightKg: string
-  heightCm: string
-  // Step 3: анализы (необязательно)
-  analyses: AnalysisFile[]
-  // Step 4: замеры тела
-  measurementsMode: 'skip' | 'fill' | null
-  measurements: MeasurementsValues
-  // Остальное — как было
-  daysPerWeek: string
-  daysCustom: string
-  experience: string
-  experienceCustom: string
-  places: PlaceKey[]
-  placeCustom: string
-  equipment: string[]
-  equipmentCustom: string
-  injuries: 'no' | 'yes' | null
-  injuriesText: string
-  workingWeights: 'no' | 'yes' | null
-  workingWeightsText: string
-  wishes: 'no' | 'yes' | null
-  wishesText: string
-  programType: string
-  programTypeCustom: string
-}
-
-const EMPTY_MEASUREMENTS: MeasurementsValues = {
-  chestCm: '',
-  waistCm: '',
-  hipsCm: '',
-  armCm: '',
-  thighCm: '',
-  forearmCm: '',
-  calfCm: '',
-  neckCm: '',
-  bodyFatPct: '',
-}
-
-const INITIAL: WizardState = {
-  intents: [],
-  targetMonths: 3,
-  ageYears: '',
-  weightKg: '',
-  heightCm: '',
-  analyses: [],
-  measurementsMode: null,
-  measurements: { ...EMPTY_MEASUREMENTS },
-  daysPerWeek: '',
-  daysCustom: '',
-  experience: '',
-  experienceCustom: '',
-  places: [],
-  placeCustom: '',
-  equipment: [],
-  equipmentCustom: '',
-  injuries: null,
-  injuriesText: '',
-  workingWeights: null,
-  workingWeightsText: '',
-  wishes: null,
-  wishesText: '',
-  programType: '',
-  programTypeCustom: '',
-}
-
-// ─── Build final message for backend ──────────────────────────────────────────
-
-function compile(state: WizardState, profile: UserProfile | undefined): string {
-  const lines: string[] = ['Ответы из анкеты:']
-
-  // 0. Намерения и срок (AI-coach режим)
-  if (state.intents.length > 0) {
-    const labels = state.intents.map((i) => INTENT_LABEL[i]).join('; ')
-    lines.push(`- Намерения: ${labels}`)
-    lines.push(`- Срок до цели: ${state.targetMonths} мес.`)
-  }
-
-  // 1. Профиль: пол — из профиля, возраст/рост/вес — из формы (с фолбеком на профиль)
-  const profileParts: string[] = []
-  if (profile?.gender) profileParts.push(GENDER_LABEL[profile.gender] ?? profile.gender)
-  if (profileParts.length) lines.push(`- Пол: ${profileParts.join(', ')}`)
-
-  const ageRaw = state.ageYears.trim() || (calcAge(profile?.dob ?? null) ?? '')
-  if (ageRaw) lines.push(`- Возраст: ${ageRaw} лет`)
-  if (state.heightCm.trim()) lines.push(`- Рост: ${state.heightCm.trim()} см`)
-  if (state.weightKg.trim()) lines.push(`- Вес: ${state.weightKg.trim()} кг`)
-
-  // 2. Замеры тела
-  if (state.measurementsMode === 'fill') {
-    const m = state.measurements
-    const parts: string[] = []
-    for (const f of MEASUREMENT_FIELDS) {
-      const v = m[f.key].trim()
-      if (v) parts.push(`${f.label} ${v} ${f.unit}`)
-    }
-    if (parts.length) lines.push(`- Замеры тела: ${parts.join(', ')}`)
-  }
-
-  // 3. Frequency
-  const days =
-    state.daysPerWeek === 'custom' ? state.daysCustom.trim() : state.daysPerWeek
-  if (days) lines.push(`- Тренировок в неделю: ${days}`)
-
-  // 5. Experience
-  const exp =
-    state.experience === 'custom' ? state.experienceCustom.trim() : state.experience
-  if (exp) lines.push(`- Стаж: ${exp}`)
-
-  // 6. Place (мультивыбор)
-  const placeLabels: string[] = []
-  for (const p of state.places) placeLabels.push(PLACE_LABEL[p])
-  if (state.placeCustom.trim()) placeLabels.push(state.placeCustom.trim())
-  if (placeLabels.length) lines.push(`- Место тренировок: ${placeLabels.join(', ')}`)
-
-  // 7. Equipment — зависит от выбранных мест
-  const eqParts: string[] = []
-  if (state.places.includes('gym')) {
-    eqParts.push('в зале — полный набор (штанги, гантели, тренажёры)')
-  }
-  if (state.places.includes('home')) {
-    const eq = [...state.equipment]
-    if (state.equipmentCustom.trim()) eq.push(state.equipmentCustom.trim())
-    eqParts.push(eq.length ? `дома — ${eq.join(', ')}` : 'дома — только вес тела')
-  }
-  if (state.places.includes('street')) {
-    eqParts.push('на улице — турники, брусья, своя масса тела')
-  }
-  if (eqParts.length) lines.push(`- Доступное оборудование: ${eqParts.join('; ')}`)
-
-  // 8. Injuries
-  if (state.injuries === 'no') {
-    lines.push('- Травм и ограничений нет')
-  } else if (state.injuries === 'yes' && state.injuriesText.trim()) {
-    lines.push(`- Травмы/ограничения: ${state.injuriesText.trim()}`)
-  }
-
-  // 9. Working weights
-  if (state.workingWeights === 'no') {
-    lines.push(
-      '- Рабочие веса неизвестны — оцени консервативные стартовые веса под мой пол, вес, стаж (не ставь 0)',
-    )
-  } else if (state.workingWeights === 'yes' && state.workingWeightsText.trim()) {
-    lines.push(`- Рабочие веса: ${state.workingWeightsText.trim()}`)
-  }
-
-  // 10. Program type
-  const prog =
-    state.programType === 'custom'
-      ? state.programTypeCustom.trim()
-      : state.programType
-  if (prog) lines.push(`- Тип программы: ${prog}`)
-
-  // 11. Анализы — отдельным блоком
-  if (state.analyses.length > 0) {
-    lines.push(
-      '',
-      '## Результаты анализов / обследований (загружены пользователем) — учитывать при подборе нагрузки',
-    )
-    state.analyses.forEach((a, i) => {
-      lines.push(`### Файл ${i + 1}: ${a.filename}`, a.text)
-    })
-    lines.push(
-      'При отклонениях в анализах будь осторожнее с нагрузкой и при необходимости отметь это в описании плана. Не ставь медицинских диагнозов.',
-    )
-  }
-
-  // 12. Wishes — отдельным акцентным блоком, чтобы AI не игнорировал
-  const wishesText = state.wishesText.trim()
-  if (wishesText) {
-    lines.push(
-      '',
-      '## Свободные пожелания пользователя — учитывать СТРОГО',
-      wishesText,
-    )
-  }
-
-  lines.push('', 'Составь план на основе этих данных и вызови tool generate_plan.')
-  return lines.join('\n')
-}
-
-// ─── Validation ───────────────────────────────────────────────────────────────
-
-function isStepComplete(step: number, s: WizardState): boolean {
-  switch (step) {
-    case 0: // intents — хотя бы один
-      return s.intents.length > 0
-    case 1: // targetMonths — default есть, всегда валидно
-      return MONTH_OPTIONS.includes(s.targetMonths)
-    case 2: { // основные параметры — рост и вес обязательны
-      const w = Number(s.weightKg)
-      const h = Number(s.heightCm)
-      return Number.isFinite(w) && w > 0 && Number.isFinite(h) && h > 0
-    }
-    case 3: // анализы — необязательно (блок на время загрузки в canProceed)
-      return true
-    case 4: // замеры — не давим, нужно лишь выбрать «Заполню/Пропустить»
-      return s.measurementsMode !== null
-    case 5: // days
-      if (s.daysPerWeek === 'custom') return s.daysCustom.trim().length > 0
-      return s.daysPerWeek !== ''
-    case 6: // experience
-      if (s.experience === 'custom') return s.experienceCustom.trim().length > 0
-      return s.experience !== ''
-    case 7: // place — мультивыбор или своё место
-      return s.places.length > 0 || s.placeCustom.trim().length > 0
-    case 8: // equipment (только если выбран «Дом»)
-      if (!s.places.includes('home')) return true
-      return s.equipment.length > 0 || s.equipmentCustom.trim().length > 0
-    case 9: // injuries
-      if (s.injuries === 'yes') return s.injuriesText.trim().length > 0
-      return s.injuries !== null
-    case 10: // working weights
-      if (s.workingWeights === 'yes') return s.workingWeightsText.trim().length > 0
-      return s.workingWeights !== null
-    case 11: // program type
-      if (s.programType === 'custom') return s.programTypeCustom.trim().length > 0
-      return s.programType !== ''
-    case 12: // wishes — необязательный, всегда completed
-      return true
-    default:
-      return true
-  }
-}
-
 // ─── Main component ───────────────────────────────────────────────────────────
-
-const VALID_INTENTS: CoachIntent[] = ['lose', 'gain', 'maintain', 'strength']
 
 export function AiPlanWizard() {
   const router = useRouter()
