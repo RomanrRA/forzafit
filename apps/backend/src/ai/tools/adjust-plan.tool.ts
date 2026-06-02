@@ -5,7 +5,7 @@ export const ADJUST_PLAN_TOOL = {
   function: {
     name: 'adjust_plan',
     description:
-      'Предложить точечные правки текущего плана на основе истории тренировок. Возвращай ТОЛЬКО упражнения, которые требуют изменений — если упражнение идёт нормально, не включай его в массив adjustments.',
+      'Предложить точечные правки текущего плана на основе истории тренировок и пожеланий пользователя. Возвращай ТОЛЬКО упражнения, которые требуют изменений (update/replace), плюс новые упражнения, которые нужно добавить (add). Если упражнение идёт нормально и его не просили трогать — не включай его в массив adjustments.',
     parameters: {
       type: 'object',
       required: ['summary', 'adjustments'],
@@ -29,12 +29,14 @@ export const ADJUST_PLAN_TOOL = {
               },
               exerciseName: {
                 type: 'string',
-                description: 'Точное название упражнения в ТЕКУЩЕМ плане (для матчинга)',
+                description:
+                  'Для update/replace — точное название упражнения в ТЕКУЩЕМ плане (для матчинга). Для add — название НОВОГО упражнения, которое нужно добавить в этот день.',
               },
               action: {
                 type: 'string',
-                enum: ['update', 'replace'],
-                description: 'update — изменить параметры; replace — заменить на другое упражнение',
+                enum: ['update', 'replace', 'add'],
+                description:
+                  'update — изменить параметры; replace — заменить на другое упражнение; add — добавить новое упражнение в день (exerciseName = название нового упражнения).',
               },
               newExerciseName: {
                 type: 'string',
@@ -65,7 +67,7 @@ export const ADJUST_PLAN_TOOL = {
   },
 } as const;
 
-export type AdjustmentAction = 'update' | 'replace';
+export type AdjustmentAction = 'update' | 'replace' | 'add';
 
 export type PlanAdjustment = {
   dayNumber: number;

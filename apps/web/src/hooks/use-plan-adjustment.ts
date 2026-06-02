@@ -9,7 +9,7 @@ const API_BASE = '/api/v1'
 export type PlanAdjustment = {
   dayNumber: number
   exerciseName: string
-  action: 'update' | 'replace'
+  action: 'update' | 'replace' | 'add'
   newExerciseName?: string
   newSets?: number
   newReps?: string
@@ -23,7 +23,7 @@ interface UsePlanAdjustmentResult {
   isStreaming: boolean
   toolCallReady: boolean
   error: string | null
-  analyze: (planTemplateId: string) => Promise<void>
+  analyze: (planTemplateId: string, userNote?: string) => Promise<void>
   apply: (indices: number[]) => Promise<{ planTemplateId: string; applied: number }>
   reset: () => void
 }
@@ -105,7 +105,7 @@ export function usePlanAdjustment(): UsePlanAdjustmentResult {
     }
   }
 
-  const analyze = useCallback(async (planTemplateId: string) => {
+  const analyze = useCallback(async (planTemplateId: string, userNote?: string) => {
     if (runningRef.current) return
     runningRef.current = true
 
@@ -117,6 +117,7 @@ export function usePlanAdjustment(): UsePlanAdjustmentResult {
 
     try {
       const token = getToken()
+      const note = userNote?.trim()
       const response = await fetch(
         `${API_BASE}/ai/plans/${planTemplateId}/adjust`,
         {
@@ -125,6 +126,7 @@ export function usePlanAdjustment(): UsePlanAdjustmentResult {
             'Content-Type': 'application/json',
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
           },
+          body: JSON.stringify(note ? { userNote: note } : {}),
         },
       )
 

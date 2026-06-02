@@ -3,10 +3,15 @@ import {
   NotFoundException,
   ForbiddenException,
   ConflictException,
+  BadRequestException,
 } from '@nestjs/common';
 import { eq, and, desc, sql } from 'drizzle-orm';
 import * as fs from 'fs';
 import * as path from 'path';
+import * as mammoth from 'mammoth';
+// pdf-parse: требуем сам lib-файл, чтобы не сработал debug-блок index.js (читает тестовый PDF при импорте)
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const pdfParse: (b: Buffer) => Promise<{ text: string }> = require('pdf-parse/lib/pdf-parse.js');
 import { DrizzleService } from '../db/db.service';
 import {
   aiConversations,
@@ -44,6 +49,10 @@ const GENDER_LABEL: Record<string, string> = {
   female: 'женский',
   other: 'другой',
 };
+
+const ANALYSIS_EXTRACT_PROMPT = `Это файл, который пользователь фитнес-приложения загрузил как свои медицинские анализы или результаты обследования. Извлеки из него ВСЕ данные, которые могут повлиять на построение программы тренировок и нагрузку: показатели крови (гемоглобин, железо, ферритин, глюкоза, холестерин/липиды, гормоны — тестостерон, ТТГ, кортизол и пр.), витамины (D, B12), давление, пульс, заключения ЭКГ/УЗИ, диагнозы, ограничения и рекомендации врача. Верни компактным структурированным списком на русском в формате «Показатель: значение (норма, если указана)». В конце добавь строку «Возможные ограничения для тренировок:» с краткими выводами, если они есть. Если документ не медицинский — в одной строке опиши, что это. Не выдумывай значения, бери только то, что реально есть в файле.`;
+
+const ANALYSIS_TEXT_MAX = 6000;
 
 // Canonical distributions: day numbers evenly spaced across the week (1=Mon..7=Sun).
 // Used to force a valid schedule even when the model outputs consecutive days.
@@ -483,6 +492,7 @@ export class AiService {
   async *adjustPlanStream(
     userId: string,
     planTemplateId: string,
+    userNote?: string,
   ): AsyncIterable<SseEvent> {
     // Load plan and ownership
     const [plan] = await this.drizzle.db
@@ -494,7 +504,7 @@ export class AiService {
     if (!plan) throw new NotFoundException('План не найден');
 
     // Build history context: last 4 weeks of finished workouts, aggregated per exercise per plan day
-    const history = await this.buildAdjustmentContext(userId, plan);
+    const history = await this.buildAdjustmentContext(userId, plan, userNote);
 
     const systemMessage: ChatMessage = { role: 'system', content: this.adjustPrompt };
     const userMessage: ChatMessage = { role: 'user', content: history };
@@ -608,6 +618,21 @@ export class AiService {
 
         const exs = Array.isArray(day.exercises) ? [...day.exercises] : [];
         for (const adj of dayAdjustments) {
+          // add — новое упражнение в день: матчить нечего, просто добавляем
+          if (adj.action === 'add') {
+            const added: Record<string, any> = {
+              name: adj.exerciseName,
+              exerciseId:
+                (await this.exercisesService.resolveByName(userId, adj.exerciseName)) ?? undefined,
+              sets: adj.newSets ?? 3,
+              reps: adj.newReps ?? '8-12',
+              weightKg: adj.newWeightKg ?? 0,
+            };
+            exs.push(added);
+            appliedCount++;
+            continue;
+          }
+
           const idx = exs.findIndex(
             (ex: any) =>
               typeof ex?.name === 'string' &&
@@ -647,9 +672,86 @@ export class AiService {
     return { planTemplateId: plan.id, applied: appliedCount };
   }
 
+  /**
+   * Извлечь текст из загруженного файла анализов. PDF/DOCX/TXT парсятся локально;
+   * фото и скан-PDF (мало текста) распознаются мультимодальной моделью (vision).
+   */
+  async extractAnalysisText(file: {
+    originalname: string;
+    mimetype: string;
+    buffer: Buffer;
+  }): Promise<{ filename: string; text: string }> {
+    if (!file?.buffer?.length) throw new BadRequestException('Файл пустой');
+
+    const name = file.originalname || 'analysis';
+    const mime = (file.mimetype || '').toLowerCase();
+    const lower = name.toLowerCase();
+
+    const finish = (raw: string) => {
+      const text = (raw || '').trim().slice(0, ANALYSIS_TEXT_MAX);
+      if (!text) throw new BadRequestException('Не удалось извлечь текст из файла');
+      return { filename: name, text };
+    };
+
+    // TXT
+    if (mime.startsWith('text/') || lower.endsWith('.txt')) {
+      return finish(file.buffer.toString('utf-8'));
+    }
+
+    // DOCX
+    if (mime.includes('officedocument.wordprocessingml') || lower.endsWith('.docx')) {
+      const { value } = await mammoth.extractRawText({ buffer: file.buffer });
+      return finish(value);
+    }
+
+    // Старый бинарный .doc — mammoth не умеет
+    if (mime === 'application/msword' || lower.endsWith('.doc')) {
+      throw new BadRequestException(
+        'Формат .doc не поддерживается — сохраните как PDF или .docx',
+      );
+    }
+
+    // Фото → vision
+    if (mime.startsWith('image/')) {
+      const text = await this.openRouter.extractFromMedia({
+        kind: 'image',
+        mediaType: mime || 'image/jpeg',
+        base64: file.buffer.toString('base64'),
+        filename: name,
+        prompt: ANALYSIS_EXTRACT_PROMPT,
+      });
+      return finish(text);
+    }
+
+    // PDF: текстовый — парсим локально; скан (мало текста) — отдаём в vision
+    if (mime === 'application/pdf' || lower.endsWith('.pdf')) {
+      let parsed = '';
+      try {
+        const result = await pdfParse(file.buffer);
+        parsed = (result?.text ?? '').trim();
+      } catch {
+        parsed = '';
+      }
+      if (parsed.length >= 80) return finish(parsed);
+      const text = await this.openRouter.extractFromMedia({
+        kind: 'pdf',
+        mediaType: 'application/pdf',
+        base64: file.buffer.toString('base64'),
+        filename: name,
+        prompt: ANALYSIS_EXTRACT_PROMPT,
+      });
+      return finish(text);
+    }
+
+    throw new BadRequestException(
+      'Неподдерживаемый формат. Загрузите PDF, DOCX, TXT или фото (JPG/PNG).',
+    );
+  }
+
   private async buildAdjustmentContext(
     userId: string,
     plan: { id: string; name: string; days: unknown },
+    userNote?: string,
   ): Promise<string> {
     const days = Array.isArray(plan.days) ? (plan.days as any[]) : [];
 
@@ -739,6 +841,16 @@ export class AiService {
         ? planExerciseLines.join('\n')
         : '  (в плане нет упражнений)';
 
+    const note = (userNote ?? '').trim();
+    const userNoteBlock = note
+      ? [
+          '',
+          '## Пожелания пользователя (ПРИОРИТЕТ)',
+          'Пользователь явно описал, что хочет изменить. Это важнее авто-анализа истории — выполни запрос в первую очередь, даже если по цифрам упражнение «в норме».',
+          note,
+        ]
+      : [];
+
     return [
       `## Текущий план «${plan.name}»`,
       planBlock,
@@ -746,8 +858,9 @@ export class AiService {
       '## История за последние 28 дней',
       'Формат сета: `вес×повторы✓` (✓ = выполнен, ✗ = не выполнен). `bw` = свой вес.',
       historyBlock,
+      ...userNoteBlock,
       '',
-      'Проанализируй историю и вызови tool `adjust_plan`.',
+      'Проанализируй историю, учти пожелания пользователя (если есть) и вызови tool `adjust_plan`.',
     ].join('\n');
   }
 

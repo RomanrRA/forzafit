@@ -7,7 +7,21 @@ import { api } from '@/lib/api'
 import { useAiPlanChat, type CoachIntent } from '@/hooks/use-ai-plan-chat'
 import { useBodyMeasurements } from '@/hooks/use-body-measurements'
 import { Button } from '@/components/ui/button'
-import { ArrowLeft, Check, Sparkles, TrendingDown, TrendingUp, Minus, Dumbbell } from 'lucide-react'
+import {
+  ArrowLeft,
+  Check,
+  Sparkles,
+  TrendingDown,
+  TrendingUp,
+  Minus,
+  Dumbbell,
+  Upload,
+  FileText,
+  X,
+  Loader2,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react'
 
 interface UserProfile {
   id: string
@@ -49,6 +63,20 @@ const INTENT_LABEL: Record<CoachIntent, string> = {
 
 const MONTH_OPTIONS = [2, 3, 6, 9, 12]
 
+type PlaceKey = 'gym' | 'home' | 'street'
+
+const PLACE_OPTIONS: Array<{ key: PlaceKey; label: string }> = [
+  { key: 'gym', label: 'Зал' },
+  { key: 'home', label: 'Дом' },
+  { key: 'street', label: 'Улица / площадка' },
+]
+
+const PLACE_LABEL: Record<PlaceKey, string> = {
+  gym: 'зал',
+  home: 'дом',
+  street: 'улица/площадка',
+}
+
 const WISH_EXAMPLES = [
   'Бассейн 2 раза в неделю',
   'Кроссфит-комплексы по пятницам',
@@ -59,7 +87,7 @@ const WISH_EXAMPLES = [
   'Утром только разминка',
 ]
 
-// Замеры тела — поля, которые показываем на шаге 1
+// Замеры тела — поля, которые показываем на шаге замеров
 const MEASUREMENT_FIELDS: Array<{
   key: 'chestCm' | 'waistCm' | 'hipsCm' | 'armCm' | 'thighCm' | 'forearmCm' | 'calfCm' | 'neckCm' | 'bodyFatPct'
   label: string
@@ -129,6 +157,8 @@ type MeasurementsValues = {
   bodyFatPct: string
 }
 
+type AnalysisFile = { filename: string; text: string }
+
 type WizardState = {
   // Step 0: намерения (AI-coach, мульти)
   intents: CoachIntent[]
@@ -138,7 +168,9 @@ type WizardState = {
   ageYears: string
   weightKg: string
   heightCm: string
-  // Step 3: замеры тела
+  // Step 3: анализы (необязательно)
+  analyses: AnalysisFile[]
+  // Step 4: замеры тела
   measurementsMode: 'skip' | 'fill' | null
   measurements: MeasurementsValues
   // Остальное — как было
@@ -146,7 +178,7 @@ type WizardState = {
   daysCustom: string
   experience: string
   experienceCustom: string
-  place: 'gym' | 'home' | 'custom' | null
+  places: PlaceKey[]
   placeCustom: string
   equipment: string[]
   equipmentCustom: string
@@ -178,13 +210,14 @@ const INITIAL: WizardState = {
   ageYears: '',
   weightKg: '',
   heightCm: '',
+  analyses: [],
   measurementsMode: null,
   measurements: { ...EMPTY_MEASUREMENTS },
   daysPerWeek: '',
   daysCustom: '',
   experience: '',
   experienceCustom: '',
-  place: null,
+  places: [],
   placeCustom: '',
   equipment: [],
   equipmentCustom: '',
@@ -241,22 +274,26 @@ function compile(state: WizardState, profile: UserProfile | undefined): string {
     state.experience === 'custom' ? state.experienceCustom.trim() : state.experience
   if (exp) lines.push(`- Стаж: ${exp}`)
 
-  // 6. Place
-  let placeText = ''
-  if (state.place === 'gym') placeText = 'зал'
-  else if (state.place === 'home') placeText = 'дом'
-  else if (state.place === 'custom') placeText = state.placeCustom.trim()
-  if (placeText) lines.push(`- Место тренировок: ${placeText}`)
+  // 6. Place (мультивыбор)
+  const placeLabels: string[] = []
+  for (const p of state.places) placeLabels.push(PLACE_LABEL[p])
+  if (state.placeCustom.trim()) placeLabels.push(state.placeCustom.trim())
+  if (placeLabels.length) lines.push(`- Место тренировок: ${placeLabels.join(', ')}`)
 
-  // 7. Equipment (home only)
-  if (state.place === 'home') {
+  // 7. Equipment — зависит от выбранных мест
+  const eqParts: string[] = []
+  if (state.places.includes('gym')) {
+    eqParts.push('в зале — полный набор (штанги, гантели, тренажёры)')
+  }
+  if (state.places.includes('home')) {
     const eq = [...state.equipment]
     if (state.equipmentCustom.trim()) eq.push(state.equipmentCustom.trim())
-    if (eq.length) lines.push(`- Доступное оборудование: ${eq.join(', ')}`)
-    else lines.push('- Оборудование: не указано (только вес тела)')
-  } else if (state.place === 'gym') {
-    lines.push('- Оборудование: полный набор зала (штанги, гантели, тренажёры)')
+    eqParts.push(eq.length ? `дома — ${eq.join(', ')}` : 'дома — только вес тела')
   }
+  if (state.places.includes('street')) {
+    eqParts.push('на улице — турники, брусья, своя масса тела')
+  }
+  if (eqParts.length) lines.push(`- Доступное оборудование: ${eqParts.join('; ')}`)
 
   // 8. Injuries
   if (state.injuries === 'no') {
@@ -281,7 +318,21 @@ function compile(state: WizardState, profile: UserProfile | undefined): string {
       : state.programType
   if (prog) lines.push(`- Тип программы: ${prog}`)
 
-  // 11. Wishes — отдельным акцентным блоком, чтобы AI не игнорировал
+  // 11. Анализы — отдельным блоком
+  if (state.analyses.length > 0) {
+    lines.push(
+      '',
+      '## Результаты анализов / обследований (загружены пользователем) — учитывать при подборе нагрузки',
+    )
+    state.analyses.forEach((a, i) => {
+      lines.push(`### Файл ${i + 1}: ${a.filename}`, a.text)
+    })
+    lines.push(
+      'При отклонениях в анализах будь осторожнее с нагрузкой и при необходимости отметь это в описании плана. Не ставь медицинских диагнозов.',
+    )
+  }
+
+  // 12. Wishes — отдельным акцентным блоком, чтобы AI не игнорировал
   const wishesText = state.wishesText.trim()
   if (wishesText) {
     lines.push(
@@ -308,30 +359,31 @@ function isStepComplete(step: number, s: WizardState): boolean {
       const h = Number(s.heightCm)
       return Number.isFinite(w) && w > 0 && Number.isFinite(h) && h > 0
     }
-    case 3: // замеры — не давим, нужно лишь выбрать «Заполню/Пропустить»
+    case 3: // анализы — необязательно (блок на время загрузки в canProceed)
+      return true
+    case 4: // замеры — не давим, нужно лишь выбрать «Заполню/Пропустить»
       return s.measurementsMode !== null
-    case 4: // days
+    case 5: // days
       if (s.daysPerWeek === 'custom') return s.daysCustom.trim().length > 0
       return s.daysPerWeek !== ''
-    case 5: // experience
+    case 6: // experience
       if (s.experience === 'custom') return s.experienceCustom.trim().length > 0
       return s.experience !== ''
-    case 6: // place
-      if (s.place === 'custom') return s.placeCustom.trim().length > 0
-      return s.place !== null
-    case 7: // equipment (only when home)
-      if (s.place !== 'home') return true
+    case 7: // place — мультивыбор или своё место
+      return s.places.length > 0 || s.placeCustom.trim().length > 0
+    case 8: // equipment (только если выбран «Дом»)
+      if (!s.places.includes('home')) return true
       return s.equipment.length > 0 || s.equipmentCustom.trim().length > 0
-    case 8: // injuries
+    case 9: // injuries
       if (s.injuries === 'yes') return s.injuriesText.trim().length > 0
       return s.injuries !== null
-    case 9: // working weights
+    case 10: // working weights
       if (s.workingWeights === 'yes') return s.workingWeightsText.trim().length > 0
       return s.workingWeights !== null
-    case 10: // program type
+    case 11: // program type
       if (s.programType === 'custom') return s.programTypeCustom.trim().length > 0
       return s.programType !== ''
-    case 11: // wishes — необязательный, всегда completed
+    case 12: // wishes — необязательный, всегда completed
       return true
     default:
       return true
@@ -354,7 +406,7 @@ export function AiPlanWizard() {
     },
   })
 
-  // Последний замер тела — для предзаполнения шага 1
+  // Последний замер тела — для предзаполнения шага замеров
   const { data: measurementsData } = useBodyMeasurements({ limit: 1, page: 1 })
   const lastMeasurement = measurementsData?.items?.[0] ?? null
 
@@ -363,11 +415,12 @@ export function AiPlanWizard() {
   const [submitted, setSubmitted] = useState(false)
   const [finalizing, setFinalizing] = useState(false)
   const [localError, setLocalError] = useState<string | null>(null)
+  const [analysesUploading, setAnalysesUploading] = useState(false)
 
   const { messages, isStreaming, toolCallReady, goalSuggestion, start, finalize, reset, error } =
     useAiPlanChat()
 
-  const TOTAL = 12
+  const TOTAL = 13
 
   // Prefill intents/months из query (?intent=lose,strength&months=3) — приходит из AiGoalDialog
   const prefilledFromQueryRef = useRef(false)
@@ -423,23 +476,24 @@ export function AiPlanWizard() {
     })
   }, [lastMeasurement])
 
-  // Skip step 7 (equipment) forward/back when place != 'home'
+  // Skip equipment (step 8) forward/back when «Дом» не выбран
   function goNext() {
-    if (step === 6 && state.place !== 'home') {
-      setStep(8)
+    if (step === 7 && !state.places.includes('home')) {
+      setStep(9)
       return
     }
     setStep((s) => Math.min(s + 1, TOTAL - 1))
   }
   function goBack() {
-    if (step === 8 && state.place !== 'home') {
-      setStep(6)
+    if (step === 9 && !state.places.includes('home')) {
+      setStep(7)
       return
     }
     setStep((s) => Math.max(s - 1, 0))
   }
 
-  const canProceed = isStepComplete(step, state)
+  const canProceed =
+    isStepComplete(step, state) && !(step === 3 && analysesUploading)
   const isLastStep = step === TOTAL - 1
 
   async function handleSubmit() {
@@ -761,8 +815,23 @@ export function AiPlanWizard() {
         </StepContainer>
       )}
 
-      {/* Step 3: замеры тела */}
+      {/* Step 3: анализы (необязательно) */}
       {step === 3 && (
+        <StepContainer
+          title="Анализы и обследования"
+          hint="Необязательно. Загрузите свежие анализы или заключения — AI учтёт их при подборе нагрузки. PDF, DOCX, TXT или фото."
+        >
+          <AnalysesUploader
+            analyses={state.analyses}
+            uploading={analysesUploading}
+            onUploadingChange={setAnalysesUploading}
+            onChange={(next) => setState((s) => ({ ...s, analyses: next }))}
+          />
+        </StepContainer>
+      )}
+
+      {/* Step 4: замеры тела */}
+      {step === 4 && (
         <StepContainer
           title="Замеры тела"
           hint="Помогут точнее подобрать нагрузку и упражнения. Если не знаете — спокойно пропускайте."
@@ -827,8 +896,8 @@ export function AiPlanWizard() {
         </StepContainer>
       )}
 
-      {/* Step 4: Days per week */}
-      {step === 4 && (
+      {/* Step 5: Days per week */}
+      {step === 5 && (
         <StepContainer title="Сколько раз в неделю готовы тренироваться?">
           <div className="grid grid-cols-1 gap-2">
             {['2', '3', '4', '5'].map((n) => (
@@ -858,8 +927,8 @@ export function AiPlanWizard() {
         </StepContainer>
       )}
 
-      {/* Step 5: Experience */}
-      {step === 5 && (
+      {/* Step 6: Experience */}
+      {step === 6 && (
         <StepContainer title="Стаж силовых тренировок">
           <div className="grid grid-cols-1 gap-2">
             {['Новичок (до 6 мес)', '6–12 месяцев', '1–3 года', '3+ лет'].map(
@@ -893,45 +962,42 @@ export function AiPlanWizard() {
         </StepContainer>
       )}
 
-      {/* Step 6: Place */}
-      {step === 6 && (
-        <StepContainer title="Где тренируетесь?">
+      {/* Step 7: Place (мультивыбор) */}
+      {step === 7 && (
+        <StepContainer
+          title="Где тренируетесь?"
+          hint="Можно выбрать несколько мест — AI совместит (например, база в зале + турники на улице)."
+        >
           <div className="grid grid-cols-1 gap-2">
-            <Chip
-              label="Зал"
-              selected={state.place === 'gym'}
-              onClick={() =>
-                setState((s) => ({ ...s, place: 'gym', equipment: [] }))
-              }
-            />
-            <Chip
-              label="Дом"
-              selected={state.place === 'home'}
-              onClick={() => setState((s) => ({ ...s, place: 'home' }))}
-            />
+            {PLACE_OPTIONS.map(({ key, label }) => (
+              <Chip
+                key={key}
+                label={label}
+                selected={state.places.includes(key)}
+                onClick={() =>
+                  setState((s) => ({
+                    ...s,
+                    places: s.places.includes(key)
+                      ? s.places.filter((x) => x !== key)
+                      : [...s.places, key],
+                  }))
+                }
+              />
+            ))}
           </div>
-          <Chip
-            label="Другое"
-            selected={state.place === 'custom'}
-            onClick={() =>
-              setState((s) => ({ ...s, place: 'custom', equipment: [] }))
+          <input
+            value={state.placeCustom}
+            onChange={(e) =>
+              setState((s) => ({ ...s, placeCustom: e.target.value }))
             }
+            placeholder="Другое место (необязательно): отель, парк..."
+            className="w-full rounded-xl border border-input bg-background/70 px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
           />
-          {state.place === 'custom' && (
-            <input
-              value={state.placeCustom}
-              onChange={(e) =>
-                setState((s) => ({ ...s, placeCustom: e.target.value }))
-              }
-              placeholder="Например: улица, парк, отель"
-              className="w-full rounded-xl border border-input bg-background/70 px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            />
-          )}
         </StepContainer>
       )}
 
-      {/* Step 7: Equipment (home only) */}
-      {step === 7 && state.place === 'home' && (
+      {/* Step 8: Equipment (только если выбран «Дом») */}
+      {step === 8 && state.places.includes('home') && (
         <StepContainer
           title="Что есть дома?"
           hint="Можно выбрать несколько вариантов"
@@ -971,8 +1037,8 @@ export function AiPlanWizard() {
         </StepContainer>
       )}
 
-      {/* Step 8: Injuries */}
-      {step === 8 && (
+      {/* Step 9: Injuries */}
+      {step === 9 && (
         <StepContainer title="Есть ли травмы или ограничения?">
           <div className="grid grid-cols-1 gap-2">
             <Chip
@@ -1002,8 +1068,8 @@ export function AiPlanWizard() {
         </StepContainer>
       )}
 
-      {/* Step 9: Working weights */}
-      {step === 9 && (
+      {/* Step 10: Working weights */}
+      {step === 10 && (
         <StepContainer title="Знаете свои рабочие веса в базе?">
           <div className="grid grid-cols-1 gap-2">
             <Chip
@@ -1042,8 +1108,8 @@ export function AiPlanWizard() {
         </StepContainer>
       )}
 
-      {/* Step 10: Program type */}
-      {step === 10 && (
+      {/* Step 11: Program type */}
+      {step === 11 && (
         <StepContainer title="Тип программы">
           <div className="grid grid-cols-1 gap-2">
             {[
@@ -1086,8 +1152,8 @@ export function AiPlanWizard() {
         </StepContainer>
       )}
 
-      {/* Step 11: Wishes (свободный промпт — необязательный) */}
-      {step === 11 && (
+      {/* Step 12: Wishes (свободный промпт — необязательный) */}
+      {step === 12 && (
         <StepContainer
           title="Свободные пожелания тренеру"
           hint="Необязательно — но всё, что напишешь, AI учтёт строго. Можно пропустить."
@@ -1149,6 +1215,148 @@ export function AiPlanWizard() {
           </Button>
         )}
       </div>
+    </div>
+  )
+}
+
+// ─── Analyses uploader ────────────────────────────────────────────────────────
+
+function AnalysesUploader({
+  analyses,
+  uploading,
+  onUploadingChange,
+  onChange,
+}: {
+  analyses: AnalysisFile[]
+  uploading: boolean
+  onUploadingChange: (v: boolean) => void
+  onChange: (next: AnalysisFile[]) => void
+}) {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [error, setError] = useState<string | null>(null)
+  const [expanded, setExpanded] = useState<Set<number>>(new Set())
+
+  function toggleExpand(i: number) {
+    setExpanded((prev) => {
+      const next = new Set(prev)
+      if (next.has(i)) next.delete(i)
+      else next.add(i)
+      return next
+    })
+  }
+
+  async function handleFiles(files: FileList | null) {
+    if (!files || files.length === 0) return
+    setError(null)
+    onUploadingChange(true)
+    const added: AnalysisFile[] = []
+    try {
+      for (const file of Array.from(files)) {
+        const form = new FormData()
+        form.append('file', file)
+        const { data } = await api.post('/ai/plans/analyses/extract', form)
+        if (data?.text) added.push({ filename: data.filename ?? file.name, text: data.text })
+      }
+      if (added.length) onChange([...analyses, ...added])
+    } catch (e: any) {
+      setError(e?.response?.data?.message ?? 'Не удалось обработать файл')
+    } finally {
+      onUploadingChange(false)
+      if (inputRef.current) inputRef.current.value = ''
+    }
+  }
+
+  function remove(i: number) {
+    onChange(analyses.filter((_, idx) => idx !== i))
+  }
+
+  return (
+    <div className="space-y-3">
+      <input
+        ref={inputRef}
+        type="file"
+        multiple
+        accept=".pdf,.docx,.txt,image/*,application/pdf"
+        className="hidden"
+        onChange={(e) => void handleFiles(e.target.files)}
+      />
+
+      <button
+        type="button"
+        onClick={() => inputRef.current?.click()}
+        disabled={uploading}
+        className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-input bg-background/50 px-4 py-6 text-sm font-medium text-muted-foreground transition-colors hover:border-primary/50 hover:text-primary disabled:opacity-60"
+      >
+        {uploading ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Распознаём файл…
+          </>
+        ) : (
+          <>
+            <Upload className="h-4 w-4" />
+            Загрузить анализы (PDF, DOCX, TXT, фото)
+          </>
+        )}
+      </button>
+
+      {error && <p className="text-xs text-destructive">{error}</p>}
+
+      {analyses.length > 0 && (
+        <ul className="space-y-2">
+          {analyses.map((a, i) => {
+            const isOpen = expanded.has(i)
+            return (
+              <li
+                key={i}
+                className="rounded-xl border border-border bg-background/60 px-3 py-2.5"
+              >
+                <div className="flex items-start gap-2">
+                  <FileText className="h-4 w-4 mt-0.5 shrink-0 text-primary" />
+                  <button
+                    type="button"
+                    onClick={() => toggleExpand(i)}
+                    className="min-w-0 flex-1 text-left"
+                    aria-expanded={isOpen}
+                  >
+                    <p className="text-sm font-medium truncate">{a.filename}</p>
+                    {!isOpen && (
+                      <p className="text-xs text-muted-foreground line-clamp-2">{a.text}</p>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => toggleExpand(i)}
+                    className="shrink-0 rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                    aria-label={isOpen ? 'Свернуть' : 'Показать распознанный текст'}
+                  >
+                    {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => remove(i)}
+                    className="shrink-0 rounded-lg p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+                    aria-label="Убрать файл"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+                {isOpen && (
+                  <div className="mt-2 max-h-64 overflow-y-auto rounded-lg bg-muted/50 px-3 py-2">
+                    <p className="text-xs text-foreground/80 whitespace-pre-wrap leading-relaxed">
+                      {a.text}
+                    </p>
+                  </div>
+                )}
+              </li>
+            )
+          })}
+        </ul>
+      )}
+
+      <p className="text-xs text-muted-foreground">
+        Распознанный текст пойдёт AI как контекст. Фото и сканы читает модель — это занимает несколько секунд.
+      </p>
     </div>
   )
 }

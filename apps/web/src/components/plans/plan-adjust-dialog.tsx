@@ -38,15 +38,26 @@ export function PlanAdjustDialog({ open, onOpenChange, planTemplateId }: Props) 
   } = usePlanAdjustment()
   const [selected, setSelected] = useState<Set<number>>(new Set())
   const [applying, setApplying] = useState(false)
+  const [note, setNote] = useState('')
+  // false = фаза ввода пожеланий; true = анализ запущен / показываем результат
+  const [started, setStarted] = useState(false)
 
-  // Kick off analysis when the dialog opens
+  // Reset to the input phase whenever the dialog opens
   useEffect(() => {
     if (!open) return
     reset()
     setSelected(new Set())
-    void analyze(planTemplateId)
+    setNote('')
+    setStarted(false)
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, planTemplateId])
+
+  function runAnalysis() {
+    reset()
+    setSelected(new Set())
+    setStarted(true)
+    void analyze(planTemplateId, note)
+  }
 
   // By default, pre-select all suggested adjustments once they arrive
   useEffect(() => {
@@ -94,24 +105,46 @@ export function PlanAdjustDialog({ open, onOpenChange, planTemplateId }: Props) 
             AI-корректировка плана
           </DialogTitle>
           <DialogDescription>
-            Анализ последних 4 недель тренировок и точечные правки.
+            Анализ последних 4 недель тренировок и точечные правки. Можно
+            подсказать AI, что не нравится — он учтёт это в приоритете.
           </DialogDescription>
         </DialogHeader>
 
-        {isStreaming && !toolCallReady && (
+        {!started && (
+          <div className="space-y-2 py-1">
+            <label className="text-sm font-medium">
+              Что хочешь изменить?{' '}
+              <span className="text-muted-foreground font-normal">(необязательно)</span>
+            </label>
+            <textarea
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              placeholder="Например: не нравятся приседания со штангой — болит колено, замени на что-то для ног. Жим лёжа стал лёгким."
+              rows={4}
+              maxLength={2000}
+              autoFocus
+              className="w-full resize-none rounded-xl border border-input bg-background/70 px-3 py-2.5 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            />
+            <p className="text-xs text-muted-foreground">
+              Оставь поле пустым, чтобы AI просто проанализировал прогресс по истории.
+            </p>
+          </div>
+        )}
+
+        {started && isStreaming && !toolCallReady && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground py-6">
             <Loader2 className="h-4 w-4 animate-spin" />
             Анализирую историю тренировок…
           </div>
         )}
 
-        {error && !isStreaming && (
+        {started && error && !isStreaming && (
           <div className="text-sm text-destructive py-4">
             {error}
           </div>
         )}
 
-        {toolCallReady && (
+        {started && toolCallReady && (
           <div className="space-y-4">
             {summary && (
               <div className="text-sm bg-muted/50 rounded-md p-3 leading-relaxed">
@@ -142,40 +175,54 @@ export function PlanAdjustDialog({ open, onOpenChange, planTemplateId }: Props) 
         )}
 
         <DialogFooter className="gap-2 pt-2">
-          {toolCallReady && !isStreaming && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                reset()
-                setSelected(new Set())
-                void analyze(planTemplateId)
-              }}
-              disabled={applying}
-            >
-              <RefreshCw className="h-3.5 w-3.5 mr-1" />
-              Перепроверить
-            </Button>
+          {!started ? (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onOpenChange(false)}
+              >
+                Отмена
+              </Button>
+              <Button size="sm" onClick={runAnalysis}>
+                <Sparkles className="h-3.5 w-3.5 mr-1" />
+                Подобрать правки
+              </Button>
+            </>
+          ) : (
+            <>
+              {toolCallReady && !isStreaming && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setStarted(false)}
+                  disabled={applying}
+                >
+                  <RefreshCw className="h-3.5 w-3.5 mr-1" />
+                  Изменить запрос
+                </Button>
+              )}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onOpenChange(false)}
+                disabled={applying}
+              >
+                Отмена
+              </Button>
+              <Button
+                size="sm"
+                onClick={handleApply}
+                disabled={!canApply || adjustments.length === 0}
+              >
+                {applying
+                  ? 'Применяю…'
+                  : adjustments.length === 0
+                    ? 'Ок'
+                    : `Применить (${selected.size})`}
+              </Button>
+            </>
           )}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onOpenChange(false)}
-            disabled={applying}
-          >
-            Отмена
-          </Button>
-          <Button
-            size="sm"
-            onClick={handleApply}
-            disabled={!canApply || adjustments.length === 0}
-          >
-            {applying
-              ? 'Применяю…'
-              : adjustments.length === 0
-                ? 'Ок'
-                : `Применить (${selected.size})`}
-          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
@@ -197,6 +244,9 @@ function AdjustmentRow({
     const parts: string[] = []
     if (adjustment.action === 'replace' && adjustment.newExerciseName) {
       parts.push(`→ ${adjustment.newExerciseName}`)
+    }
+    if (adjustment.action === 'add') {
+      parts.push('новое упражнение')
     }
     if (adjustment.newSets != null) parts.push(`${adjustment.newSets} подх.`)
     if (adjustment.newReps != null) parts.push(`${adjustment.newReps} повт.`)
@@ -221,8 +271,12 @@ function AdjustmentRow({
       <div className="flex-1 min-w-0 space-y-1">
         <div className="flex items-center gap-2 flex-wrap">
           <Badge variant="outline" className="text-xs">{dayLabel}</Badge>
-          <Badge variant={adjustment.action === 'replace' ? 'secondary' : 'outline'} className="text-xs">
-            {adjustment.action === 'replace' ? 'Замена' : 'Правка'}
+          <Badge variant={adjustment.action === 'update' ? 'outline' : 'secondary'} className="text-xs">
+            {adjustment.action === 'replace'
+              ? 'Замена'
+              : adjustment.action === 'add'
+                ? 'Добавить'
+                : 'Правка'}
           </Badge>
           <span className="font-medium text-sm break-words">{adjustment.exerciseName}</span>
         </div>

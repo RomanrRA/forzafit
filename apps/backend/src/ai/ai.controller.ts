@@ -8,12 +8,16 @@ import {
   Res,
   HttpCode,
   HttpStatus,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiTags,
   ApiBearerAuth,
   ApiOperation,
   ApiResponse,
+  ApiConsumes,
 } from '@nestjs/swagger';
 import { Response } from 'express';
 import { AiService } from './ai.service';
@@ -23,6 +27,7 @@ import {
   StartConversationDto,
   ApplyAdjustmentsDto,
   ApplyAdjustmentsResponseDto,
+  AdjustPlanDto,
 } from './dto/ai.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
@@ -85,6 +90,23 @@ export class AiController {
     }
   }
 
+  @Post('analyses/extract')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Извлечь текст из файла анализов (PDF/DOCX/TXT/фото) для AI-визарда',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiResponse({ status: 200, description: '{ filename, text }' })
+  @UseInterceptors(
+    FileInterceptor('file', { limits: { fileSize: 15 * 1024 * 1024 } }),
+  )
+  extractAnalysis(
+    @UploadedFile() file: Express.Multer.File,
+    @CurrentUser('userId') _userId: string,
+  ): Promise<{ filename: string; text: string }> {
+    return this.aiService.extractAnalysisText(file);
+  }
+
   @Post(':planTemplateId/adjust')
   @ApiOperation({
     summary: 'Запустить AI-анализ истории и получить diff правок плана (SSE stream)',
@@ -93,11 +115,16 @@ export class AiController {
   async adjust(
     @Param('planTemplateId', ParseUUIDPipe) planTemplateId: string,
     @CurrentUser('userId') userId: string,
+    @Body() dto: AdjustPlanDto,
     @Res() res: Response,
   ): Promise<void> {
     this.initSse(res);
     try {
-      for await (const event of this.aiService.adjustPlanStream(userId, planTemplateId)) {
+      for await (const event of this.aiService.adjustPlanStream(
+        userId,
+        planTemplateId,
+        dto?.userNote,
+      )) {
         this.writeEvent(res, event);
       }
     } catch (err: any) {

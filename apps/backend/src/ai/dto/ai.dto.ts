@@ -54,6 +54,18 @@ export class StartConversationDto {
   targetMonths?: number;
 }
 
+export class AdjustPlanDto {
+  @ApiPropertyOptional({
+    description:
+      'Свободный текст с пожеланиями пользователя: что не нравится, какие упражнения не подходят, что заменить. AI учтёт это в приоритете над авто-анализом истории.',
+    example: 'Не нравятся приседания со штангой — болит колено. Замени на что-то для ног без осевой нагрузки.',
+  })
+  @IsOptional()
+  @IsString()
+  @MaxLength(2000)
+  userNote?: string;
+}
+
 // SSE event shapes (for documentation only — not used as class-validator DTOs)
 export interface SseMetaEvent {
   type: 'meta';

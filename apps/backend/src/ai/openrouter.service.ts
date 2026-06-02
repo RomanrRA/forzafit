@@ -202,6 +202,63 @@ export class OpenRouterService {
     yield { type: 'done' };
   }
 
+  /**
+   * Одноразовое извлечение текста из изображения или PDF через мультимодальную
+   * модель (vision). Не использует типизированный ChatMessage, т.к. контент-блоки
+   * image_url/file отличаются от текстового потока. Возвращает чистый текст ответа.
+   */
+  async extractFromMedia(params: {
+    kind: 'image' | 'pdf';
+    mediaType: string; // image/jpeg | image/png | application/pdf
+    base64: string;
+    filename: string;
+    prompt: string;
+    model?: string;
+    maxTokens?: number;
+  }): Promise<string> {
+    const dataUrl = `data:${params.mediaType};base64,${params.base64}`;
+    const mediaBlock =
+      params.kind === 'image'
+        ? { type: 'image_url', image_url: { url: dataUrl } }
+        : {
+            type: 'file',
+            file: { filename: params.filename, file_data: dataUrl },
+          };
+
+    const body: Record<string, unknown> = {
+      model: params.model ?? this.model,
+      messages: [
+        {
+          role: 'user',
+          content: [{ type: 'text', text: params.prompt }, mediaBlock],
+        },
+      ],
+      stream: false,
+      max_tokens: params.maxTokens ?? 2000,
+    };
+
+    const response = await fetch(`${this.baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: this.headers,
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`OpenRouter media error ${response.status}: ${text}`);
+    }
+
+    const json = (await response.json()) as OpenRouterResponse;
+    const content = json.choices?.[0]?.message?.content;
+    if (typeof content === 'string') return content;
+    if (Array.isArray(content)) {
+      return content
+        .map((b) => (b && typeof b === 'object' && 'text' in b ? (b as any).text : ''))
+        .join('');
+    }
+    return '';
+  }
+
   async completion(params: {
     messages: ChatMessage[];
     tools?: OpenRouterTool[];
