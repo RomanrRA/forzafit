@@ -4,6 +4,7 @@ import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD } from '@nestjs/core';
 
+import { validateEnv } from './config/env.validation';
 import { DbModule } from './db/db.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
@@ -27,6 +28,7 @@ import { WorkoutAdviceModule } from './workout-advice/workout-advice.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      validate: validateEnv,
     }),
     ThrottlerModule.forRoot([
       {
