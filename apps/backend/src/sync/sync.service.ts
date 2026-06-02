@@ -35,10 +35,9 @@ export class SyncService {
         await this.applyEvent(userId, event);
         processed++;
       } catch (err) {
-        this.logger.warn(
-          `Sync event ${event.id} failed: ${err.message}`,
-        );
-        errors.push(`${event.id}: ${err.message}`);
+        const message = err instanceof Error ? err.message : String(err);
+        this.logger.warn(`Sync event ${event.id} failed: ${message}`);
+        errors.push(`${event.id}: ${message}`);
       }
     }
 
