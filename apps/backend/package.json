@@ -8,6 +8,7 @@
     "start:dev": "nest start --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,test}/**/*.ts\"",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage",
@@ -55,10 +56,14 @@
     "@types/passport-local": "^1.0.38",
     "@types/pg": "^8.11.6",
     "@types/supertest": "^6.0.2",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
     "@vitest/coverage-v8": "^2.0.0",
     "drizzle-kit": "^0.28.0",
+    "eslint": "^8.57.1",
     "supertest": "^7.0.0",
     "typescript": "^5.4.0",
+    "unplugin-swc": "^1.5.9",
     "vitest": "^2.0.0"
   }
 }

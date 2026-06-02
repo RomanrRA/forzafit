@@ -217,11 +217,11 @@ export class PrDetectorService {
   }
 }
 
-function epley1Rm(weight: number, reps: number): number {
+export function epley1Rm(weight: number, reps: number): number {
   if (reps === 1) return weight;
   return weight * (1 + reps / 30);
 }
 
-function round1(n: number): number {
+export function round1(n: number): number {
   return Math.round(n * 10) / 10;
 }
