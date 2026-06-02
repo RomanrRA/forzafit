@@ -3,6 +3,7 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { globalValidationPipe } from './common/pipes/validation.pipe';
+import { AllExceptionsFilter } from './common/filters/all-exceptions.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -21,6 +22,9 @@ async function bootstrap() {
 
   // Global validation
   app.useGlobalPipes(globalValidationPipe);
+
+  // Централизованная обработка ошибок + структурное логирование
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   // Swagger
   const config = new DocumentBuilder()
