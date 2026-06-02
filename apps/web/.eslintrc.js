@@ -1,0 +1,4 @@
+module.exports = {
+  extends: 'next/core-web-vitals',
+  ignorePatterns: ['node_modules', '.next', 'public'],
+}

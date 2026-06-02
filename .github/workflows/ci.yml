@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Отменяем устаревшие прогоны при новом пуше в ту же ветку/PR.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (lint · typecheck · test · build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint --workspace=apps/backend
+
+      - name: Typecheck
+        run: npm run typecheck --workspace=apps/backend
+
+      - name: Test
+        run: npm test --workspace=apps/backend
+
+      - name: Build
+        run: npm run build --workspace=apps/backend
+
+  web:
+    name: Web (lint · typecheck)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint --workspace=apps/web
+
+      - name: Typecheck
+        run: npm run typecheck --workspace=apps/web
