@@ -46,7 +46,6 @@ export function ActiveWorkout({ workout }: Props) {
   const updateWorkout = useUpdateWorkout(workout.id)
   const reorder = useReorderWorkoutExercises(workout.id)
   const { data: personalRecords } = usePersonalRecords()
-  const [now, setNow] = useState(() => Date.now())
   const [paused, setPaused] = useState(false)
   const [celebration, setCelebration] = useState<WorkoutCompletedGamification | null>(null)
   // Сколько кг уже показывали как PR в этой активной сессии — чтобы не дублировать toast
@@ -81,20 +80,27 @@ export function ActiveWorkout({ workout }: Props) {
     [prMaxByExercise, prShown],
   )
 
-  useEffect(() => {
-    if (workout.finishedAt || paused) return
-    const id = setInterval(() => setNow(Date.now()), 1000)
-    return () => clearInterval(id)
-  }, [workout.finishedAt, paused])
-
-  const elapsedSec = Math.max(
-    0,
-    Math.floor((now - new Date(workout.startedAt).getTime()) / 1000),
-  )
   const totalEx = exercises.length
   const completedEx = exercises.filter(
     (e) => e.sets.length > 0 && e.sets.every((s) => s.completed),
   ).length
+
+  // Стабильный массив для dnd-списка: пересчитываем только при реальных
+  // изменениях упражнений/активного индекса, а не на каждом ре-рендере.
+  const sortableItems = useMemo(
+    () =>
+      exercises.map((e, i) => ({
+        id: e.id,
+        name: e.exercise.name,
+        muscleGroup: e.exercise.muscleGroups?.[0]
+          ? muscleRu(e.exercise.muscleGroups[0])
+          : null,
+        totalSets: e.sets.length,
+        doneSets: e.sets.filter((s) => s.completed).length,
+        isActive: i === exIdx,
+      })),
+    [exercises, exIdx],
+  )
 
   async function handleFinish() {
     try {
@@ -190,7 +196,11 @@ export function ActiveWorkout({ workout }: Props) {
               letterSpacing: -0.4,
             }}
           >
-            {fmtClock(elapsedSec)}
+            <ElapsedClock
+              startedAt={workout.startedAt}
+              paused={paused}
+              finishedAt={workout.finishedAt}
+            />
           </span>
         </div>
 
@@ -239,7 +249,11 @@ export function ActiveWorkout({ workout }: Props) {
             letterSpacing: -0.5,
           }}
         >
-          {fmtClock(elapsedSec)}
+          <ElapsedClock
+            startedAt={workout.startedAt}
+            paused={paused}
+            finishedAt={workout.finishedAt}
+          />
         </span>
         <span className="ml-2 eyebrow">в работе</span>
       </div>
@@ -253,7 +267,6 @@ export function ActiveWorkout({ workout }: Props) {
         </div>
       ) : ex ? (
         <ExerciseStage
-          key={ex.id}
           workoutId={workout.id}
           ex={ex}
           isFirst={exIdx === 0}
@@ -272,16 +285,7 @@ export function ActiveWorkout({ workout }: Props) {
             <span className="eyebrow">Упражнения тренировки</span>
           </div>
           <SortableExerciseList
-            items={exercises.map((e, i) => ({
-              id: e.id,
-              name: e.exercise.name,
-              muscleGroup: e.exercise.muscleGroups?.[0]
-                ? muscleRu(e.exercise.muscleGroups[0])
-                : null,
-              totalSets: e.sets.length,
-              doneSets: e.sets.filter((s) => s.completed).length,
-              isActive: i === exIdx,
-            }))}
+            items={sortableItems}
             onReorder={(ids) => {
               const newIdx = ids.indexOf(exercises[exIdx]?.id ?? '')
               if (newIdx >= 0) setExIdx(newIdx)
@@ -312,4 +316,30 @@ export function ActiveWorkout({ workout }: Props) {
       />
     </div>
   )
+}
+
+// Изолированные часы: тикают раз в секунду внутри себя, поэтому ре-рендер
+// затрагивает только цифры времени, а не всё дерево активной тренировки
+// (ExerciseStage + dnd-список). Раньше тик жил в ActiveWorkout и каждую
+// секунду перерисовывал весь экран — на мобиле это давало тормоза.
+function ElapsedClock({
+  startedAt,
+  paused,
+  finishedAt,
+}: {
+  startedAt: string
+  paused: boolean
+  finishedAt?: string | null
+}) {
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    if (finishedAt || paused) return
+    const id = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(id)
+  }, [finishedAt, paused])
+  const elapsedSec = Math.max(
+    0,
+    Math.floor((now - new Date(startedAt).getTime()) / 1000),
+  )
+  return <>{fmtClock(elapsedSec)}</>
 }

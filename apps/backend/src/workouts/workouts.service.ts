@@ -190,6 +190,25 @@ export class WorkoutsService {
       .where(eq(workoutSessions.id, id));
   }
 
+  /**
+   * Массовое удаление тренировок одним запросом. Удаляются только сессии,
+   * принадлежащие пользователю; чужие/несуществующие id молча игнорируются.
+   * Каскад в схеме сам подчищает упражнения и подходы.
+   */
+  async deleteMany(ids: string[], userId: string): Promise<{ deleted: number }> {
+    if (ids.length === 0) return { deleted: 0 };
+    const deleted = await this.drizzle.db
+      .delete(workoutSessions)
+      .where(
+        and(
+          inArray(workoutSessions.id, ids),
+          eq(workoutSessions.userId, userId),
+        ),
+      )
+      .returning({ id: workoutSessions.id });
+    return { deleted: deleted.length };
+  }
+
   // ─── Exercises within session ──────────────────────────────────────────────
 
   async addExercise(

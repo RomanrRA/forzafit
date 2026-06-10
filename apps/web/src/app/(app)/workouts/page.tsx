@@ -5,7 +5,8 @@ import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { format, startOfDay } from 'date-fns'
 import { ru } from 'date-fns/locale'
-import { useWorkouts, useDeleteWorkout } from '@/hooks/use-workouts'
+import { useWorkouts, useDeleteWorkout, useBulkDeleteWorkouts } from '@/hooks/use-workouts'
+import { toast } from '@/hooks/use-toast'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
@@ -36,6 +37,7 @@ export default function WorkoutsPage() {
   const [selected, setSelected] = useState<Set<string>>(new Set())
 
   const deleteMutation = useDeleteWorkout()
+  const bulkDeleteMutation = useBulkDeleteWorkouts()
 
   const todayDate = format(new Date(), 'yyyy-MM-dd')
   const yesterdayDate = format(new Date(Date.now() - 86400000), 'yyyy-MM-dd')
@@ -86,10 +88,16 @@ export default function WorkoutsPage() {
 
   async function deleteSelected() {
     if (!confirm(`Удалить ${selected.size} тренировок?`)) return
-    for (const id of selected) {
-      await deleteMutation.mutateAsync(id)
+    try {
+      await bulkDeleteMutation.mutateAsync([...selected])
+      setSelected(new Set())
+    } catch {
+      toast({
+        variant: 'destructive',
+        title: 'Не удалось удалить',
+        description: 'Попробуйте ещё раз',
+      })
     }
-    setSelected(new Set())
   }
 
   return (
@@ -216,10 +224,10 @@ export default function WorkoutsPage() {
                 variant="destructive"
                 size="sm"
                 onClick={deleteSelected}
-                disabled={deleteMutation.isPending}
+                disabled={bulkDeleteMutation.isPending}
               >
                 <Trash2 className="h-3.5 w-3.5 mr-1" />
-                Удалить ({selected.size})
+                {bulkDeleteMutation.isPending ? 'Удаление…' : `Удалить (${selected.size})`}
               </Button>
             )}
           </div>

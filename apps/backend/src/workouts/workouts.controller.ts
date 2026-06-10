@@ -18,6 +18,7 @@ import {
   CreateWorkoutDto,
   UpdateWorkoutDto,
   WorkoutQueryDto,
+  BulkDeleteWorkoutsDto,
   AddExerciseToWorkoutDto,
   UpdateWorkoutExerciseDto,
   AddSetDto,
@@ -102,6 +103,15 @@ export class WorkoutsController {
     @Body() dto: UpdateWorkoutDto,
   ) {
     return this.workouts.update(id, userId, dto);
+  }
+
+  @Post('bulk-delete')
+  @ApiOperation({ summary: 'Удалить несколько тренировок одним запросом' })
+  bulkDelete(
+    @CurrentUser('userId') userId: string,
+    @Body() dto: BulkDeleteWorkoutsDto,
+  ) {
+    return this.workouts.deleteMany(dto.ids, userId);
   }
 
   @Delete(':id')

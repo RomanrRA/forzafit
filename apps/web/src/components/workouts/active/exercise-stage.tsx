@@ -30,6 +30,15 @@ import { fmtKg, WEIGHT_STEP } from './active-workout.utils'
 
 // ─── Exercise stage ─────────────────────────────────────────────────────────
 
+// Уровни субъективной тяжести подхода. Нажатие = подход сохранён с этим RPE +
+// запуск таймера отдыха. Заменяет отдельный ряд RPE 1–10.
+const DIFFICULTY = [
+  { key: 'easy', label: 'Легко', rpe: 6, tone: 'var(--c-green)' },
+  { key: 'normal', label: 'Норм', rpe: 8, tone: 'var(--c-accent)' },
+  { key: 'hard', label: 'Тяжело', rpe: 9, tone: 'var(--c-orange)' },
+  { key: 'fail', label: 'Отказ', rpe: 10, tone: 'var(--c-red)' },
+] as const
+
 interface StageProps {
   workoutId: string
   ex: WorkoutExercise
@@ -95,19 +104,18 @@ export function ExerciseStage({
   const [weight, setWeight] = useState<number>(initial.weight)
   const [reps, setReps] = useState<number>(initial.reps)
   const [bodyweight, setBodyweight] = useState<boolean>(initial.bodyweight)
-  const [rpe, setRpe] = useState<number | null>(null)
   const [restAt, setRestAt] = useState<number | null>(null)
   const [justDoneId, setJustDoneId] = useState<string | null>(null)
   const [showHowTo, setShowHowTo] = useState(false)
 
-  // Reset on exercise change
+  // Reset on exercise change.
+  // ВАЖНО: restAt/justDoneId намеренно НЕ обнуляем — таймер отдыха должен
+  // продолжать идти при переходе к следующему упражнению (не сбрасываться).
   useEffect(() => {
     setWeight(initial.weight)
     setReps(initial.reps)
     setBodyweight(initial.bodyweight)
-    setRpe(null)
-    setRestAt(null)
-    setJustDoneId(null)
+    setShowHowTo(false)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ex.id])
 
@@ -124,7 +132,7 @@ export function ExerciseStage({
     }
   }, [doneSets, weight])
 
-  const completeSet = useCallback(async () => {
+  const completeSet = useCallback(async (rpeVal: number) => {
     const finalWeight = bodyweight ? 0 : weight
     try {
       let newSet: WorkoutSet
@@ -133,7 +141,7 @@ export function ExerciseStage({
           setId: nextPlanned.id,
           weightKg: finalWeight,
           reps,
-          rpe: rpe ?? undefined,
+          rpe: rpeVal,
           completed: true,
         })
         newSet = result.data
@@ -141,19 +149,18 @@ export function ExerciseStage({
         newSet = await addSet.mutateAsync({
           weightKg: finalWeight,
           reps,
-          rpe: rpe ?? undefined,
+          rpe: rpeVal,
           completed: true,
         })
       }
       setJustDoneId(newSet.id)
-      setRpe(null)
       const restSec = ex.restTimerSec && ex.restTimerSec > 0 ? ex.restTimerSec : 90
       setRestAt(restSec)
       onPrCheck(finalWeight, reps)
     } catch {
       toast({ variant: 'destructive', title: 'Не удалось сохранить подход' })
     }
-  }, [addSet, updateSet, nextPlanned, bodyweight, weight, reps, rpe, ex.restTimerSec, onPrCheck])
+  }, [addSet, updateSet, nextPlanned, bodyweight, weight, reps, ex.restTimerSec, onPrCheck])
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -174,10 +181,10 @@ export function ExerciseStage({
         setReps((r) => Math.max(0, r - 1))
       } else if (e.code === 'Space') {
         e.preventDefault()
-        if (!allDone) completeSet()
-      } else if (/^[1-9]$/.test(e.key) || e.key === '0') {
-        const v = e.key === '0' ? 10 : Number(e.key)
-        setRpe((cur) => (cur === v ? null : v))
+        if (!allDone) completeSet(8) // Норм по умолчанию
+      } else if (/^[1-4]$/.test(e.key)) {
+        e.preventDefault()
+        if (!allDone) completeSet(DIFFICULTY[Number(e.key) - 1].rpe)
       }
     }
     window.addEventListener('keydown', onKey)
@@ -332,100 +339,84 @@ export function ExerciseStage({
           />
         </div>
 
-        {/* RPE */}
-        <div className="mt-5">
-          <div className="mb-2 flex items-baseline justify-between">
-            <span className="eyebrow">RPE</span>
-            <span style={{ fontSize: 11, color: 'var(--txt-3)' }}>
-              как тяжело · 1—10 на клавиатуре
-            </span>
-          </div>
-          <div className="grid grid-cols-10 gap-1">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((v) => {
-              const active = rpe === v
-              const tone =
-                v >= 9 ? 'var(--c-red)' : v >= 7 ? 'var(--c-orange)' : 'var(--c-accent)'
-              return (
-                <button
-                  key={v}
-                  type="button"
-                  onClick={() => setRpe(active ? null : v)}
-                  className="tnum"
-                  style={{
-                    height: 36,
-                    borderRadius: 10,
-                    background: active
-                      ? `color-mix(in oklab, ${tone} 28%, transparent)`
-                      : 'var(--gl-bg)',
-                    border: `1px solid ${
-                      active
-                        ? `color-mix(in oklab, ${tone} 50%, transparent)`
-                        : 'var(--gl-border)'
-                    }`,
-                    color: active ? tone : 'var(--txt-2)',
-                    fontWeight: 700,
-                    fontSize: 14,
-                    cursor: 'pointer',
-                  }}
-                >
-                  {v}
-                </button>
-              )
-            })}
-          </div>
-        </div>
-
         {/* CTA */}
         {(() => {
           const inFlight = addSet.isPending || updateSet.isPending || (allDone && !!isFinishing)
-          const ctaAction = allDone ? (isLast ? onFinish : onNext) : completeSet
-          const ctaLabel = allDone
-            ? isLast
-              ? 'Все подходы сделаны · завершить тренировку'
-              : 'Все подходы сделаны · следующее упражнение'
-            : 'Подход выполнен'
-          return (
-            <button
-              type="button"
-              onClick={ctaAction}
-              disabled={inFlight}
-              className="glass-btn-primary mt-5 flex w-full items-center justify-center gap-2"
-              style={{
-                minHeight: 60,
-                borderRadius: 18,
-                fontSize: 17,
-                fontWeight: 800,
-                letterSpacing: 0.1,
-                cursor: inFlight ? 'wait' : 'pointer',
-                opacity: inFlight ? 0.6 : 1,
-              }}
-            >
-              <Check className="h-[22px] w-[22px]" strokeWidth={2.4} />
-              <span>{ctaLabel}</span>
-              {!allDone && (
-                <kbd
-                  className="ml-2 hidden sm:inline-block"
-                  style={{
-                    padding: '2px 8px',
-                    borderRadius: 6,
-                    background: 'rgba(0,0,0,0.18)',
-                    color: 'rgba(255,255,255,0.85)',
-                    fontSize: 11,
-                    fontWeight: 600,
-                    fontFamily: 'ui-monospace, "SF Mono", Menlo, monospace',
-                  }}
-                >
-                  Space
-                </kbd>
-              )}
-              {allDone && (
-                isLast ? (
+
+          // Все подходы сделаны — одна кнопка перехода/завершения
+          if (allDone) {
+            return (
+              <button
+                type="button"
+                onClick={isLast ? onFinish : onNext}
+                disabled={inFlight}
+                className="glass-btn-primary mt-5 flex w-full items-center justify-center gap-2"
+                style={{
+                  minHeight: 60,
+                  borderRadius: 18,
+                  fontSize: 17,
+                  fontWeight: 800,
+                  letterSpacing: 0.1,
+                  cursor: inFlight ? 'wait' : 'pointer',
+                  opacity: inFlight ? 0.6 : 1,
+                }}
+              >
+                <Check className="h-[22px] w-[22px]" strokeWidth={2.4} />
+                <span>
+                  {isLast
+                    ? 'Все подходы сделаны · завершить тренировку'
+                    : 'Все подходы сделаны · следующее упражнение'}
+                </span>
+                {isLast ? (
                   <Flag className="h-[20px] w-[20px]" strokeWidth={2.4} />
                 ) : (
                   <ChevronRight className="h-[22px] w-[22px]" strokeWidth={2.4} />
-                )
-              )}
-            </button>
+                )}
+              </button>
+            )
+          }
+
+          // Подход не закрыт — выбор тяжести = завершение подхода + таймер
+          return (
+            <div className="mt-5">
+              <div className="mb-2 flex items-baseline justify-between">
+                <span className="eyebrow">Подход выполнен — насколько тяжело?</span>
+                <span style={{ fontSize: 11, color: 'var(--txt-3)' }}>
+                  1—4 на клавиатуре
+                </span>
+              </div>
+              <div className="grid grid-cols-4 gap-2">
+                {DIFFICULTY.map((d, i) => (
+                  <button
+                    key={d.key}
+                    type="button"
+                    onClick={() => completeSet(d.rpe)}
+                    disabled={inFlight}
+                    className="flex flex-col items-center justify-center gap-0.5"
+                    style={{
+                      minHeight: 60,
+                      borderRadius: 16,
+                      background: `color-mix(in oklab, ${d.tone} 16%, transparent)`,
+                      border: `1px solid color-mix(in oklab, ${d.tone} 42%, transparent)`,
+                      color: d.tone,
+                      fontWeight: 800,
+                      fontSize: 15,
+                      letterSpacing: 0.1,
+                      cursor: inFlight ? 'wait' : 'pointer',
+                      opacity: inFlight ? 0.6 : 1,
+                    }}
+                  >
+                    <span>{d.label}</span>
+                    <kbd
+                      className="tnum hidden sm:block"
+                      style={{ fontSize: 10, fontWeight: 600, opacity: 0.6 }}
+                    >
+                      {i + 1}
+                    </kbd>
+                  </button>
+                ))}
+              </div>
+            </div>
           )
         })()}
       </div>
@@ -466,7 +457,6 @@ export function ExerciseStage({
               setWeight(s.weightKg ?? 0)
               setReps(s.reps ?? 0)
               setBodyweight(s.weightKg === 0)
-              setRpe(s.rpe ?? null)
               toast({ title: 'Подход скопирован в ввод' })
             }}
           />

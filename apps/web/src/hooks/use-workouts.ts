@@ -92,6 +92,17 @@ export function useDeleteWorkout() {
   })
 }
 
+export function useBulkDeleteWorkouts() {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      const { data } = await api.post('/workouts/bulk-delete', { ids })
+      return data as { deleted: number }
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['workouts'] }),
+  })
+}
+
 export function useAddExerciseToWorkout(workoutId: string) {
   const qc = useQueryClient()
   return useMutation({

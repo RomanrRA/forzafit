@@ -7,6 +7,9 @@ import {
   IsBoolean,
   IsUUID,
   IsInt,
+  IsArray,
+  ArrayMaxSize,
+  ArrayNotEmpty,
   Min,
   Max,
 } from 'class-validator';
@@ -35,6 +38,15 @@ export class CreateWorkoutDto {
 }
 
 export class UpdateWorkoutDto extends CreateWorkoutDto {}
+
+export class BulkDeleteWorkoutsDto {
+  @ApiProperty({ type: [String], description: 'ID тренировок для удаления' })
+  @IsArray()
+  @ArrayNotEmpty()
+  @ArrayMaxSize(500)
+  @IsUUID('all', { each: true })
+  ids: string[];
+}
 
 export class WorkoutQueryDto {
   @ApiPropertyOptional({ description: 'Фильтр с даты (ISO 8601)' })

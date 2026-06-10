@@ -14,7 +14,6 @@ import { PlanAdjustDialog } from '@/components/plans/plan-adjust-dialog'
 import { RecentPrCard } from '@/components/gamification/recent-pr-card'
 import { RecentAchievementCard } from '@/components/gamification/recent-achievement-card'
 import { ActiveQuestCard } from '@/components/gamification/active-quest-card'
-import { StreakHeatmapCard } from '@/components/dashboard/streak-heatmap-card'
 import { BodyWeightCard } from '@/components/dashboard/body-weight-card'
 import { plural } from '@/lib/utils'
 
@@ -88,8 +87,8 @@ export default function DashboardPage() {
         </h1>
       </div>
 
-      {/* ── Hero row: Today plan + Streak ─────────────────── */}
-      <div className="grid gap-4 sm:gap-5 grid-cols-1 lg:[grid-template-columns:1.4fr_1fr]">
+      {/* ── Hero row: Today plan ─────────────────── */}
+      <div className="grid gap-4 sm:gap-5 grid-cols-1">
         {nextWorkout ? (() => {
             const wDate = startOfDay(new Date(nextWorkout.startedAt))
             const today = startOfDay(new Date())
@@ -232,8 +231,6 @@ export default function DashboardPage() {
               </div>
             </div>
           )}
-
-        <StreakHeatmapCard />
       </div>
 
       {/* ── PR/Achievement (left) + Body weight (right) ───── */}
@@ -283,7 +280,7 @@ export default function DashboardPage() {
           ? 'Пропущена вчера'
           : `Пропущена ${daysAgo} ${plural(daysAgo, ['день', 'дня', 'дней'])} назад`
         return (
-          <Link href={`/workouts/${missedWorkout.id}`}>
+          <Link href={`/workouts/${missedWorkout.id}`} className="block">
             <Card className="border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-950/30 hover:border-red-400 transition-colors cursor-pointer">
               <CardContent className="flex items-center gap-3 py-3 px-4">
                 <AlertTriangle className="h-5 w-5 shrink-0 text-red-500" />
