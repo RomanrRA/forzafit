@@ -29,6 +29,11 @@ Thumbs.db
 .vscode/settings.json
 .idea/
 
+# Graphify — генерируемые и локальные файлы (кэш и HTML не коммитим, данные коммитим)
+graphify-out/cache/
+graphify-out/.graphify_python
+graphify-out/.graphify_root
+
 # TypeScript cache
 *.tsbuildinfo
 
@@ -45,6 +50,11 @@ Thumbs.db
 !drizzle.config.ts
 !apps/backend/drizzle/migrations/meta/_journal.json
 !apps/mobile/eas.json
+# Graphify data files — разрешаем явно после общего *.json
+!graphify-out/graph.json
+!graphify-out/manifest.json
+!graphify-out/cost.json
+!graphify-out/GRAPH_REPORT.md
 
 # Claude / MCP local files
 .claude/

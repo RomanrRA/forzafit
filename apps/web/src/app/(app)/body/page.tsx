@@ -21,7 +21,7 @@ import {
   useDeleteBodyMeasurement,
   type BodyMeasurement,
 } from '@/hooks/use-body-measurements'
-import { AvatarBlock } from '@/components/avatar/avatar-block'
+import { StatsCard } from '@/components/stats/stats-card'
 
 // Custom field definition (persists across sessions)
 interface CustomFieldDef {
@@ -431,8 +431,8 @@ export default function BodyPage() {
         </div>
       </div>
 
-      {/* 3D-аватар — строится по замерам и профилю */}
-      <AvatarBlock />
+      {/* Характеристики — RPG-статы по тренировкам, PR и стрику */}
+      <StatsCard />
 
       {/* Migration banner */}
       {hasLocalData && (

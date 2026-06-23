@@ -1,0 +1,1747 @@
+{
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\.eslintrc.js": {
+    "mtime": 1780422534.5808134,
+    "ast_hash": "abf2f9c687f8a57b77430fcd0c2ee758",
+    "semantic_hash": "abf2f9c687f8a57b77430fcd0c2ee758"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\drizzle.config.ts": {
+    "mtime": 1772883318.7960362,
+    "ast_hash": "fefdff2b0ed906cabec6da9a9cbede86",
+    "semantic_hash": "fefdff2b0ed906cabec6da9a9cbede86"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\drizzle\\migrations\\0000_closed_the_liberteens.sql": {
+    "mtime": 1773180687.2887373,
+    "ast_hash": "4c608c8ecea53d870639761554a774d7",
+    "semantic_hash": "4c608c8ecea53d870639761554a774d7"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\drizzle\\migrations\\0001_unique_colleen_wing.sql": {
+    "mtime": 1773235035.6217935,
+    "ast_hash": "0b92a8757a2262775d75dbb9f5ed0402",
+    "semantic_hash": "0b92a8757a2262775d75dbb9f5ed0402"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\drizzle\\migrations\\0002_dizzy_paibok.sql": {
+    "mtime": 1774793654.7057405,
+    "ast_hash": "a227f1f86dd6df88d929df34546bdd8e",
+    "semantic_hash": "a227f1f86dd6df88d929df34546bdd8e"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\drizzle\\migrations\\0003_aberrant_invaders.sql": {
+    "mtime": 1774947648.5150096,
+    "ast_hash": "f2961d14cda1369c97f74dc1e230b3be",
+    "semantic_hash": "f2961d14cda1369c97f74dc1e230b3be"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\drizzle\\migrations\\0004_local_auth.sql": {
+    "mtime": 1776468483.8624601,
+    "ast_hash": "f4f4032c538ff06b5433931160072488",
+    "semantic_hash": "f4f4032c538ff06b5433931160072488"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\drizzle\\migrations\\0005_strong_master_chief.sql": {
+    "mtime": 1776525110.4814308,
+    "ast_hash": "58eb26fe1b0540d6fa946cc9f2bea75d",
+    "semantic_hash": "58eb26fe1b0540d6fa946cc9f2bea75d"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\drizzle\\migrations\\0006_thin_sir_ram.sql": {
+    "mtime": 1778269361.2820334,
+    "ast_hash": "225e57a51867ff35ebc250242949e041",
+    "semantic_hash": "225e57a51867ff35ebc250242949e041"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\drizzle\\migrations\\0007_add_rpe_to_workout_sets.sql": {
+    "mtime": 1778363696.557632,
+    "ast_hash": "97a84584fa6b7cba7fa06af83dfe307f",
+    "semantic_hash": "97a84584fa6b7cba7fa06af83dfe307f"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\drizzle\\migrations\\0008_quick_supreme_intelligence.sql": {
+    "mtime": 1778447879.0114079,
+    "ast_hash": "21b035b84df47d2c79db6f526ac64b2c",
+    "semantic_hash": "21b035b84df47d2c79db6f526ac64b2c"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\drizzle\\migrations\\0009_sad_thunderbolt.sql": {
+    "mtime": 1778707867.832425,
+    "ast_hash": "20c92d15e5b43c12be1918a309f0ca60",
+    "semantic_hash": "20c92d15e5b43c12be1918a309f0ca60"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\drizzle\\migrations\\0010_body_goals.sql": {
+    "mtime": 1779583557.0026815,
+    "ast_hash": "587fa3fb050d6040e2eaeb35ea73eddd",
+    "semantic_hash": "587fa3fb050d6040e2eaeb35ea73eddd"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\drizzle\\migrations\\0011_user_quests.sql": {
+    "mtime": 1779655357.1348045,
+    "ast_hash": "ad295560a709a576038e07a7ca8f9222",
+    "semantic_hash": "ad295560a709a576038e07a7ca8f9222"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\drizzle\\migrations\\0012_body_measurements_extra_circumferences.sql": {
+    "mtime": 1779802522.86073,
+    "ast_hash": "c819d7692c96046f4679fc5b0cad464c",
+    "semantic_hash": "c819d7692c96046f4679fc5b0cad464c"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\drizzle\\migrations\\0013_workout_advice.sql": {
+    "mtime": 1779803854.3215244,
+    "ast_hash": "fe09ecb88672cc6ae6270af952ae45ef",
+    "semantic_hash": "fe09ecb88672cc6ae6270af952ae45ef"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\drizzle\\migrations\\0014_exercises_media_metadata.sql": {
+    "mtime": 1779900853.1789765,
+    "ast_hash": "1283106ed8aa661b7c08192b3d3ac55e",
+    "semantic_hash": "1283106ed8aa661b7c08192b3d3ac55e"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\drizzle\\migrations\\meta\\_journal.json": {
+    "mtime": 1779900856.061151,
+    "ast_hash": "3ea41d93a6ee58c38447339c85378d6d",
+    "semantic_hash": "3ea41d93a6ee58c38447339c85378d6d"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\drizzle\\seed-exercise-images-2.sql": {
+    "mtime": 1773279296.5701568,
+    "ast_hash": "ed5147d1bafa8bb36222a9c15eb8dcf6",
+    "semantic_hash": "ed5147d1bafa8bb36222a9c15eb8dcf6"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\drizzle\\seed-exercise-images.sql": {
+    "mtime": 1773278002.9361866,
+    "ast_hash": "f0360d74b6af92fe7764f78c48f049b9",
+    "semantic_hash": "f0360d74b6af92fe7764f78c48f049b9"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\drizzle\\seed-exercises-full.sql": {
+    "mtime": 1773389413.6155307,
+    "ast_hash": "48a23208307c6d1bc7a75c0716fc4aa8",
+    "semantic_hash": "48a23208307c6d1bc7a75c0716fc4aa8"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\drizzle\\seed-exercises-v2.sql": {
+    "mtime": 1773237720.7193272,
+    "ast_hash": "355b437c5ce6f26e9262d719a96d66ef",
+    "semantic_hash": "355b437c5ce6f26e9262d719a96d66ef"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\drizzle\\seed-exercises.sql": {
+    "mtime": 1773182634.3551886,
+    "ast_hash": "4feee6a02878c80215c6a66ec80ebb09",
+    "semantic_hash": "4feee6a02878c80215c6a66ec80ebb09"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\nest-cli.json": {
+    "mtime": 1779901007.8521135,
+    "ast_hash": "2a704c589875c3e573820929cab0946b",
+    "semantic_hash": "2a704c589875c3e573820929cab0946b"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\package.json": {
+    "mtime": 1780422599.5921576,
+    "ast_hash": "425a34980575e0681f2acc979c952719",
+    "semantic_hash": "425a34980575e0681f2acc979c952719"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\seed-stats-demo.sql": {
+    "mtime": 1782076392.0059094,
+    "ast_hash": "cb8218e67eae2d49132b8e87bf1eca20",
+    "semantic_hash": "cb8218e67eae2d49132b8e87bf1eca20"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\ai\\ai.context.spec.ts": {
+    "mtime": 1780427496.6487112,
+    "ast_hash": "7731a308344d34be9d49f3aae71ca013",
+    "semantic_hash": "7731a308344d34be9d49f3aae71ca013"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\ai\\ai.context.ts": {
+    "mtime": 1780427451.7525215,
+    "ast_hash": "eb2a0937dc4964fe8d6f78e1e550f366",
+    "semantic_hash": "eb2a0937dc4964fe8d6f78e1e550f366"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\ai\\ai.controller.ts": {
+    "mtime": 1780399584.024757,
+    "ast_hash": "06133e041b0a8942c940fbcaab125195",
+    "semantic_hash": "06133e041b0a8942c940fbcaab125195"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\ai\\ai.module.ts": {
+    "mtime": 1779875012.9509892,
+    "ast_hash": "fb9a13481a31b1a59aca38f3205469e6",
+    "semantic_hash": "fb9a13481a31b1a59aca38f3205469e6"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\ai\\ai.service.ts": {
+    "mtime": 1780427481.995621,
+    "ast_hash": "c1dbd119d7bd34b8ac7b74fe1b91a73c",
+    "semantic_hash": "c1dbd119d7bd34b8ac7b74fe1b91a73c"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\ai\\dto\\ai.dto.ts": {
+    "mtime": 1780398953.9084864,
+    "ast_hash": "baef2e896fac87d699607ca72485e82f",
+    "semantic_hash": "baef2e896fac87d699607ca72485e82f"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\ai\\openrouter.module.ts": {
+    "mtime": 1779662808.0201795,
+    "ast_hash": "ad45f7f9403ff73a196c09a17cfddfd5",
+    "semantic_hash": "ad45f7f9403ff73a196c09a17cfddfd5"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\ai\\openrouter.service.ts": {
+    "mtime": 1780399518.7684374,
+    "ast_hash": "bdcdb2c74e70e84ab33d727295e3b98e",
+    "semantic_hash": "bdcdb2c74e70e84ab33d727295e3b98e"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\ai\\tools\\adjust-plan.tool.ts": {
+    "mtime": 1780399293.8129804,
+    "ast_hash": "f966a46ab628f2e8d77fc5e29679e349",
+    "semantic_hash": "f966a46ab628f2e8d77fc5e29679e349"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\ai\\tools\\generate-plan.tool.ts": {
+    "mtime": 1778707735.4065106,
+    "ast_hash": "96168097a56ab8e0b51f3425388d78b3",
+    "semantic_hash": "96168097a56ab8e0b51f3425388d78b3"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\ai\\tools\\suggest-body-goal.tool.ts": {
+    "mtime": 1779874978.0071235,
+    "ast_hash": "79706e3d935e4e7d502c8cfe66d98a78",
+    "semantic_hash": "79706e3d935e4e7d502c8cfe66d98a78"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\app.module.ts": {
+    "mtime": 1782073851.564111,
+    "ast_hash": "5b77c86d046dcdb6993b86e3eccdbf2b",
+    "semantic_hash": "5b77c86d046dcdb6993b86e3eccdbf2b"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\auth\\auth.controller.ts": {
+    "mtime": 1776506094.6820614,
+    "ast_hash": "3a2aa26f4fff9f7b4b0daa31cc16b425",
+    "semantic_hash": "3a2aa26f4fff9f7b4b0daa31cc16b425"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\auth\\auth.module.ts": {
+    "mtime": 1779834762.065604,
+    "ast_hash": "234b6c012ad4378590c473d77bb4504a",
+    "semantic_hash": "234b6c012ad4378590c473d77bb4504a"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\auth\\auth.service.ts": {
+    "mtime": 1779834769.8575137,
+    "ast_hash": "b03b7c322a74816280d37d7033ef4959",
+    "semantic_hash": "b03b7c322a74816280d37d7033ef4959"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\auth\\dto\\login.dto.ts": {
+    "mtime": 1776467446.74624,
+    "ast_hash": "ae1c348c6e39ce0d4b09102b6d06c025",
+    "semantic_hash": "ae1c348c6e39ce0d4b09102b6d06c025"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\auth\\dto\\register.dto.ts": {
+    "mtime": 1776467428.997126,
+    "ast_hash": "716b4ac1d93a0bbadd8c4e95bec706f5",
+    "semantic_hash": "716b4ac1d93a0bbadd8c4e95bec706f5"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\auth\\guards\\jwt-auth.guard.ts": {
+    "mtime": 1772883371.297065,
+    "ast_hash": "184c5bd056e5657c27ecdd69e1e40701",
+    "semantic_hash": "184c5bd056e5657c27ecdd69e1e40701"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\auth\\guards\\local-auth.guard.ts": {
+    "mtime": 1776467435.4948454,
+    "ast_hash": "b7845e495d81f8b9c89e70f6dcae5f3a",
+    "semantic_hash": "b7845e495d81f8b9c89e70f6dcae5f3a"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\auth\\strategies\\jwt.strategy.ts": {
+    "mtime": 1772883368.152886,
+    "ast_hash": "01cf040fb57e66afdfddb201a1e0e62f",
+    "semantic_hash": "01cf040fb57e66afdfddb201a1e0e62f"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\auth\\strategies\\local.strategy.ts": {
+    "mtime": 1776467434.3611028,
+    "ast_hash": "19919e3074bcbd2e3aa55350c02b2e96",
+    "semantic_hash": "19919e3074bcbd2e3aa55350c02b2e96"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\body-goals\\body-goal-ai.service.ts": {
+    "mtime": 1779899228.517838,
+    "ast_hash": "8e745839bc4ca5f9c56fcab31d7c218f",
+    "semantic_hash": "8e745839bc4ca5f9c56fcab31d7c218f"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\body-goals\\body-goals.controller.ts": {
+    "mtime": 1779836305.3577106,
+    "ast_hash": "17c47782febc0b8bba4f4d703ce5772d",
+    "semantic_hash": "17c47782febc0b8bba4f4d703ce5772d"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\body-goals\\body-goals.module.ts": {
+    "mtime": 1779836236.025611,
+    "ast_hash": "b1ee9995b0cffd6f2222985322054b71",
+    "semantic_hash": "b1ee9995b0cffd6f2222985322054b71"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\body-goals\\body-goals.service.ts": {
+    "mtime": 1779896994.7795508,
+    "ast_hash": "008dbec46a7c74758b3a9f8bf2d1473c",
+    "semantic_hash": "008dbec46a7c74758b3a9f8bf2d1473c"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\body-goals\\dto\\body-goal.dto.ts": {
+    "mtime": 1779896981.4464095,
+    "ast_hash": "83da56ff4a009f429d80e32a92bd5389",
+    "semantic_hash": "83da56ff4a009f429d80e32a92bd5389"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\body-measurements\\body-measurements.controller.ts": {
+    "mtime": 1774947534.626109,
+    "ast_hash": "49617262b671ad07a0a0b55925324a51",
+    "semantic_hash": "49617262b671ad07a0a0b55925324a51"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\body-measurements\\body-measurements.module.ts": {
+    "mtime": 1774947535.9168384,
+    "ast_hash": "04cf8126650232a93268c403412c7f24",
+    "semantic_hash": "04cf8126650232a93268c403412c7f24"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\body-measurements\\body-measurements.service.ts": {
+    "mtime": 1779803524.627458,
+    "ast_hash": "30d1516c176403483a2bb7402031f045",
+    "semantic_hash": "30d1516c176403483a2bb7402031f045"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\body-measurements\\dto\\body-measurement.dto.ts": {
+    "mtime": 1779802565.4546132,
+    "ast_hash": "74853df5568152f24550004a30b4e7e2",
+    "semantic_hash": "74853df5568152f24550004a30b4e7e2"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\calendar\\calendar.controller.ts": {
+    "mtime": 1778709369.5692751,
+    "ast_hash": "4545c3aee577304759829deb9580003c",
+    "semantic_hash": "4545c3aee577304759829deb9580003c"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\calendar\\calendar.module.ts": {
+    "mtime": 1778707963.406388,
+    "ast_hash": "6d8859ba2142127ce51d97f54917a882",
+    "semantic_hash": "6d8859ba2142127ce51d97f54917a882"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\calendar\\calendar.service.ts": {
+    "mtime": 1778709357.4908712,
+    "ast_hash": "3e2693faa031c02cc2916efd471591df",
+    "semantic_hash": "3e2693faa031c02cc2916efd471591df"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\common\\decorators\\current-user.decorator.ts": {
+    "mtime": 1772883416.3590417,
+    "ast_hash": "c0ba255fba3632b1f84de2442a170901",
+    "semantic_hash": "c0ba255fba3632b1f84de2442a170901"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\common\\filters\\all-exceptions.filter.spec.ts": {
+    "mtime": 1780423088.5088854,
+    "ast_hash": "48181c45102a99eb5b908931c447438d",
+    "semantic_hash": "48181c45102a99eb5b908931c447438d"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\common\\filters\\all-exceptions.filter.ts": {
+    "mtime": 1780423057.8712895,
+    "ast_hash": "5eb4a609f3cd05c26056d8d262ff759d",
+    "semantic_hash": "5eb4a609f3cd05c26056d8d262ff759d"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\common\\pipes\\validation.pipe.ts": {
+    "mtime": 1772883419.8765304,
+    "ast_hash": "ce48b0c50ea95138e5f696b76411f5b8",
+    "semantic_hash": "ce48b0c50ea95138e5f696b76411f5b8"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\config\\env.validation.spec.ts": {
+    "mtime": 1780422238.5647578,
+    "ast_hash": "4039f3ff7bc46dd099643e705c461a51",
+    "semantic_hash": "4039f3ff7bc46dd099643e705c461a51"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\config\\env.validation.ts": {
+    "mtime": 1780421677.8519413,
+    "ast_hash": "049cdd0ee9dd5e3a265c67c85c1cc59a",
+    "semantic_hash": "049cdd0ee9dd5e3a265c67c85c1cc59a"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\db\\db.module.ts": {
+    "mtime": 1779899232.957254,
+    "ast_hash": "138368ca628022816328f14ae6e6f5c9",
+    "semantic_hash": "138368ca628022816328f14ae6e6f5c9"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\db\\db.service.ts": {
+    "mtime": 1772883356.142186,
+    "ast_hash": "41d3b9c7074236e0689b6d06a11a5cf0",
+    "semantic_hash": "41d3b9c7074236e0689b6d06a11a5cf0"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\db\\schema.ts": {
+    "mtime": 1779900866.4773011,
+    "ast_hash": "f06409e600bcd589a47c26131ca313f8",
+    "semantic_hash": "f06409e600bcd589a47c26131ca313f8"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\feed\\feed.controller.ts": {
+    "mtime": 1778448175.8707006,
+    "ast_hash": "e448fd94b8af1cd0fbcf7b6f3bf98135",
+    "semantic_hash": "e448fd94b8af1cd0fbcf7b6f3bf98135"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\feed\\feed.module.ts": {
+    "mtime": 1778448180.5892134,
+    "ast_hash": "8a7b05a586357b8c63e37bbb9823c84c",
+    "semantic_hash": "8a7b05a586357b8c63e37bbb9823c84c"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\feed\\feed.service.ts": {
+    "mtime": 1779658626.08554,
+    "ast_hash": "ef04b62ca24a9e89e5074f1af0891334",
+    "semantic_hash": "ef04b62ca24a9e89e5074f1af0891334"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\friends\\dto\\create-friend-request.dto.ts": {
+    "mtime": 1778448078.205771,
+    "ast_hash": "cd917bac4b9a2f1b8daa4a5364c0791f",
+    "semantic_hash": "cd917bac4b9a2f1b8daa4a5364c0791f"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\friends\\friends.controller.ts": {
+    "mtime": 1778456540.5162897,
+    "ast_hash": "21150edbdc3dd97c0fda63568fafc9f3",
+    "semantic_hash": "21150edbdc3dd97c0fda63568fafc9f3"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\friends\\friends.module.ts": {
+    "mtime": 1778448119.7895389,
+    "ast_hash": "53cf0c1e6022623c95a9d404d1d38a65",
+    "semantic_hash": "53cf0c1e6022623c95a9d404d1d38a65"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\friends\\friends.service.ts": {
+    "mtime": 1780319913.4067006,
+    "ast_hash": "d34be85a1eb80bb6ba5eadf337e501bb",
+    "semantic_hash": "d34be85a1eb80bb6ba5eadf337e501bb"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\gamification\\achievements-seed.ts": {
+    "mtime": 1779835638.9518352,
+    "ast_hash": "c01b61024b41a126767217d965be6159",
+    "semantic_hash": "c01b61024b41a126767217d965be6159"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\gamification\\achievements.service.ts": {
+    "mtime": 1779899240.9507074,
+    "ast_hash": "4ca62dd36071c74088e4989289237d87",
+    "semantic_hash": "4ca62dd36071c74088e4989289237d87"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\gamification\\gamification.controller.ts": {
+    "mtime": 1778269361.28861,
+    "ast_hash": "838b00916383fdba8c432fed98979c32",
+    "semantic_hash": "838b00916383fdba8c432fed98979c32"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\gamification\\gamification.module.ts": {
+    "mtime": 1779658671.4801283,
+    "ast_hash": "c41b54504ad2232d01b96a04e119d119",
+    "semantic_hash": "c41b54504ad2232d01b96a04e119d119"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\gamification\\gamification.service.ts": {
+    "mtime": 1779658705.1815867,
+    "ast_hash": "a55a2e99ce83d6fa7d2ec1bb0f0bf116",
+    "semantic_hash": "a55a2e99ce83d6fa7d2ec1bb0f0bf116"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\gamification\\pr-detector.service.spec.ts": {
+    "mtime": 1780422246.3430755,
+    "ast_hash": "4a779035ab975368d52f8697d9ea22fc",
+    "semantic_hash": "4a779035ab975368d52f8697d9ea22fc"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\gamification\\pr-detector.service.ts": {
+    "mtime": 1780422228.9545386,
+    "ast_hash": "c9e82e49a77fc4af7ecc1694676b2764",
+    "semantic_hash": "c9e82e49a77fc4af7ecc1694676b2764"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\gamification\\streak.service.spec.ts": {
+    "mtime": 1780422345.7300289,
+    "ast_hash": "f3683c50ded5a1e66e7afd142f4a8947",
+    "semantic_hash": "f3683c50ded5a1e66e7afd142f4a8947"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\gamification\\streak.service.ts": {
+    "mtime": 1779899253.3622239,
+    "ast_hash": "1c9facc612582dd86e912f6ea260e5a0",
+    "semantic_hash": "1c9facc612582dd86e912f6ea260e5a0"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\leaderboard\\leaderboard.controller.ts": {
+    "mtime": 1778449032.7647095,
+    "ast_hash": "caf1de7df2bdc57a0db1c10d21f57fc4",
+    "semantic_hash": "caf1de7df2bdc57a0db1c10d21f57fc4"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\leaderboard\\leaderboard.module.ts": {
+    "mtime": 1778449038.1142275,
+    "ast_hash": "8923ac00995c21ec748cf17130927659",
+    "semantic_hash": "8923ac00995c21ec748cf17130927659"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\leaderboard\\leaderboard.service.ts": {
+    "mtime": 1778449021.5013952,
+    "ast_hash": "9d65a32dde6df8b14dade24645090d0a",
+    "semantic_hash": "9d65a32dde6df8b14dade24645090d0a"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\mail\\mail.module.ts": {
+    "mtime": 1776467458.997638,
+    "ast_hash": "4c757291f1f99c33ca78e5498b323842",
+    "semantic_hash": "4c757291f1f99c33ca78e5498b323842"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\mail\\mail.service.ts": {
+    "mtime": 1778269361.2921207,
+    "ast_hash": "1ea5e32e14b98db0ee61b2720c0cced4",
+    "semantic_hash": "1ea5e32e14b98db0ee61b2720c0cced4"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\main.ts": {
+    "mtime": 1780423070.9962635,
+    "ast_hash": "abc9f13ac5d4b1c5b96a84663c8fd346",
+    "semantic_hash": "abc9f13ac5d4b1c5b96a84663c8fd346"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\plan-templates\\dto\\plan-template.dto.ts": {
+    "mtime": 1778707749.196617,
+    "ast_hash": "437ccc55f3e758d4bc6a0c5ff84a5c7a",
+    "semantic_hash": "437ccc55f3e758d4bc6a0c5ff84a5c7a"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\plan-templates\\plan-templates.controller.ts": {
+    "mtime": 1773252404.8213742,
+    "ast_hash": "5120d20893bf9590f02cf6b69f54e9f3",
+    "semantic_hash": "5120d20893bf9590f02cf6b69f54e9f3"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\plan-templates\\plan-templates.module.ts": {
+    "mtime": 1778705186.121706,
+    "ast_hash": "2fa299c1aa6824dc86ca6cf2aa5d8309",
+    "semantic_hash": "2fa299c1aa6824dc86ca6cf2aa5d8309"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\plan-templates\\plan-templates.service.ts": {
+    "mtime": 1778705249.1234877,
+    "ast_hash": "53004bc8440ba84069fa86af20d9f282",
+    "semantic_hash": "53004bc8440ba84069fa86af20d9f282"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\quests\\dto\\quest.dto.ts": {
+    "mtime": 1779899259.03038,
+    "ast_hash": "b88b1371bdde2670e1c19e471d3be57b",
+    "semantic_hash": "b88b1371bdde2670e1c19e471d3be57b"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\quests\\quest-ai.service.ts": {
+    "mtime": 1779899276.6486788,
+    "ast_hash": "db1c9c3e1e23c6dd580b7e0b631b3f22",
+    "semantic_hash": "db1c9c3e1e23c6dd580b7e0b631b3f22"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\quests\\quest-tracker.service.ts": {
+    "mtime": 1779899286.7372615,
+    "ast_hash": "b0e8a0eddbea7bca4b3a9132ad74bb35",
+    "semantic_hash": "b0e8a0eddbea7bca4b3a9132ad74bb35"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\quests\\quests-cron.service.ts": {
+    "mtime": 1779899291.5183332,
+    "ast_hash": "0715e3f0ead2da1482c62c6c2a5a5adf",
+    "semantic_hash": "0715e3f0ead2da1482c62c6c2a5a5adf"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\quests\\quests.controller.ts": {
+    "mtime": 1779661462.2793403,
+    "ast_hash": "ab81234ca00c9e03eec8d3ea91ab9a10",
+    "semantic_hash": "ab81234ca00c9e03eec8d3ea91ab9a10"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\quests\\quests.module.ts": {
+    "mtime": 1779662815.3047469,
+    "ast_hash": "a90a8e620ff4941fe48338d8be89c36e",
+    "semantic_hash": "a90a8e620ff4941fe48338d8be89c36e"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\quests\\quests.service.ts": {
+    "mtime": 1779899299.4299893,
+    "ast_hash": "7a9b8c717d1e63cd30b8752624f77228",
+    "semantic_hash": "7a9b8c717d1e63cd30b8752624f77228"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\quests\\quests.types.ts": {
+    "mtime": 1779658264.7788303,
+    "ast_hash": "98620fee11156aab063165bf935cfa51",
+    "semantic_hash": "98620fee11156aab063165bf935cfa51"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\stats\\stats.controller.ts": {
+    "mtime": 1782073833.123277,
+    "ast_hash": "8ebe3f958b2d9efd8e71ee145ee056f6",
+    "semantic_hash": "8ebe3f958b2d9efd8e71ee145ee056f6"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\stats\\stats.module.ts": {
+    "mtime": 1782073841.5589771,
+    "ast_hash": "ef9680d0c2e935819afb10499f64b84e",
+    "semantic_hash": "ef9680d0c2e935819afb10499f64b84e"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\stats\\stats.service.spec.ts": {
+    "mtime": 1782073875.9383686,
+    "ast_hash": "f18ba21030edcf93209cb6f4f732f46d",
+    "semantic_hash": "f18ba21030edcf93209cb6f4f732f46d"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\stats\\stats.service.ts": {
+    "mtime": 1782073826.0939057,
+    "ast_hash": "e1069f892afe5d706301f9129f72d24c",
+    "semantic_hash": "e1069f892afe5d706301f9129f72d24c"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\sync\\dto\\sync.dto.ts": {
+    "mtime": 1779899304.8107162,
+    "ast_hash": "42cf9f171c25098ea1d0f63d3fddd25f",
+    "semantic_hash": "42cf9f171c25098ea1d0f63d3fddd25f"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\sync\\sync.controller.ts": {
+    "mtime": 1772883575.9702942,
+    "ast_hash": "57d60f7eac2b2bf30520fad05b6ff0ce",
+    "semantic_hash": "57d60f7eac2b2bf30520fad05b6ff0ce"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\sync\\sync.module.ts": {
+    "mtime": 1772883579.5958884,
+    "ast_hash": "d374d2207a0bb95fb6fc102b78e072ee",
+    "semantic_hash": "d374d2207a0bb95fb6fc102b78e072ee"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\sync\\sync.service.ts": {
+    "mtime": 1780421899.8345225,
+    "ast_hash": "9a3dc2cb82ecf6d9bf40946c697b8093",
+    "semantic_hash": "9a3dc2cb82ecf6d9bf40946c697b8093"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\users\\dto\\update-user.dto.ts": {
+    "mtime": 1779801521.7434938,
+    "ast_hash": "7df6775c667f618edbdb551f9af5037a",
+    "semantic_hash": "7df6775c667f618edbdb551f9af5037a"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\users\\users.controller.ts": {
+    "mtime": 1778447998.5731602,
+    "ast_hash": "0d698062956f63be1cb0dbafa69d423e",
+    "semantic_hash": "0d698062956f63be1cb0dbafa69d423e"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\users\\users.module.ts": {
+    "mtime": 1772883447.0761166,
+    "ast_hash": "f3eb2901994d3dcf77b5bb6766f937aa",
+    "semantic_hash": "f3eb2901994d3dcf77b5bb6766f937aa"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\users\\users.service.ts": {
+    "mtime": 1778447988.4880526,
+    "ast_hash": "c690d4576848f8f639925ef411e1421d",
+    "semantic_hash": "c690d4576848f8f639925ef411e1421d"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\workout-advice\\workout-advice-ai.service.ts": {
+    "mtime": 1779899312.65678,
+    "ast_hash": "c5f48c6e259bb60c7346a399fc38e5bd",
+    "semantic_hash": "c5f48c6e259bb60c7346a399fc38e5bd"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\workout-advice\\workout-advice.controller.ts": {
+    "mtime": 1779804027.1346714,
+    "ast_hash": "523ff2927bccc65ef44e37b406b61959",
+    "semantic_hash": "523ff2927bccc65ef44e37b406b61959"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\workout-advice\\workout-advice.module.ts": {
+    "mtime": 1779804033.3196752,
+    "ast_hash": "f33415614ef8853748717a45fb57c45c",
+    "semantic_hash": "f33415614ef8853748717a45fb57c45c"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\workout-advice\\workout-advice.service.ts": {
+    "mtime": 1779803994.3471117,
+    "ast_hash": "e942c23af493f278bf6cdb93a6a88b8a",
+    "semantic_hash": "e942c23af493f278bf6cdb93a6a88b8a"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\workout-advice\\workout-advice.types.ts": {
+    "mtime": 1779803901.3277133,
+    "ast_hash": "eee4abc3d75740661ad4f1973eaf44ac",
+    "semantic_hash": "eee4abc3d75740661ad4f1973eaf44ac"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\workouts\\dto\\workout.dto.ts": {
+    "mtime": 1780584677.940848,
+    "ast_hash": "586a08289a4697faf1f77ca776d6f187",
+    "semantic_hash": "586a08289a4697faf1f77ca776d6f187"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\workouts\\exercises\\dto\\exercise.dto.ts": {
+    "mtime": 1773276645.9243827,
+    "ast_hash": "e87b72ee72c8bfb80541f0c3b65a202a",
+    "semantic_hash": "e87b72ee72c8bfb80541f0c3b65a202a"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\workouts\\exercises\\exercise-match.ts": {
+    "mtime": 1780322727.9752476,
+    "ast_hash": "ab0418f570a1a6edb8f425defa66a2c4",
+    "semantic_hash": "ab0418f570a1a6edb8f425defa66a2c4"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\workouts\\exercises\\exercise-translations.json": {
+    "mtime": 1779923010.8414898,
+    "ast_hash": "191e65bced91e2a3aff8cfd591a805b0",
+    "semantic_hash": "191e65bced91e2a3aff8cfd591a805b0"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\workouts\\exercises\\exercises.controller.ts": {
+    "mtime": 1779899323.930378,
+    "ast_hash": "07483897be9c10f4d5887089ded6354c",
+    "semantic_hash": "07483897be9c10f4d5887089ded6354c"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\workouts\\exercises\\exercises.module.ts": {
+    "mtime": 1772883480.069001,
+    "ast_hash": "bae102fb124893d136f2fcf99c6d5408",
+    "semantic_hash": "bae102fb124893d136f2fcf99c6d5408"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\workouts\\exercises\\exercises.service.ts": {
+    "mtime": 1780321439.6087837,
+    "ast_hash": "7d1bf96d49c5b831cda60304874c76ae",
+    "semantic_hash": "7d1bf96d49c5b831cda60304874c76ae"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\workouts\\exercises\\free-db-loader.ts": {
+    "mtime": 1779919419.5585215,
+    "ast_hash": "f6a99890b4ce4de01108329aa98f021d",
+    "semantic_hash": "f6a99890b4ce4de01108329aa98f021d"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\workouts\\exercises\\free-exercise-db.json": {
+    "mtime": 1779900967.200832,
+    "ast_hash": "9ad3ec578856f748c65eb69fa32b746a",
+    "semantic_hash": "9ad3ec578856f748c65eb69fa32b746a"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\workouts\\exercises\\seed-data.ts": {
+    "mtime": 1778707839.185608,
+    "ast_hash": "790f38523a0e0f5ed0edcdb6e0d9599f",
+    "semantic_hash": "790f38523a0e0f5ed0edcdb6e0d9599f"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\workouts\\workouts.controller.ts": {
+    "mtime": 1780584701.9369962,
+    "ast_hash": "88d73ee16a3492a1d5a02a68413be419",
+    "semantic_hash": "88d73ee16a3492a1d5a02a68413be419"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\workouts\\workouts.module.ts": {
+    "mtime": 1778269361.2931237,
+    "ast_hash": "832c948e31cd40adbee9774825d7576d",
+    "semantic_hash": "832c948e31cd40adbee9774825d7576d"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\workouts\\workouts.service.ts": {
+    "mtime": 1780584686.9204507,
+    "ast_hash": "d2231bad16457091ac498faf252dda1f",
+    "semantic_hash": "d2231bad16457091ac498faf252dda1f"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\tsconfig.json": {
+    "mtime": 1780421906.4197476,
+    "ast_hash": "f3b19f2203c8ba51bbc4fc166248bbc5",
+    "semantic_hash": "f3b19f2203c8ba51bbc4fc166248bbc5"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\vitest.config.ts": {
+    "mtime": 1780422734.609765,
+    "ast_hash": "80dd7db111cf084431908ecd6545234f",
+    "semantic_hash": "80dd7db111cf084431908ecd6545234f"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\mobile\\app\\(app)\\(tabs)\\_layout.tsx": {
+    "mtime": 1773532141.0223677,
+    "ast_hash": "89a65951989957cb39259f77c2c1c42a",
+    "semantic_hash": "89a65951989957cb39259f77c2c1c42a"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\mobile\\app\\(app)\\(tabs)\\body.tsx": {
+    "mtime": 1778269361.295122,
+    "ast_hash": "6c8221b2d12d5ad9f38dbad179a39660",
+    "semantic_hash": "6c8221b2d12d5ad9f38dbad179a39660"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\mobile\\app\\(app)\\(tabs)\\index.tsx": {
+    "mtime": 1773532159.7744634,
+    "ast_hash": "a55b5b85dd2392ba3cc27d3e652a115c",
+    "semantic_hash": "a55b5b85dd2392ba3cc27d3e652a115c"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\mobile\\app\\(app)\\(tabs)\\profile.tsx": {
+    "mtime": 1773532218.2042701,
+    "ast_hash": "6f5d736989b4725ec1beb3c375236ef1",
+    "semantic_hash": "6f5d736989b4725ec1beb3c375236ef1"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\mobile\\app\\(app)\\(tabs)\\progress.tsx": {
+    "mtime": 1773532177.057989,
+    "ast_hash": "c069696fffe16e65feb18e7b55ee63d6",
+    "semantic_hash": "c069696fffe16e65feb18e7b55ee63d6"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\mobile\\app\\(app)\\(tabs)\\workouts.tsx": {
+    "mtime": 1773532171.2907226,
+    "ast_hash": "22be071ef627fb453d3e279c2bded03d",
+    "semantic_hash": "22be071ef627fb453d3e279c2bded03d"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\mobile\\app\\(app)\\_layout.tsx": {
+    "mtime": 1773532134.7558546,
+    "ast_hash": "5dcd28112faefa7bfb09f6f94b4ec4da",
+    "semantic_hash": "5dcd28112faefa7bfb09f6f94b4ec4da"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\mobile\\app\\(app)\\exercises\\select.tsx": {
+    "mtime": 1773532259.0474734,
+    "ast_hash": "1c2aa3eb55c52a6dd24323a61019439a",
+    "semantic_hash": "1c2aa3eb55c52a6dd24323a61019439a"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\mobile\\app\\(app)\\workouts\\[id].tsx": {
+    "mtime": 1773532245.3741689,
+    "ast_hash": "7eed9adf627b6fd3f20b3264e213070a",
+    "semantic_hash": "7eed9adf627b6fd3f20b3264e213070a"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\mobile\\app\\(auth)\\_layout.tsx": {
+    "mtime": 1773532109.5440366,
+    "ast_hash": "b62a67e87654b73ac72fc44d962807c5",
+    "semantic_hash": "b62a67e87654b73ac72fc44d962807c5"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\mobile\\app\\(auth)\\login.tsx": {
+    "mtime": 1773532128.989977,
+    "ast_hash": "0bfdd112f398fb516a97e7bd3fed738f",
+    "semantic_hash": "0bfdd112f398fb516a97e7bd3fed738f"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\mobile\\app\\_layout.tsx": {
+    "mtime": 1773532096.271448,
+    "ast_hash": "19b73a74e58acc6c9270968688eb8dc4",
+    "semantic_hash": "19b73a74e58acc6c9270968688eb8dc4"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\mobile\\app\\index.tsx": {
+    "mtime": 1773532107.2896082,
+    "ast_hash": "cfc9bed8cad5d1d4d06f23de567b1647",
+    "semantic_hash": "cfc9bed8cad5d1d4d06f23de567b1647"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\mobile\\babel.config.js": {
+    "mtime": 1773532027.4491744,
+    "ast_hash": "16f8a649a494aecb8d604116c2ff88a7",
+    "semantic_hash": "16f8a649a494aecb8d604116c2ff88a7"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\mobile\\eas.json": {
+    "mtime": 1773560475.2601705,
+    "ast_hash": "aa06b27bcb197de76c184585d796bcb6",
+    "semantic_hash": "aa06b27bcb197de76c184585d796bcb6"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\mobile\\hooks\\use-auth.ts": {
+    "mtime": 1773532075.2303934,
+    "ast_hash": "2fd03cd68dcaefef995274d3d2dea560",
+    "semantic_hash": "2fd03cd68dcaefef995274d3d2dea560"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\mobile\\hooks\\use-exercises.ts": {
+    "mtime": 1773532090.5697515,
+    "ast_hash": "ffe5f56f0bd0fa3fea695f42cdfec128",
+    "semantic_hash": "ffe5f56f0bd0fa3fea695f42cdfec128"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\mobile\\hooks\\use-workouts.ts": {
+    "mtime": 1773532086.3702424,
+    "ast_hash": "bcc3b1d658d695b51f5c69501a1c6801",
+    "semantic_hash": "bcc3b1d658d695b51f5c69501a1c6801"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\mobile\\lib\\api.ts": {
+    "mtime": 1776513658.167981,
+    "ast_hash": "2e40358a312a2d0e944db7b0872ef586",
+    "semantic_hash": "2e40358a312a2d0e944db7b0872ef586"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\mobile\\lib\\firebase.ts": {
+    "mtime": 1773532062.8314476,
+    "ast_hash": "62f5d3127ddeb6937de7605b3718beaa",
+    "semantic_hash": "62f5d3127ddeb6937de7605b3718beaa"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\mobile\\metro.config.js": {
+    "mtime": 1773532034.2231553,
+    "ast_hash": "a454b601d14616c80fc2b2e20c8dd71d",
+    "semantic_hash": "a454b601d14616c80fc2b2e20c8dd71d"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\mobile\\nativewind-env.d.ts": {
+    "mtime": 1773532048.8213205,
+    "ast_hash": "b02bcf4fde15f746f6e5248537d0b156",
+    "semantic_hash": "b02bcf4fde15f746f6e5248537d0b156"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\mobile\\package.json": {
+    "mtime": 1773560487.686702,
+    "ast_hash": "8964d333bb56fd2627437574234b9e58",
+    "semantic_hash": "8964d333bb56fd2627437574234b9e58"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\mobile\\store\\auth.store.ts": {
+    "mtime": 1773532067.7907698,
+    "ast_hash": "9e0279596316b21a79cab567d101b8e5",
+    "semantic_hash": "9e0279596316b21a79cab567d101b8e5"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\mobile\\tailwind.config.js": {
+    "mtime": 1773532038.0880165,
+    "ast_hash": "3cf6954024b18383056a082b1a9191be",
+    "semantic_hash": "3cf6954024b18383056a082b1a9191be"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\mobile\\tsconfig.json": {
+    "mtime": 1773532046.684987,
+    "ast_hash": "dd44505e753e2adb7d02eab8f8942755",
+    "semantic_hash": "dd44505e753e2adb7d02eab8f8942755"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\.eslintrc.js": {
+    "mtime": 1780428235.9803889,
+    "ast_hash": "b672d13a7ffd1838d46c275198d14d23",
+    "semantic_hash": "b672d13a7ffd1838d46c275198d14d23"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\next-env.d.ts": {
+    "mtime": 1776464108.061821,
+    "ast_hash": "90426577ad8f38459f3e566411c85589",
+    "semantic_hash": "90426577ad8f38459f3e566411c85589"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\next.config.ts": {
+    "mtime": 1773846655.3843555,
+    "ast_hash": "d15f86dd34198de609f06a4719169bfd",
+    "semantic_hash": "d15f86dd34198de609f06a4719169bfd"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\package.json": {
+    "mtime": 1780422606.4391277,
+    "ast_hash": "73ff5b806029414469b27171f96d1758",
+    "semantic_hash": "73ff5b806029414469b27171f96d1758"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\postcss.config.js": {
+    "mtime": 1772889518.628441,
+    "ast_hash": "854b38759e7a8b4b82306ae2d9a3a833",
+    "semantic_hash": "854b38759e7a8b4b82306ae2d9a3a833"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\scripts\\generate-icons.mjs": {
+    "mtime": 1778443713.430312,
+    "ast_hash": "33f003e5d36d0d09908f996ab6a74163",
+    "semantic_hash": "33f003e5d36d0d09908f996ab6a74163"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(app)\\achievements\\_content.tsx": {
+    "mtime": 1779833994.026065,
+    "ast_hash": "55b0211ad4840de445e5842111f65205",
+    "semantic_hash": "55b0211ad4840de445e5842111f65205"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(app)\\achievements\\page.tsx": {
+    "mtime": 1779835679.9270496,
+    "ast_hash": "cb5127c147c8dfea7a084429d1da7d78",
+    "semantic_hash": "cb5127c147c8dfea7a084429d1da7d78"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(app)\\avatar\\page.tsx": {
+    "mtime": 1779833558.7715845,
+    "ast_hash": "6ad635eacac70e80f43d3acfff3a1858",
+    "semantic_hash": "6ad635eacac70e80f43d3acfff3a1858"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(app)\\body\\page.tsx": {
+    "mtime": 1782074017.9839842,
+    "ast_hash": "4ae57c606ee0f4ae4f2e6ac04876eb63",
+    "semantic_hash": "4ae57c606ee0f4ae4f2e6ac04876eb63"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(app)\\dashboard\\page.tsx": {
+    "mtime": 1780599746.226405,
+    "ast_hash": "311edc4981e6143d0fda84f145f87834",
+    "semantic_hash": "311edc4981e6143d0fda84f145f87834"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(app)\\exercises\\page.tsx": {
+    "mtime": 1780323716.8661127,
+    "ast_hash": "ee9932b1c2b541062479d3f90c3f9630",
+    "semantic_hash": "ee9932b1c2b541062479d3f90c3f9630"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(app)\\feed\\_content.tsx": {
+    "mtime": 1779833738.6502614,
+    "ast_hash": "4c8b2fa21e2efe7ffdd7e2878eaaa673",
+    "semantic_hash": "4c8b2fa21e2efe7ffdd7e2878eaaa673"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(app)\\feed\\page.tsx": {
+    "mtime": 1779833680.7094462,
+    "ast_hash": "589358132b190ffe6dc02b7d04611a4f",
+    "semantic_hash": "589358132b190ffe6dc02b7d04611a4f"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(app)\\friends\\_content.tsx": {
+    "mtime": 1779833785.994542,
+    "ast_hash": "9651168741512df1ce76fc4636dfdc07",
+    "semantic_hash": "9651168741512df1ce76fc4636dfdc07"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(app)\\friends\\page.tsx": {
+    "mtime": 1779833876.6335008,
+    "ast_hash": "74461c884d5891a4c1f6b061a7f297fb",
+    "semantic_hash": "74461c884d5891a4c1f6b061a7f297fb"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(app)\\layout.tsx": {
+    "mtime": 1779803066.7273057,
+    "ast_hash": "60fc4b9594475ecce07a497d81a0ce75",
+    "semantic_hash": "60fc4b9594475ecce07a497d81a0ce75"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(app)\\leaderboard\\_content.tsx": {
+    "mtime": 1779833824.1560652,
+    "ast_hash": "217cad9bf2f1d137ad31360bd7730e34",
+    "semantic_hash": "217cad9bf2f1d137ad31360bd7730e34"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(app)\\leaderboard\\page.tsx": {
+    "mtime": 1779833892.2620888,
+    "ast_hash": "3a765cf15899e6c53cac0b3be10b3521",
+    "semantic_hash": "3a765cf15899e6c53cac0b3be10b3521"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(app)\\onboarding\\page.tsx": {
+    "mtime": 1779803101.4482448,
+    "ast_hash": "0fc2cd4d708318b24dcfd901510b08bd",
+    "semantic_hash": "0fc2cd4d708318b24dcfd901510b08bd"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(app)\\plans\\[id]\\edit\\page.tsx": {
+    "mtime": 1773238752.4679017,
+    "ast_hash": "8f2d3137271ad33cf56de4b4159e23b8",
+    "semantic_hash": "8f2d3137271ad33cf56de4b4159e23b8"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(app)\\plans\\[id]\\page.tsx": {
+    "mtime": 1779901299.2034798,
+    "ast_hash": "817219a8cd1ce7030a63e98ae2700eb4",
+    "semantic_hash": "817219a8cd1ce7030a63e98ae2700eb4"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(app)\\plans\\new\\page.tsx": {
+    "mtime": 1779897324.4176412,
+    "ast_hash": "cded1db32dcedc773ae5618be7d8cc6a",
+    "semantic_hash": "cded1db32dcedc773ae5618be7d8cc6a"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(app)\\plans\\page.tsx": {
+    "mtime": 1779897352.9271133,
+    "ast_hash": "8dfe6768b9b4f72c76cbcb779b2c4906",
+    "semantic_hash": "8dfe6768b9b4f72c76cbcb779b2c4906"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(app)\\profile\\[username]\\page.tsx": {
+    "mtime": 1778456595.2672853,
+    "ast_hash": "391f8cbdf1b8784490a2e9c1007823a6",
+    "semantic_hash": "391f8cbdf1b8784490a2e9c1007823a6"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(app)\\profile\\page.tsx": {
+    "mtime": 1779803415.6880755,
+    "ast_hash": "439690546e18e3cb4912f8c47e4f2f13",
+    "semantic_hash": "439690546e18e3cb4912f8c47e4f2f13"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(app)\\progress\\page.tsx": {
+    "mtime": 1779919354.4758656,
+    "ast_hash": "82297d05df4a7db27d5788a4f8c14868",
+    "semantic_hash": "82297d05df4a7db27d5788a4f8c14868"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(app)\\quests\\_content.tsx": {
+    "mtime": 1779834046.5316865,
+    "ast_hash": "4d35471ae878a7099fdea475d7e421a7",
+    "semantic_hash": "4d35471ae878a7099fdea475d7e421a7"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(app)\\quests\\page.tsx": {
+    "mtime": 1779834082.4534264,
+    "ast_hash": "13b6840296f295940815c224615bdfb5",
+    "semantic_hash": "13b6840296f295940815c224615bdfb5"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(app)\\social\\page.tsx": {
+    "mtime": 1779833859.5380442,
+    "ast_hash": "0fdffdfd61841ec0129d4c9799f8323f",
+    "semantic_hash": "0fdffdfd61841ec0129d4c9799f8323f"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(app)\\workouts\\[id]\\active\\page.tsx": {
+    "mtime": 1778363959.0307045,
+    "ast_hash": "3bf2cc97f22688c0fd8f270942d24bd4",
+    "semantic_hash": "3bf2cc97f22688c0fd8f270942d24bd4"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(app)\\workouts\\[id]\\page.tsx": {
+    "mtime": 1779804107.1937747,
+    "ast_hash": "b12bd64adec7e4fa3f559d5744ddd674",
+    "semantic_hash": "b12bd64adec7e4fa3f559d5744ddd674"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(app)\\workouts\\new\\page.tsx": {
+    "mtime": 1773318362.3386369,
+    "ast_hash": "8c35440bd3f209e5176acdef3e5be75f",
+    "semantic_hash": "8c35440bd3f209e5176acdef3e5be75f"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(app)\\workouts\\page.tsx": {
+    "mtime": 1780584729.0698676,
+    "ast_hash": "f5217985aa37e1da4d48f507e3949580",
+    "semantic_hash": "f5217985aa37e1da4d48f507e3949580"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(auth)\\login\\page.tsx": {
+    "mtime": 1776506150.9909623,
+    "ast_hash": "599810d3a1f67c5b0c42e5e8e8aedaac",
+    "semantic_hash": "599810d3a1f67c5b0c42e5e8e8aedaac"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\(auth)\\reset-password\\page.tsx": {
+    "mtime": 1776506171.6451027,
+    "ast_hash": "46ac2ef0825fcd72b12365fce909718e",
+    "semantic_hash": "46ac2ef0825fcd72b12365fce909718e"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\auth-provider.tsx": {
+    "mtime": 1772889727.3125784,
+    "ast_hash": "949faedf160a8a24256ffacaf0b419d8",
+    "semantic_hash": "949faedf160a8a24256ffacaf0b419d8"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\layout.tsx": {
+    "mtime": 1773846663.6045947,
+    "ast_hash": "1220c4da674e73c7a0e71105d79031c1",
+    "semantic_hash": "1220c4da674e73c7a0e71105d79031c1"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\manifest.ts": {
+    "mtime": 1773849862.8220055,
+    "ast_hash": "231a509778e770843803f44a016071d1",
+    "semantic_hash": "231a509778e770843803f44a016071d1"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\page.tsx": {
+    "mtime": 1772889729.9290483,
+    "ast_hash": "92e21e88e48ba74f75daed785b8c0c3c",
+    "semantic_hash": "92e21e88e48ba74f75daed785b8c0c3c"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\providers.tsx": {
+    "mtime": 1773317763.2120156,
+    "ast_hash": "16d2b07007d94385e89d9c21690f7047",
+    "semantic_hash": "16d2b07007d94385e89d9c21690f7047"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\app\\theme-provider.tsx": {
+    "mtime": 1773317755.3300097,
+    "ast_hash": "c1bbc684113bd104f9286a5fb47b07f0",
+    "semantic_hash": "c1bbc684113bd104f9286a5fb47b07f0"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\avatar\\ai-goal-dialog.tsx": {
+    "mtime": 1779897329.8507886,
+    "ast_hash": "230d112e799dcb00f3a177a83fc5af1f",
+    "semantic_hash": "230d112e799dcb00f3a177a83fc5af1f"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\avatar\\avatar-block.tsx": {
+    "mtime": 1779897534.378358,
+    "ast_hash": "cb4d6b4612e7b18859c977e955e2ac46",
+    "semantic_hash": "cb4d6b4612e7b18859c977e955e2ac46"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\avatar\\avatar-viewer.constants.ts": {
+    "mtime": 1780426608.545419,
+    "ast_hash": "4d848509c05ac822271290bf97128357",
+    "semantic_hash": "4d848509c05ac822271290bf97128357"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\avatar\\avatar-viewer.tsx": {
+    "mtime": 1780426689.017229,
+    "ast_hash": "1081f1a12aa54f67a1d341de7c68890a",
+    "semantic_hash": "1081f1a12aa54f67a1d341de7c68890a"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\avatar\\avatar-viewer.utils.ts": {
+    "mtime": 1780426616.0721872,
+    "ast_hash": "b95e79148c9b0d267aee663d0a96e370",
+    "semantic_hash": "b95e79148c9b0d267aee663d0a96e370"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\dashboard\\body-weight-card.tsx": {
+    "mtime": 1778402220.406578,
+    "ast_hash": "466a6f85fbe891fd71ef9329a1004f42",
+    "semantic_hash": "466a6f85fbe891fd71ef9329a1004f42"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\dashboard\\streak-heatmap-card.tsx": {
+    "mtime": 1778458549.0047033,
+    "ast_hash": "92ab701682f2f750ec1a2c15141f9e1f",
+    "semantic_hash": "92ab701682f2f750ec1a2c15141f9e1f"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\exercises\\create-exercise-dialog.tsx": {
+    "mtime": 1773276744.9194746,
+    "ast_hash": "716688d70015d9eec2c15f180c2cd658",
+    "semantic_hash": "716688d70015d9eec2c15f180c2cd658"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\exercises\\exercise-filters.tsx": {
+    "mtime": 1778406985.2102065,
+    "ast_hash": "e27b65b5a70dd492d9db2c2a90f5464a",
+    "semantic_hash": "e27b65b5a70dd492d9db2c2a90f5464a"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\exercises\\exercise-how-to-dialog.tsx": {
+    "mtime": 1780323674.711171,
+    "ast_hash": "394b1bacc50d0dc33f1125196507461d",
+    "semantic_hash": "394b1bacc50d0dc33f1125196507461d"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\gamification\\active-quest-card.tsx": {
+    "mtime": 1779661698.322654,
+    "ast_hash": "62a8657fc66d04e192f493d2e798d3b6",
+    "semantic_hash": "62a8657fc66d04e192f493d2e798d3b6"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\gamification\\celebration-dialog.tsx": {
+    "mtime": 1778484613.6973298,
+    "ast_hash": "cb806ff0855ddc6d0d1fecf57a9afc01",
+    "semantic_hash": "cb806ff0855ddc6d0d1fecf57a9afc01"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\gamification\\recent-achievement-card.tsx": {
+    "mtime": 1778484641.9222643,
+    "ast_hash": "71ee9d6d6309c0763a92ec0e736a226c",
+    "semantic_hash": "71ee9d6d6309c0763a92ec0e736a226c"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\gamification\\recent-pr-card.tsx": {
+    "mtime": 1778456258.1842265,
+    "ast_hash": "fa50970f9e0d8a73ef146b3d9b5d18ba",
+    "semantic_hash": "fa50970f9e0d8a73ef146b3d9b5d18ba"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\layout\\bottom-nav.tsx": {
+    "mtime": 1779834194.0801144,
+    "ast_hash": "e75c033f9d16a21ccaac59ce193aff5b",
+    "semantic_hash": "e75c033f9d16a21ccaac59ce193aff5b"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\layout\\header.tsx": {
+    "mtime": 1778362495.4043088,
+    "ast_hash": "8a9e4415d0c0d119e0564594f92fe130",
+    "semantic_hash": "8a9e4415d0c0d119e0564594f92fe130"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\layout\\sidebar.tsx": {
+    "mtime": 1779834148.7770875,
+    "ast_hash": "23c88322cf8f2bfef95c69d0baa53dd9",
+    "semantic_hash": "23c88322cf8f2bfef95c69d0baa53dd9"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\plans\\ai-plan-wizard.constants.ts": {
+    "mtime": 1780423222.5596015,
+    "ast_hash": "561394b5f253f5247c2d68d280cabba4",
+    "semantic_hash": "561394b5f253f5247c2d68d280cabba4"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\plans\\ai-plan-wizard.tsx": {
+    "mtime": 1780426087.5913708,
+    "ast_hash": "9ff5c9e48597697e48837c1f8a527787",
+    "semantic_hash": "9ff5c9e48597697e48837c1f8a527787"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\plans\\ai-plan-wizard.types.ts": {
+    "mtime": 1780423204.5937088,
+    "ast_hash": "66a5b9ae5a7df11adb30d527f257db4f",
+    "semantic_hash": "66a5b9ae5a7df11adb30d527f257db4f"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\plans\\ai-plan-wizard.utils.ts": {
+    "mtime": 1780423255.2171798,
+    "ast_hash": "cf1ea6d4b451b1acfcb50fd338a5c88a",
+    "semantic_hash": "cf1ea6d4b451b1acfcb50fd338a5c88a"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\plans\\calendar-subscribe-dialog.tsx": {
+    "mtime": 1778708801.4868605,
+    "ast_hash": "8a788131961b0bf3360fc0416c43fd72",
+    "semantic_hash": "8a788131961b0bf3360fc0416c43fd72"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\plans\\plan-adjust-dialog.tsx": {
+    "mtime": 1780399336.694187,
+    "ast_hash": "4f3d42881db0b45c24837ea67dc23e18",
+    "semantic_hash": "4f3d42881db0b45c24837ea67dc23e18"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\plans\\plan-builder.tsx": {
+    "mtime": 1778707726.411876,
+    "ast_hash": "d218d1bffbafeb91e9e67a8b256379a3",
+    "semantic_hash": "d218d1bffbafeb91e9e67a8b256379a3"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\progress\\lift-card.tsx": {
+    "mtime": 1778402268.9861298,
+    "ast_hash": "c54896fd9b696f9c56a5f343b0d6b31c",
+    "semantic_hash": "c54896fd9b696f9c56a5f343b0d6b31c"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\progress\\muscle-group-filter.tsx": {
+    "mtime": 1778404169.376074,
+    "ast_hash": "9ac05bd97b0bea53b9e3c158e797bfa2",
+    "semantic_hash": "9ac05bd97b0bea53b9e3c158e797bfa2"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\progress\\period-tabs.tsx": {
+    "mtime": 1778402235.499595,
+    "ast_hash": "166afd37910cd666cc47a09f77056d0b",
+    "semantic_hash": "166afd37910cd666cc47a09f77056d0b"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\social\\share-invite.tsx": {
+    "mtime": 1778461121.5542624,
+    "ast_hash": "b603cba14219f9b9a56f7313a88d7e0f",
+    "semantic_hash": "b603cba14219f9b9a56f7313a88d7e0f"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\stats\\stats-card.tsx": {
+    "mtime": 1782074011.007565,
+    "ast_hash": "98aa7380f3bf6f9d5c0ac84b8d63beda",
+    "semantic_hash": "98aa7380f3bf6f9d5c0ac84b8d63beda"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\ui\\badge.tsx": {
+    "mtime": 1772889595.247857,
+    "ast_hash": "b6050679e453190e00ee91c0aa948c30",
+    "semantic_hash": "b6050679e453190e00ee91c0aa948c30"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\ui\\big-sparkline.tsx": {
+    "mtime": 1778402207.0921645,
+    "ast_hash": "ac34a9234c628b7e22cbe564b303c4df",
+    "semantic_hash": "ac34a9234c628b7e22cbe564b303c4df"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\ui\\button.tsx": {
+    "mtime": 1778368056.0460384,
+    "ast_hash": "23ee6575a26cd3de91a317f60a2f37b5",
+    "semantic_hash": "23ee6575a26cd3de91a317f60a2f37b5"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\ui\\card.tsx": {
+    "mtime": 1773316799.5538282,
+    "ast_hash": "7e88b3b2433da029e4b260d6875640e4",
+    "semantic_hash": "7e88b3b2433da029e4b260d6875640e4"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\ui\\dialog.tsx": {
+    "mtime": 1772889634.2969887,
+    "ast_hash": "afa4732e5becd7fed643e9dfce2207f1",
+    "semantic_hash": "afa4732e5becd7fed643e9dfce2207f1"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\ui\\input.tsx": {
+    "mtime": 1772889576.8466682,
+    "ast_hash": "541cf631b31292033b2940aabe0e0e1d",
+    "semantic_hash": "541cf631b31292033b2940aabe0e0e1d"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\ui\\label.tsx": {
+    "mtime": 1772889581.2195146,
+    "ast_hash": "f0251bb9db7f67955d834c6b656fe576",
+    "semantic_hash": "f0251bb9db7f67955d834c6b656fe576"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\ui\\select.tsx": {
+    "mtime": 1772889619.7031713,
+    "ast_hash": "1110ae28080cdb92a80ce0cc3c7713a6",
+    "semantic_hash": "1110ae28080cdb92a80ce0cc3c7713a6"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\ui\\separator.tsx": {
+    "mtime": 1772889600.2183356,
+    "ast_hash": "900b9f89a558ce403085c82cf6e3ef2c",
+    "semantic_hash": "900b9f89a558ce403085c82cf6e3ef2c"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\ui\\toast.tsx": {
+    "mtime": 1772889653.5851736,
+    "ast_hash": "28ce44f994fb01f5afd272e44e5879c4",
+    "semantic_hash": "28ce44f994fb01f5afd272e44e5879c4"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\ui\\toaster.tsx": {
+    "mtime": 1772889675.9686627,
+    "ast_hash": "5dba7f26958bf4181d46855af3b05462",
+    "semantic_hash": "5dba7f26958bf4181d46855af3b05462"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\workouts\\active\\active-workout.tsx": {
+    "mtime": 1781099278.1653204,
+    "ast_hash": "b798676180bce631a9994d0a39c8d0f9",
+    "semantic_hash": "b798676180bce631a9994d0a39c8d0f9"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\workouts\\active\\active-workout.utils.ts": {
+    "mtime": 1780426881.36949,
+    "ast_hash": "7f7a9bb793a1476d514f5f0fb3341e23",
+    "semantic_hash": "7f7a9bb793a1476d514f5f0fb3341e23"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\workouts\\active\\big-stepper.tsx": {
+    "mtime": 1778363812.7599795,
+    "ast_hash": "b44414dbdec483eb0dc08d1ae862e13d",
+    "semantic_hash": "b44414dbdec483eb0dc08d1ae862e13d"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\workouts\\active\\exercise-stage.tsx": {
+    "mtime": 1780585377.338951,
+    "ast_hash": "f500e32e1d25c56b103fa2767c826081",
+    "semantic_hash": "f500e32e1d25c56b103fa2767c826081"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\workouts\\active\\rest-timer.tsx": {
+    "mtime": 1778363831.5252204,
+    "ast_hash": "adb97146729926f68319ed6c5d69e68d",
+    "semantic_hash": "adb97146729926f68319ed6c5d69e68d"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\workouts\\add-exercise-dialog.tsx": {
+    "mtime": 1779919328.6188815,
+    "ast_hash": "609adb40bad0744d045bdce504ecd23f",
+    "semantic_hash": "609adb40bad0744d045bdce504ecd23f"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\workouts\\exercise-row.tsx": {
+    "mtime": 1779919341.7157006,
+    "ast_hash": "3d3944539a16783a092b1ce3da6aec9f",
+    "semantic_hash": "3d3944539a16783a092b1ce3da6aec9f"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\workouts\\set-row.tsx": {
+    "mtime": 1774888499.799064,
+    "ast_hash": "e9b40a46728bcb701f43842678f6a7db",
+    "semantic_hash": "e9b40a46728bcb701f43842678f6a7db"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\workouts\\sortable-exercise-list.tsx": {
+    "mtime": 1778365322.305071,
+    "ast_hash": "edd100599e3960b4a609b174dc4bd8d6",
+    "semantic_hash": "edd100599e3960b4a609b174dc4bd8d6"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\workouts\\sortable-workout-exercises.tsx": {
+    "mtime": 1778365770.6230912,
+    "ast_hash": "fd6e9e38bb9bbec0468789ff0f87c38d",
+    "semantic_hash": "fd6e9e38bb9bbec0468789ff0f87c38d"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\components\\workouts\\workout-advice-panel.tsx": {
+    "mtime": 1779804090.1418686,
+    "ast_hash": "7239f706287b650410e7e476849d38ac",
+    "semantic_hash": "7239f706287b650410e7e476849d38ac"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\data\\plans.ts": {
+    "mtime": 1773401662.2955644,
+    "ast_hash": "04e653f77f61bcb6d4030ea522db38f3",
+    "semantic_hash": "04e653f77f61bcb6d4030ea522db38f3"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\hooks\\use-ai-plan-chat.ts": {
+    "mtime": 1779895632.8070838,
+    "ast_hash": "eae82057c3082a8014d7249c6276263d",
+    "semantic_hash": "eae82057c3082a8014d7249c6276263d"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\hooks\\use-auth.ts": {
+    "mtime": 1776506064.9797385,
+    "ast_hash": "3bef4e0a26d129c0a364a4fe82c8f48a",
+    "semantic_hash": "3bef4e0a26d129c0a364a4fe82c8f48a"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\hooks\\use-body-goals.ts": {
+    "mtime": 1779897019.5107572,
+    "ast_hash": "f9464a65584c023bd5a99d725523f987",
+    "semantic_hash": "f9464a65584c023bd5a99d725523f987"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\hooks\\use-body-measurements.ts": {
+    "mtime": 1779802606.360838,
+    "ast_hash": "e3f32fcc00c20ab01a2a6a8a5a4c7b68",
+    "semantic_hash": "e3f32fcc00c20ab01a2a6a8a5a4c7b68"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\hooks\\use-exercises.ts": {
+    "mtime": 1779901097.9729416,
+    "ast_hash": "f759caf242debd7b10465d1c93215a9c",
+    "semantic_hash": "f759caf242debd7b10465d1c93215a9c"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\hooks\\use-gamification.ts": {
+    "mtime": 1778366850.090732,
+    "ast_hash": "7819e4c1491d763e66616a2e40329d38",
+    "semantic_hash": "7819e4c1491d763e66616a2e40329d38"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\hooks\\use-plan-adjustment.ts": {
+    "mtime": 1780399327.6278815,
+    "ast_hash": "82c517fb9c604d8e34166c56eba24a41",
+    "semantic_hash": "82c517fb9c604d8e34166c56eba24a41"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\hooks\\use-plan-templates.ts": {
+    "mtime": 1773252424.844502,
+    "ast_hash": "c847de844bb71296aca5fdcbf4dbbd10",
+    "semantic_hash": "c847de844bb71296aca5fdcbf4dbbd10"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\hooks\\use-quests.ts": {
+    "mtime": 1779661540.044524,
+    "ast_hash": "fea02d8017c141ebcdaf6666c5b45147",
+    "semantic_hash": "fea02d8017c141ebcdaf6666c5b45147"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\hooks\\use-social.ts": {
+    "mtime": 1778456549.079239,
+    "ast_hash": "d2ec14b7b678602bfde81da6b4ca4390",
+    "semantic_hash": "d2ec14b7b678602bfde81da6b4ca4390"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\hooks\\use-stats.ts": {
+    "mtime": 1782073949.2406418,
+    "ast_hash": "b1449b4bf17835458bac6a32c3f98734",
+    "semantic_hash": "b1449b4bf17835458bac6a32c3f98734"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\hooks\\use-toast.ts": {
+    "mtime": 1772889669.7415829,
+    "ast_hash": "f8c94e13500212675280480a632c959e",
+    "semantic_hash": "f8c94e13500212675280480a632c959e"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\hooks\\use-workout-advice.ts": {
+    "mtime": 1779804065.341901,
+    "ast_hash": "73ceaadcfccd6eabb7b51cc09af9909f",
+    "semantic_hash": "73ceaadcfccd6eabb7b51cc09af9909f"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\hooks\\use-workouts.ts": {
+    "mtime": 1780584708.7209396,
+    "ast_hash": "9f5e1806fbf6c56bf4155ba432292901",
+    "semantic_hash": "9f5e1806fbf6c56bf4155ba432292901"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\lib\\api.ts": {
+    "mtime": 1772889547.0210533,
+    "ast_hash": "712fc80af3e3995676fc0ecf86662ea5",
+    "semantic_hash": "712fc80af3e3995676fc0ecf86662ea5"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\lib\\avatar-measurements-mapping.ts": {
+    "mtime": 1779801706.7403004,
+    "ast_hash": "aecbb60c94c9b61a2af7b5efd17c69a0",
+    "semantic_hash": "aecbb60c94c9b61a2af7b5efd17c69a0"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\lib\\avatar-morphs-from-body.ts": {
+    "mtime": 1779802798.9146683,
+    "ast_hash": "17219f40c3e20f06f3a560407a1a7a9b",
+    "semantic_hash": "17219f40c3e20f06f3a560407a1a7a9b"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\lib\\avatar-morphs.ts": {
+    "mtime": 1779583557.2046688,
+    "ast_hash": "dd9a8d740d02f2fff3950d15da4850e7",
+    "semantic_hash": "dd9a8d740d02f2fff3950d15da4850e7"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\lib\\crypto.ts": {
+    "mtime": 1773523794.5680246,
+    "ast_hash": "5d824a5052ec4ae8343d9e2f752a57a8",
+    "semantic_hash": "5d824a5052ec4ae8343d9e2f752a57a8"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\lib\\exercise-labels.ts": {
+    "mtime": 1779919282.6961863,
+    "ast_hash": "5b59cd19da051982227a6a76dacae490",
+    "semantic_hash": "5b59cd19da051982227a6a76dacae490"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\lib\\query-client.ts": {
+    "mtime": 1772889550.0661097,
+    "ast_hash": "901e82dfeef855e3628a5c3d8c00d5a9",
+    "semantic_hash": "901e82dfeef855e3628a5c3d8c00d5a9"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\lib\\utils.ts": {
+    "mtime": 1778367809.8178608,
+    "ast_hash": "f025a591985d8c12a4877837d1fbec5e",
+    "semantic_hash": "f025a591985d8c12a4877837d1fbec5e"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\store\\auth.store.ts": {
+    "mtime": 1778269361.3063858,
+    "ast_hash": "3a8439203ccb4058f11bc3fdd43e4fe1",
+    "semantic_hash": "3a8439203ccb4058f11bc3fdd43e4fe1"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\store\\sidebar.store.ts": {
+    "mtime": 1778445624.556282,
+    "ast_hash": "57ba5c3e19df25368f4b4e64903a00ba",
+    "semantic_hash": "57ba5c3e19df25368f4b4e64903a00ba"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\src\\store\\theme.store.ts": {
+    "mtime": 1778269361.3079443,
+    "ast_hash": "35841f356dbc9e965abcb5c427cf1ba1",
+    "semantic_hash": "35841f356dbc9e965abcb5c427cf1ba1"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\tailwind.config.ts": {
+    "mtime": 1772889516.3870018,
+    "ast_hash": "5c2d5f7bacb71d5bf686cf5fcea14051",
+    "semantic_hash": "5c2d5f7bacb71d5bf686cf5fcea14051"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\tsconfig.json": {
+    "mtime": 1772889522.3777897,
+    "ast_hash": "0cf97a81150d3b8904f285780896980d",
+    "semantic_hash": "0cf97a81150d3b8904f285780896980d"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\deploy.sh": {
+    "mtime": 1780320488.7743082,
+    "ast_hash": "d3e62d67491b79a58d7460f3bbf88d2b",
+    "semantic_hash": "d3e62d67491b79a58d7460f3bbf88d2b"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\package.json": {
+    "mtime": 1778269361.3150935,
+    "ast_hash": "bcc484e46319a536b4c607bbf25f2cfb",
+    "semantic_hash": "bcc484e46319a536b4c607bbf25f2cfb"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\packages\\types\\package.json": {
+    "mtime": 1778269361.3167078,
+    "ast_hash": "1d9571eb4c08c87f9cf22cf388949ef3",
+    "semantic_hash": "1d9571eb4c08c87f9cf22cf388949ef3"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\packages\\types\\src\\index.ts": {
+    "mtime": 1778269361.3177152,
+    "ast_hash": "9ef8c43d814720fe2024dab6e6d658aa",
+    "semantic_hash": "9ef8c43d814720fe2024dab6e6d658aa"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\scripts\\avatar\\_avatar_common.py": {
+    "mtime": 1779583557.217588,
+    "ast_hash": "38ab9e4b454f19472e53560ca6caea0c",
+    "semantic_hash": "38ab9e4b454f19472e53560ca6caea0c"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\scripts\\avatar\\build_female.py": {
+    "mtime": 1779583557.2186549,
+    "ast_hash": "8631fa465a39e592f0560722cb8c1ea7",
+    "semantic_hash": "8631fa465a39e592f0560722cb8c1ea7"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\scripts\\avatar\\build_male.py": {
+    "mtime": 1779583557.219719,
+    "ast_hash": "6c9b89fe86d5516ca69f3765c1dfe3f2",
+    "semantic_hash": "6c9b89fe86d5516ca69f3765c1dfe3f2"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\.github\\workflows\\ci.yml": {
+    "mtime": 1780422634.7890742,
+    "ast_hash": "12d0f42d393d9e9d4bbf65d55622872d",
+    "semantic_hash": "12d0f42d393d9e9d4bbf65d55622872d"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\CHANGELOG.md": {
+    "mtime": 1776511181.4610784,
+    "ast_hash": "4b92efc7820d9f09919f456043aa8678",
+    "semantic_hash": "4b92efc7820d9f09919f456043aa8678"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\CLAUDE.md": {
+    "mtime": 1779923063.2474375,
+    "ast_hash": "56852f3247356f82de5a66ac907f1f7f",
+    "semantic_hash": "56852f3247356f82de5a66ac907f1f7f"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\ai\\prompts\\plan-adjust.md": {
+    "mtime": 1780399322.780872,
+    "ast_hash": "da3ae23ba7e4078710053fa0ba438392",
+    "semantic_hash": "da3ae23ba7e4078710053fa0ba438392"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\backend\\src\\ai\\prompts\\plan-wizard.md": {
+    "mtime": 1780321454.6617932,
+    "ast_hash": "805443dd687ff9827182afa2ad53cc22",
+    "semantic_hash": "805443dd687ff9827182afa2ad53cc22"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\busines.md": {
+    "mtime": 1773524815.3261473,
+    "ast_hash": "889ceb961cad147792efe53c9af4f76c",
+    "semantic_hash": "889ceb961cad147792efe53c9af4f76c"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\docker-compose.prod.yml": {
+    "mtime": 1778272896.8443134,
+    "ast_hash": "ec770ac3f704d064b859ea0646acd919",
+    "semantic_hash": "ec770ac3f704d064b859ea0646acd919"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\docker-compose.yml": {
+    "mtime": 1778270564.605488,
+    "ast_hash": "75d391eb276f56979a4aadc3a5563c3f",
+    "semantic_hash": "75d391eb276f56979a4aadc3a5563c3f"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\docs\\avatar-3d-progress.md": {
+    "mtime": 1779583557.2056713,
+    "ast_hash": "c7254a19104e4083ad673e5d98bb9ccb",
+    "semantic_hash": "c7254a19104e4083ad673e5d98bb9ccb"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\docs\\redesign-claude-design.md": {
+    "mtime": 1778776015.6051583,
+    "ast_hash": "f07e0e2fcddc0caaed544a9d3fc619e1",
+    "semantic_hash": "f07e0e2fcddc0caaed544a9d3fc619e1"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\docs\\security\\incident-2026-04-18-rce-xmrig.md": {
+    "mtime": 1776466842.126369,
+    "ast_hash": "c1399cefef28e535637dcabf2ebd668e",
+    "semantic_hash": "c1399cefef28e535637dcabf2ebd668e"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\scripts\\avatar\\AVATAR_BUILD.md": {
+    "mtime": 1779583557.216493,
+    "ast_hash": "eadc33f54a92b771b6f1ce498bc12613",
+    "semantic_hash": "eadc33f54a92b771b6f1ce498bc12613"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\eyes\\blue.png": {
+    "mtime": 1779583557.0152164,
+    "ast_hash": "d0f61d1b7ac330da8f22201902e95c70",
+    "semantic_hash": "d0f61d1b7ac330da8f22201902e95c70"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\eyes\\bluegreen.png": {
+    "mtime": 1779583557.019843,
+    "ast_hash": "f6d72710e115ce7266d2553cd4710314",
+    "semantic_hash": "f6d72710e115ce7266d2553cd4710314"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\eyes\\brown.png": {
+    "mtime": 1779583557.0243523,
+    "ast_hash": "36da78f5e78249c15725561542be81a4",
+    "semantic_hash": "36da78f5e78249c15725561542be81a4"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\eyes\\brownlight.png": {
+    "mtime": 1779583557.0290897,
+    "ast_hash": "7acbf6e39ccd0be1e6d85fc21cbc7215",
+    "semantic_hash": "7acbf6e39ccd0be1e6d85fc21cbc7215"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\eyes\\deepblue.png": {
+    "mtime": 1779583557.0341132,
+    "ast_hash": "0b4f5225d61957f407797c2c6aea95d2",
+    "semantic_hash": "0b4f5225d61957f407797c2c6aea95d2"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\eyes\\green.png": {
+    "mtime": 1779583557.0384893,
+    "ast_hash": "68ee5fd8e5dd053444f5ff93e093fbf1",
+    "semantic_hash": "68ee5fd8e5dd053444f5ff93e093fbf1"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\eyes\\grey.png": {
+    "mtime": 1779583557.043284,
+    "ast_hash": "b3946a10b16bdbe55f83b6635576b562",
+    "semantic_hash": "b3946a10b16bdbe55f83b6635576b562"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\eyes\\ice.png": {
+    "mtime": 1779583557.0473285,
+    "ast_hash": "b302769365b2d9ba56aaa3230c6d4814",
+    "semantic_hash": "b302769365b2d9ba56aaa3230c6d4814"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\eyes\\lightblue.png": {
+    "mtime": 1779583557.0523348,
+    "ast_hash": "f43ec57d32be45dd86cb58fa678c1434",
+    "semantic_hash": "f43ec57d32be45dd86cb58fa678c1434"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\african_m.webp": {
+    "mtime": 1779584523.311,
+    "ast_hash": "1b1af80e1485a38657205c60d8a305db",
+    "semantic_hash": "1b1af80e1485a38657205c60d8a305db"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\aksel_m.webp": {
+    "mtime": 1779584523.742,
+    "ast_hash": "3e9726ff3f089b692a374b1b974b47e8",
+    "semantic_hash": "3e9726ff3f089b692a374b1b974b47e8"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\alana_f.webp": {
+    "mtime": 1779584524.11,
+    "ast_hash": "104b2e4553ea8b3044f68c6121f90b05",
+    "semantic_hash": "104b2e4553ea8b3044f68c6121f90b05"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\bronze_f.webp": {
+    "mtime": 1779584524.487,
+    "ast_hash": "1fbcc7a6991b4a06435acbd4dbc77fad",
+    "semantic_hash": "1fbcc7a6991b4a06435acbd4dbc77fad"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\bronze_makeup_f.webp": {
+    "mtime": 1779584524.893,
+    "ast_hash": "9e6d400870186f598ff82a9285064cf7",
+    "semantic_hash": "9e6d400870186f598ff82a9285064cf7"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\creamy_f.webp": {
+    "mtime": 1779584525.304,
+    "ast_hash": "573a4fba4adfd7c71755b86d567391b3",
+    "semantic_hash": "573a4fba4adfd7c71755b86d567391b3"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\emo_m.webp": {
+    "mtime": 1779584525.701,
+    "ast_hash": "a61111df1ab97029c4b213012f6bb87a",
+    "semantic_hash": "a61111df1ab97029c4b213012f6bb87a"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\eurasian_mid_f.webp": {
+    "mtime": 1779584526.212,
+    "ast_hash": "419482a66d86c69b549f8fbb281b229d",
+    "semantic_hash": "419482a66d86c69b549f8fbb281b229d"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\eurasian_old_f.webp": {
+    "mtime": 1779584526.705,
+    "ast_hash": "7b973f0fb7cc0945e77b43d3942fcace",
+    "semantic_hash": "7b973f0fb7cc0945e77b43d3942fcace"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\eurasian_old_m.webp": {
+    "mtime": 1779584527.139,
+    "ast_hash": "87066a5f9f9371acffe7515fe40b9040",
+    "semantic_hash": "87066a5f9f9371acffe7515fe40b9040"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\eurasian_young_f.webp": {
+    "mtime": 1779584527.556,
+    "ast_hash": "69faad057f9bea458e227fccfc0b9efc",
+    "semantic_hash": "69faad057f9bea458e227fccfc0b9efc"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\eyeliner_m.webp": {
+    "mtime": 1779584527.994,
+    "ast_hash": "19f3c54b09e89b7295449b6942e157b7",
+    "semantic_hash": "19f3c54b09e89b7295449b6942e157b7"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\fair_f.webp": {
+    "mtime": 1779584528.457,
+    "ast_hash": "703519888e8819a80831e323fa130f33",
+    "semantic_hash": "703519888e8819a80831e323fa130f33"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\freckles_f.webp": {
+    "mtime": 1779584528.931,
+    "ast_hash": "49bae89c233c6aa44bea9f62c888a459",
+    "semantic_hash": "49bae89c233c6aa44bea9f62c888a459"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\freckles_m.webp": {
+    "mtime": 1779584529.341,
+    "ast_hash": "ef8a20a3c140d80e4ca2cbacefd0597c",
+    "semantic_hash": "ef8a20a3c140d80e4ca2cbacefd0597c"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\genuine_f.webp": {
+    "mtime": 1779584529.788,
+    "ast_hash": "29d4fb1585bd7e02ae178f2a7860d077",
+    "semantic_hash": "29d4fb1585bd7e02ae178f2a7860d077"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\ginger2_f.webp": {
+    "mtime": 1779584530.292,
+    "ast_hash": "48f42625e18983e05638a97cd31ff42a",
+    "semantic_hash": "48f42625e18983e05638a97cd31ff42a"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\ginger_f.webp": {
+    "mtime": 1779584530.829,
+    "ast_hash": "9fb9347688ed79d8db72cf78942f1756",
+    "semantic_hash": "9fb9347688ed79d8db72cf78942f1756"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\ginger_m.webp": {
+    "mtime": 1779584531.363,
+    "ast_hash": "4bb00f58e4752341e7f0fdc35e69f373",
+    "semantic_hash": "4bb00f58e4752341e7f0fdc35e69f373"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\ginger_makeup_f.webp": {
+    "mtime": 1779584531.857,
+    "ast_hash": "50de98c42cb52e126fa3623cc822a99e",
+    "semantic_hash": "50de98c42cb52e126fa3623cc822a99e"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\goth_m.webp": {
+    "mtime": 1779584532.243,
+    "ast_hash": "43aaca1a561b5f6a40cd2b31ce165900",
+    "semantic_hash": "43aaca1a561b5f6a40cd2b31ce165900"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\indian2_f.webp": {
+    "mtime": 1779584532.714,
+    "ast_hash": "1dac3c90985098f9e7519f39161ceec2",
+    "semantic_hash": "1dac3c90985098f9e7519f39161ceec2"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\indian_f.webp": {
+    "mtime": 1779584533.178,
+    "ast_hash": "2ddd28baff5e7a0ecfebf5a9987535b8",
+    "semantic_hash": "2ddd28baff5e7a0ecfebf5a9987535b8"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\light_f.webp": {
+    "mtime": 1779584533.555,
+    "ast_hash": "e2d6d450cb8b460e60ac1800e8adc6ba",
+    "semantic_hash": "e2d6d450cb8b460e60ac1800e8adc6ba"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\light_m.webp": {
+    "mtime": 1779584533.965,
+    "ast_hash": "badcbd5f252062985e46ddb48a977a7e",
+    "semantic_hash": "badcbd5f252062985e46ddb48a977a7e"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\makeup_f.webp": {
+    "mtime": 1779584534.367,
+    "ast_hash": "c810b013b7f3716e7b0161f55f178e9c",
+    "semantic_hash": "c810b013b7f3716e7b0161f55f178e9c"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\midtoned_f.webp": {
+    "mtime": 1779584534.769,
+    "ast_hash": "afaa9bf7cf218e07ac3d3bf9f634a2f6",
+    "semantic_hash": "afaa9bf7cf218e07ac3d3bf9f634a2f6"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\natural_makeup_f.webp": {
+    "mtime": 1779584535.159,
+    "ast_hash": "269f5fb31956e7b572f9d08ab4ddd994",
+    "semantic_hash": "269f5fb31956e7b572f9d08ab4ddd994"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\redhead_f.webp": {
+    "mtime": 1779584535.659,
+    "ast_hash": "e4b26a3bfba3fb563d9a357498ba5b37",
+    "semantic_hash": "e4b26a3bfba3fb563d9a357498ba5b37"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\slavic_mid_m.webp": {
+    "mtime": 1779584536.08,
+    "ast_hash": "815246f817cdc028bfebf2dc02f72104",
+    "semantic_hash": "815246f817cdc028bfebf2dc02f72104"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\slavic_old_m.webp": {
+    "mtime": 1779584536.534,
+    "ast_hash": "1f3156555d9e5ba5816fe8c832922bd5",
+    "semantic_hash": "1f3156555d9e5ba5816fe8c832922bd5"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\tattooed_m.webp": {
+    "mtime": 1779584536.937,
+    "ast_hash": "1c9715838c3c7d0a2de59e10ad9f84ea",
+    "semantic_hash": "1c9715838c3c7d0a2de59e10ad9f84ea"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\uniform_f.webp": {
+    "mtime": 1779584537.295,
+    "ast_hash": "a4b25121f9de5ac22398253ac0b26c28",
+    "semantic_hash": "a4b25121f9de5ac22398253ac0b26c28"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\viking_m.webp": {
+    "mtime": 1779584537.694,
+    "ast_hash": "39aa8924f3d9be75dd0b8b293791c604",
+    "semantic_hash": "39aa8924f3d9be75dd0b8b293791c604"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\violet_makeup_f.webp": {
+    "mtime": 1779584538.108,
+    "ast_hash": "660f3871d0f5104568ab45a9efd3ee9f",
+    "semantic_hash": "660f3871d0f5104568ab45a9efd3ee9f"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\avatar\\skins\\zoey_f.webp": {
+    "mtime": 1779584538.615,
+    "ast_hash": "9a46b717596d8d242cf4cd6ea34fa64b",
+    "semantic_hash": "9a46b717596d8d242cf4cd6ea34fa64b"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\icons\\apple-touch-icon.png": {
+    "mtime": 1778444829.385,
+    "ast_hash": "112d89e6537d94a5100cb0833c3e7f7d",
+    "semantic_hash": "112d89e6537d94a5100cb0833c3e7f7d"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\icons\\icon-192.png": {
+    "mtime": 1778444829.348,
+    "ast_hash": "3e1cbc7a082f0f9953180475aa292606",
+    "semantic_hash": "3e1cbc7a082f0f9953180475aa292606"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\icons\\icon-512.png": {
+    "mtime": 1778444829.373,
+    "ast_hash": "c4b607ca12b5baf853c67b061317c097",
+    "semantic_hash": "c4b607ca12b5baf853c67b061317c097"
+  },
+  "C:\\Users\\roman\\Projects\\fitnessHelper\\apps\\web\\public\\icons\\icon.svg": {
+    "mtime": 1778444823.7196953,
+    "ast_hash": "84f294456125b50d34fecb6eed5dac2e",
+    "semantic_hash": "84f294456125b50d34fecb6eed5dac2e"
+  }
+}

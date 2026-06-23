@@ -22,6 +22,7 @@ import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import { CalendarModule } from './calendar/calendar.module';
 import { QuestsModule } from './quests/quests.module';
 import { WorkoutAdviceModule } from './workout-advice/workout-advice.module';
+import { StatsModule } from './stats/stats.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { WorkoutAdviceModule } from './workout-advice/workout-advice.module';
     CalendarModule,
     QuestsModule,
     WorkoutAdviceModule,
+    StatsModule,
   ],
   providers: [
     {
